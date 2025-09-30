@@ -1,4 +1,4 @@
-name: NavMate Backend CI
+name: TinderTrip Backend CI
 
 on:
   push:
