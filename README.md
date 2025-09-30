@@ -1,8 +1,6 @@
 # TinderTrip Backend
 
 [![CI](https://github.com/callmetos/TinderTrip-Backend/actions/workflows/ci.yml/badge.svg)](https://github.com/callmetos/TinderTrip-Backend/actions/workflows/ci.yml)
-[![Security](https://github.com/callmetos/TinderTrip-Backend/actions/workflows/security.yml/badge.svg)](https://github.com/callmetos/TinderTrip-Backend/actions/workflows/security.yml)
-[![Release](https://github.com/callmetos/TinderTrip-Backend/actions/workflows/release.yml/badge.svg)](https://github.com/callmetos/TinderTrip-Backend/actions/workflows/release.yml)
 [![Go Version](https://img.shields.io/badge/Go-1.23-blue.svg)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](docker-compose.yml)
@@ -283,37 +281,17 @@ docker-compose -f docker-compose.prod.yml up -d
 kubectl apply -f k8s/
 ```
 
-## 🔄 CI/CD Pipeline
+## 🔄 CI Pipeline
 
-This project uses GitHub Actions for continuous integration and deployment:
+This project uses GitHub Actions for continuous integration:
 
-### Automated Workflows
+### Automated CI Pipeline
 
-- **CI Pipeline**: Runs on every push and PR
+- **Runs on every push and PR**
   - Go 1.23 setup and dependency caching
   - Unit and integration tests with PostgreSQL and Redis
   - Code linting with golangci-lint
-  - Security scanning with Trivy and gosec
-  - Performance testing with k6
   - Docker image building and testing
-
-- **Security Scanning**: Daily security scans
-  - CodeQL analysis
-  - Trivy vulnerability scanning
-  - gosec Go security scanner
-  - Secret scanning with TruffleHog
-  - License compliance checking
-
-- **Release Management**: Automated releases
-  - Multi-platform binary builds (Linux, Windows, macOS)
-  - Docker image publishing to GitHub Container Registry
-  - Automated changelog generation
-  - Release artifact management
-
-- **Dependency Updates**: Automated dependency management
-  - Dependabot for Go modules and GitHub Actions
-  - Automated PR creation for updates
-  - Auto-merge for minor updates (with tests passing)
 
 ### Quality Gates
 
@@ -321,8 +299,6 @@ All changes must pass:
 - ✅ Unit tests (100% pass rate)
 - ✅ Integration tests
 - ✅ Code linting (golangci-lint)
-- ✅ Security scanning
-- ✅ Performance tests
 - ✅ Docker build verification
 
 ## 🤝 Contributing

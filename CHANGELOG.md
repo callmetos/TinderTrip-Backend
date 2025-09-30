@@ -8,16 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- GitHub Actions CI/CD pipeline
+- GitHub Actions CI pipeline
 - Automated testing and linting
-- Security scanning with Trivy and gosec
-- Performance testing with k6
-- Automated dependency updates with Dependabot
-- Code quality monitoring
-- Automated releases and deployments
 - Issue and PR templates
 - Code of Conduct and Contributing guidelines
-- Security policy and vulnerability reporting
 - Comprehensive documentation
 
 ### Changed
@@ -41,8 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed user profile update issues
 
 ### Security
-- Added comprehensive security scanning
-- Implemented vulnerability reporting process
 - Enhanced authentication security
 - Added rate limiting and CORS protection
 - Improved input validation and sanitization
