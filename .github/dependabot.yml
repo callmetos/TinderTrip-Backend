@@ -1,14 +1,14 @@
 version: 2
 updates:
-  # Enable version updates for Go modules
+  # Enable version updates for Go modules only
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "monthly"  # เปลี่ยนจาก weekly เป็น monthly
+      day: 1
       time: "09:00"
       timezone: "Asia/Bangkok"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 3  # ลดจำนวน PR ที่เปิดพร้อมกัน
     reviewers:
       - "callmetos"
     assignees:
@@ -20,46 +20,8 @@ updates:
       - "dependencies"
       - "go"
     ignore:
-      # Ignore major version updates for these packages
+      # Ignore major version updates
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
-
-  # Enable version updates for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Asia/Bangkok"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "callmetos"
-    assignees:
-      - "callmetos"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "github-actions"
-
-  # Enable version updates for Docker
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "09:00"
-      timezone: "Asia/Bangkok"
-    open-pull-requests-limit: 5
-    reviewers:
-      - "callmetos"
-    assignees:
-      - "callmetos"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    labels:
-      - "dependencies"
-      - "docker"
+      # Ignore specific packages if needed
+      # - dependency-name: "github.com/gin-gonic/gin"
