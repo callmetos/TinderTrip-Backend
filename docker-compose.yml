@@ -1,0 +1,26 @@
+# ไฟล์นี้ถูกปรับปรุงให้อ่านค่า Environment Variables จากไฟล์ .env
+# ทำให้การตั้งค่าง่ายและปลอดภัยขึ้น
+# ระบบใช้ Google Drive สำหรับเก็บรูปภาพแทน MinIO
+services:
+  api:
+    build: . # สั่งให้สร้าง image จาก Dockerfile ใน folder ปัจจุบัน
+    # โหลด Environment Variables ทั้งหมดจากไฟล์ .env มาใช้งานใน container นี้
+    env_file:
+      - .env
+    ports:
+      # Map พอร์ตของ api service ใน container ออกมาที่เครื่องเรา
+      - "9952:${SERVER_PORT}"
+    environment:
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: ${SERVER_PORT}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URL: ${GOOGLE_REDIRECT_URL}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY}
+      NEXTCLOUD_URL: ${NEXTCLOUD_URL}
+      NEXTCLOUD_USERNAME: ${NEXTCLOUD_USERNAME}
+      NEXTCLOUD_PASSWORD: ${NEXTCLOUD_PASSWORD}

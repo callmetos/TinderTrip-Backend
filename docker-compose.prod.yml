@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: tinder-trip-postgres-prod
+    environment:
+      POSTGRES_DB: tinder_trip
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tinder-trip-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: tinder-trip-redis-prod
+    volumes:
+      - redis_data:/data
+    networks:
+      - tinder-trip-network
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tinder-trip-app-prod
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=tinder_trip
+      - DB_SSLMODE=disable
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DB=0
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRE_HOURS=24
+      - GIN_MODE=release
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM_NAME=${SMTP_FROM_NAME}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - tinder-trip-network
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: tinder-trip-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - app
+    networks:
+      - tinder-trip-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  tinder-trip-network:
+    driver: bridge

@@ -1,0 +1,89 @@
+package middleware
+
+import (
+	"net/http"
+	"strings"
+
+	"TinderTrip-Backend/pkg/config"
+
+	"github.com/gin-gonic/gin"
+	"github.com/rs/cors"
+)
+
+// CORS middleware for handling Cross-Origin Resource Sharing
+func CORS() gin.HandlerFunc {
+	cfg := config.AppConfig.CORS
+
+	c := cors.New(cors.Options{
+		AllowedOrigins:   cfg.AllowedOrigins,
+		AllowedMethods:   cfg.AllowedMethods,
+		AllowedHeaders:   cfg.AllowedHeaders,
+		ExposedHeaders:   []string{"Content-Length", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           86400, // 24 hours
+		Debug:            false,
+	})
+
+	return func(ctx *gin.Context) {
+		c.HandlerFunc(ctx.Writer, ctx.Request)
+		ctx.Next()
+	}
+}
+
+// CustomCORS is a custom CORS implementation
+func CustomCORS() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		cfg := config.AppConfig.CORS
+
+		origin := c.Request.Header.Get("Origin")
+
+		// Check if origin is allowed
+		if isOriginAllowed(origin, cfg.AllowedOrigins) {
+			c.Header("Access-Control-Allow-Origin", origin)
+		}
+
+		// Set CORS headers
+		c.Header("Access-Control-Allow-Methods", strings.Join(cfg.AllowedMethods, ", "))
+		c.Header("Access-Control-Allow-Headers", strings.Join(cfg.AllowedHeaders, ", "))
+		c.Header("Access-Control-Allow-Credentials", "true")
+		c.Header("Access-Control-Max-Age", "86400")
+
+		// Handle preflight requests
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+
+		c.Next()
+	}
+}
+
+// isOriginAllowed checks if the origin is in the allowed list
+func isOriginAllowed(origin string, allowedOrigins []string) bool {
+	if origin == "" {
+		return false
+	}
+
+	for _, allowedOrigin := range allowedOrigins {
+		if allowedOrigin == "*" || allowedOrigin == origin {
+			return true
+		}
+	}
+
+	return false
+}
+
+// CORSOptions handles OPTIONS requests for CORS
+func CORSOptions() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if c.Request.Method == "OPTIONS" {
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Requested-With")
+			c.Header("Access-Control-Max-Age", "86400")
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+		c.Next()
+	}
+}
