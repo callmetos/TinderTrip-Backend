@@ -136,7 +136,7 @@ jobs:
       run: k6 run load-test.js
 
     - name: Upload performance results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: performance-results
         path: |
@@ -202,7 +202,7 @@ jobs:
         GIN_MODE: test
 
     - name: Upload profiling results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: profiling-results
         path: |
