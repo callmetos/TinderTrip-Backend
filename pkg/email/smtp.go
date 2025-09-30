@@ -1,11 +1,11 @@
 package email
 
 import (
+	"TinderTrip-Backend/pkg/config"
 	"crypto/tls"
 	"fmt"
 	"net/smtp"
 	"strings"
-	"TinderTrip-Backend/pkg/config"
 )
 
 // SMTPClient represents an SMTP email client

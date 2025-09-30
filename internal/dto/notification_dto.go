@@ -31,8 +31,8 @@ type MarkNotificationReadRequest struct {
 
 // GetNotificationsRequest represents a get notifications request
 type GetNotificationsRequest struct {
-	Page  int  `form:"page" binding:"min=1"`
-	Limit int  `form:"limit" binding:"min=1,max=100"`
+	Page  int   `form:"page" binding:"min=1"`
+	Limit int   `form:"limit" binding:"min=1,max=100"`
 	Read  *bool `form:"read"`
 }
 
