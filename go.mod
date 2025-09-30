@@ -1,6 +1,6 @@
 module TinderTrip-Backend
 
-go 1.23
+go 1.23.0
 
 toolchain go1.24.1
 
@@ -14,9 +14,9 @@ require (
 	github.com/rs/cors v1.10.1
 	github.com/sirupsen/logrus v1.9.2
 	github.com/swaggo/files v1.0.1
-	github.com/swaggo/gin-swagger v1.6.0
+	github.com/swaggo/gin-swagger v1.6.1
 	github.com/ulule/limiter/v3 v3.11.2
-	golang.org/x/crypto v0.28.0
+	golang.org/x/crypto v0.36.0
 	golang.org/x/oauth2 v0.1.0
 	gorm.io/driver/postgres v1.5.4
 	gorm.io/gorm v1.25.5
@@ -68,12 +68,12 @@ require (
 	github.com/ugorji/go/codec v1.2.11 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/arch v0.3.0 // indirect
-	golang.org/x/net v0.30.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/text v0.19.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.26.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.30.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
