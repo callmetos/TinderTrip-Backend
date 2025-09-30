@@ -199,7 +199,7 @@ func (s *HistoryService) GetUserStats(userID string) (*dto.UserStatsResponse, er
 	var dayTripEvents int64
 	err = database.GetDB().Model(&models.UserEventHistory{}).
 		Joins("JOIN events ON user_event_history.event_id = events.id").
-		Where("user_event_history.user_id = ? AND events.event_type = ?", userUUID, models.EventTypeOneDayTrip).
+		Where("user_event_history.user_id = ? AND events.event_type = ?", userUUID, models.EventTypeDaytrip).
 		Count(&dayTripEvents).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to count day trip events: %w", err)

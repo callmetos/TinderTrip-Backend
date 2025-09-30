@@ -196,7 +196,7 @@ func (s *WorkerService) processNotifications() {
 	// Get events starting soon (within 1 hour)
 	var events []models.Event
 	err := database.GetDB().Where("status = ? AND start_at BETWEEN ? AND ?",
-		models.EventStatusActive, time.Now(), time.Now().Add(1*time.Hour)).Find(&events).Error
+		models.EventStatusPublished, time.Now(), time.Now().Add(1*time.Hour)).Find(&events).Error
 	if err != nil {
 		log.Printf("Error getting events starting soon: %v", err)
 		return
@@ -213,7 +213,7 @@ func (s *WorkerService) processNotifications() {
 	// Get events that just completed
 	var completedEvents []models.Event
 	err = database.GetDB().Where("status = ? AND end_at BETWEEN ? AND ?",
-		models.EventStatusActive, time.Now().Add(-1*time.Hour), time.Now()).Find(&completedEvents).Error
+		models.EventStatusPublished, time.Now().Add(-1*time.Hour), time.Now()).Find(&completedEvents).Error
 	if err != nil {
 		log.Printf("Error getting completed events: %v", err)
 		return

@@ -65,7 +65,7 @@ func (pb *PrefBudget) GetBudgetForEventType(eventType EventType) (min, max *int)
 	switch eventType {
 	case EventTypeMeal:
 		return pb.GetMealBudget()
-	case EventTypeOneDayTrip:
+	case EventTypeDaytrip:
 		return pb.GetDaytripBudget()
 	case EventTypeOvernight:
 		return pb.GetOvernightBudget()

@@ -62,7 +62,7 @@ func (s *EventService) GetEvents(userID string, page, limit int, eventType, stat
 // GetPublicEvents gets public events (no authentication required)
 func (s *EventService) GetPublicEvents(page, limit int, eventType string) ([]dto.EventResponse, int64, error) {
 	// Build query for active events only
-	query := database.GetDB().Model(&models.Event{}).Where("deleted_at IS NULL AND status = ?", models.EventStatusActive)
+	query := database.GetDB().Model(&models.Event{}).Where("deleted_at IS NULL AND status = ?", models.EventStatusPublished)
 
 	// Apply filters
 	if eventType != "" {
@@ -128,7 +128,7 @@ func (s *EventService) GetPublicEvent(eventID string) (*dto.EventResponse, error
 	// Get event (only active events)
 	var event models.Event
 	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").
-		Where("id = ? AND deleted_at IS NULL AND status = ?", eventUUID, models.EventStatusActive).First(&event).Error
+		Where("id = ? AND deleted_at IS NULL AND status = ?", eventUUID, models.EventStatusPublished).First(&event).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("event not found")
