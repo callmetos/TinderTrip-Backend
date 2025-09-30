@@ -9,7 +9,6 @@ import (
 // Response represents a standard API response
 type Response struct {
 	Success bool        `json:"success"`
-	Status  string      `json:"status"`
 	Message string      `json:"message,omitempty"`
 	Data    interface{} `json:"data,omitempty"`
 	Error   string      `json:"error,omitempty"`
@@ -19,7 +18,6 @@ type Response struct {
 func SuccessResponse(c *gin.Context, statusCode int, message string, data interface{}) {
 	c.JSON(statusCode, Response{
 		Success: true,
-		Status:  "success",
 		Message: message,
 		Data:    data,
 	})
@@ -29,7 +27,6 @@ func SuccessResponse(c *gin.Context, statusCode int, message string, data interf
 func ErrorResponse(c *gin.Context, statusCode int, message string, err error) {
 	response := Response{
 		Success: false,
-		Status:  "error",
 		Message: message,
 	}
 
@@ -44,7 +41,6 @@ func ErrorResponse(c *gin.Context, statusCode int, message string, err error) {
 func ValidationErrorResponse(c *gin.Context, message string, errors map[string]string) {
 	c.JSON(http.StatusBadRequest, Response{
 		Success: false,
-		Status:  "validation_error",
 		Message: message,
 		Data:    errors,
 	})
@@ -54,7 +50,6 @@ func ValidationErrorResponse(c *gin.Context, message string, errors map[string]s
 func NotFoundResponse(c *gin.Context, message string) {
 	c.JSON(http.StatusNotFound, Response{
 		Success: false,
-		Status:  "not_found",
 		Message: message,
 	})
 }
@@ -63,7 +58,6 @@ func NotFoundResponse(c *gin.Context, message string) {
 func UnauthorizedResponse(c *gin.Context, message string) {
 	c.JSON(http.StatusUnauthorized, Response{
 		Success: false,
-		Status:  "unauthorized",
 		Message: message,
 	})
 }
@@ -72,7 +66,6 @@ func UnauthorizedResponse(c *gin.Context, message string) {
 func ForbiddenResponse(c *gin.Context, message string) {
 	c.JSON(http.StatusForbidden, Response{
 		Success: false,
-		Status:  "forbidden",
 		Message: message,
 	})
 }
@@ -81,7 +74,6 @@ func ForbiddenResponse(c *gin.Context, message string) {
 func InternalServerErrorResponse(c *gin.Context, message string, err error) {
 	response := Response{
 		Success: false,
-		Status:  "internal_server_error",
 		Message: message,
 	}
 
@@ -96,7 +88,6 @@ func InternalServerErrorResponse(c *gin.Context, message string, err error) {
 func BadRequestResponse(c *gin.Context, message string) {
 	c.JSON(http.StatusBadRequest, Response{
 		Success: false,
-		Status:  "bad_request",
 		Message: message,
 	})
 }
@@ -105,7 +96,6 @@ func BadRequestResponse(c *gin.Context, message string) {
 func ConflictResponse(c *gin.Context, message string) {
 	c.JSON(http.StatusConflict, Response{
 		Success: false,
-		Status:  "conflict",
 		Message: message,
 	})
 }
@@ -114,7 +104,6 @@ func ConflictResponse(c *gin.Context, message string) {
 func TooManyRequestsResponse(c *gin.Context, message string) {
 	c.JSON(http.StatusTooManyRequests, Response{
 		Success: false,
-		Status:  "too_many_requests",
 		Message: message,
 	})
 }
@@ -122,7 +111,7 @@ func TooManyRequestsResponse(c *gin.Context, message string) {
 // PaginationResponse represents a paginated response
 type PaginationResponse struct {
 	Success    bool        `json:"success"`
-	Status     string      `json:"status"`
+	Message    string      `json:"message,omitempty"`
 	Data       interface{} `json:"data"`
 	Total      int64       `json:"total"`
 	Page       int         `json:"page"`
@@ -136,7 +125,7 @@ func SendPaginatedResponse(c *gin.Context, data interface{}, total int64, page, 
 
 	c.JSON(http.StatusOK, PaginationResponse{
 		Success:    true,
-		Status:     "success",
+		Message:    "Data retrieved successfully",
 		Data:       data,
 		Total:      total,
 		Page:       page,
