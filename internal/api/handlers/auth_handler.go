@@ -226,10 +226,13 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	// Validate state parameter
+	// Validate state parameter (skip if Redis is not available)
 	ctx := c.Request.Context()
 	validState, err := database.GetCache(ctx, "oauth_state:"+state)
-	if err != nil || validState != "valid" {
+	if err != nil {
+		// If Redis is not available, skip state validation
+		utils.Logger().WithField("error", err).Warn("Redis not available, skipping state validation")
+	} else if validState != "valid" {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Error:   "Invalid state",
 			Message: "Invalid or expired state parameter",
@@ -279,6 +282,17 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 
 	// Clean up state
 	database.DeleteCache(ctx, "oauth_state:"+state)
+
+	// Send welcome email for new Google OAuth users
+	go func() {
+		if err := h.emailService.SendWelcomeEmail(userInfo.Email, userInfo.Name); err != nil {
+			utils.Logger().WithFields(map[string]interface{}{
+				"error":   err,
+				"user_id": user.ID.String(),
+				"email":   userInfo.Email,
+			}).Error("Failed to send welcome email for Google OAuth user")
+		}
+	}()
 
 	c.JSON(http.StatusOK, dto.AuthResponse{
 		Token: jwtToken,
