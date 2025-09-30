@@ -11,9 +11,11 @@ import (
 type EventType string
 
 const (
-	EventTypeMeal       EventType = "meal"
-	EventTypeOneDayTrip EventType = "one_day_trip"
-	EventTypeOvernight  EventType = "overnight"
+	EventTypeMeal      EventType = "meal"
+	EventTypeDaytrip   EventType = "daytrip"
+	EventTypeOvernight EventType = "overnight"
+	EventTypeActivity  EventType = "activity"
+	EventTypeOther     EventType = "other"
 )
 
 // EventStatus represents the event status enum
@@ -21,8 +23,7 @@ type EventStatus string
 
 const (
 	EventStatusDraft     EventStatus = "draft"
-	EventStatusActive    EventStatus = "active"
-	EventStatusClosed    EventStatus = "closed"
+	EventStatusPublished EventStatus = "published"
 	EventStatusCancelled EventStatus = "cancelled"
 	EventStatusCompleted EventStatus = "completed"
 )
@@ -70,9 +71,9 @@ func (e *Event) BeforeCreate(tx *gorm.DB) error {
 	return nil
 }
 
-// IsActive checks if the event is active
-func (e *Event) IsActive() bool {
-	return e.Status == EventStatusActive
+// IsPublished checks if the event is published
+func (e *Event) IsPublished() bool {
+	return e.Status == EventStatusPublished
 }
 
 // IsDraft checks if the event is in draft status
@@ -88,11 +89,6 @@ func (e *Event) IsCompleted() bool {
 // IsCancelled checks if the event is cancelled
 func (e *Event) IsCancelled() bool {
 	return e.Status == EventStatusCancelled
-}
-
-// IsClosed checks if the event is closed
-func (e *Event) IsClosed() bool {
-	return e.Status == EventStatusClosed
 }
 
 // HasLocation checks if the event has location data

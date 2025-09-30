@@ -13,6 +13,8 @@ type AuthProvider string
 const (
 	AuthProviderPassword AuthProvider = "password"
 	AuthProviderGoogle   AuthProvider = "google"
+	AuthProviderApple    AuthProvider = "apple"
+	AuthProviderFacebook AuthProvider = "facebook"
 )
 
 // User represents the users table
