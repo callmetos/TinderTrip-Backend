@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"TinderTrip-Backend/docs"
 	"TinderTrip-Backend/internal/api/middleware"
 	"TinderTrip-Backend/internal/api/routes"
 	"TinderTrip-Backend/pkg/config"
@@ -41,6 +42,13 @@ func NewServer() *Server {
 
 	// Add Swagger documentation
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// Initialize Swagger docs
+	docs.SwaggerInfo.Title = "TinderTrip API"
+	docs.SwaggerInfo.Description = "A Tinder-like trip matching API"
+	docs.SwaggerInfo.Version = "1.0"
+	docs.SwaggerInfo.Host = "localhost:8080"
+	docs.SwaggerInfo.BasePath = "/api/v1"
 
 	return &Server{
 		router: router,
