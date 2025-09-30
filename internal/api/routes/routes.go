@@ -15,7 +15,8 @@ func SetupRoutes(router *gin.Engine) {
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
-			"status":  "ok",
+			"success": true,
+			"status":  "success",
 			"message": "TinderTrip API is running",
 		})
 	})
