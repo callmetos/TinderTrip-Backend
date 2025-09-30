@@ -23,6 +23,10 @@ go.work
 .env.development
 .env.production
 
+# Static files (HTML, CSS, JS for development)
+public/
+cmd/static/
+
 # IDE
 .vscode/
 .idea/

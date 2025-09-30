@@ -4,6 +4,7 @@ import (
 	"TinderTrip-Backend/pkg/config"
 	"crypto/tls"
 	"fmt"
+	"net"
 	"net/smtp"
 	"strings"
 )
@@ -39,14 +40,8 @@ func (c *SMTPClient) SendEmail(message *EmailMessage) error {
 	// Connect to the server
 	addr := fmt.Sprintf("%s:%d", c.config.SMTPHost, c.config.SMTPPort)
 
-	// Create TLS config
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: false,
-		ServerName:         c.config.SMTPHost,
-	}
-
-	// Connect to the server
-	conn, err := tls.Dial("tcp", addr, tlsConfig)
+	// Connect to SMTP server (plain connection first)
+	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		return fmt.Errorf("failed to connect to SMTP server: %w", err)
 	}
@@ -58,6 +53,16 @@ func (c *SMTPClient) SendEmail(message *EmailMessage) error {
 		return fmt.Errorf("failed to create SMTP client: %w", err)
 	}
 	defer client.Quit()
+
+	// Start TLS
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: false,
+		ServerName:         c.config.SMTPHost,
+	}
+
+	if err := client.StartTLS(tlsConfig); err != nil {
+		return fmt.Errorf("failed to start TLS: %w", err)
+	}
 
 	// Authenticate
 	if err := client.Auth(auth); err != nil {

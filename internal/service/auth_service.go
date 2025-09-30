@@ -121,8 +121,15 @@ func (s *AuthService) SendPasswordResetEmail(email string) error {
 	}
 
 	// Send email
-	resetURL := "http://localhost:3000/reset-password" // Frontend URL
-	return s.emailService.SendPasswordResetEmail(email, token, resetURL)
+	resetURL := "http://localhost:3001/reset-password.html" // Frontend URL
+	fmt.Printf("DEBUG: Attempting to send email to %s with token %s\n", email, token)
+	err = s.emailService.SendPasswordResetEmail(email, token, resetURL)
+	if err != nil {
+		fmt.Printf("DEBUG: Email sending failed: %v\n", err)
+		return fmt.Errorf("failed to send email: %w", err)
+	}
+	fmt.Printf("DEBUG: Email sent successfully to %s\n", email)
+	return nil
 }
 
 // ResetPassword resets user password
