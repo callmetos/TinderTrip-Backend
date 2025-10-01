@@ -57,7 +57,7 @@ func NewServer() *Server {
 
 func (s *Server) Start() error {
 	port := config.AppConfig.Server.Port
-	host := config.AppConfig.Server.Host
+	host := "0.0.0.0" // Hardcode to 0.0.0.0 for LAN access
 
 	s.httpServer = &http.Server{
 		Addr:         fmt.Sprintf("%s:%s", host, port),
