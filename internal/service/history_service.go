@@ -301,14 +301,26 @@ func (s *HistoryService) convertHistoryToResponse(history models.UserEventHistor
 		// Add profile info
 		if history.User != nil && history.User.Profile != nil {
 			response.User.Profile = &dto.UserProfileResponse{
-				ID:            history.User.Profile.ID.String(),
-				UserID:        history.User.Profile.UserID.String(),
-				Bio:           history.User.Profile.Bio,
-				Languages:     history.User.Profile.Languages,
-				DateOfBirth:   history.User.Profile.DateOfBirth,
-				Gender:        func() string { if history.User.Profile.Gender != nil { return string(*history.User.Profile.Gender) } else { return "" } }(),
-				JobTitle:      history.User.Profile.JobTitle,
-				Smoking:       func() string { if history.User.Profile.Smoking != nil { return string(*history.User.Profile.Smoking) } else { return "" } }(),
+				ID:          history.User.Profile.ID.String(),
+				UserID:      history.User.Profile.UserID.String(),
+				Bio:         history.User.Profile.Bio,
+				Languages:   history.User.Profile.Languages,
+				DateOfBirth: history.User.Profile.DateOfBirth,
+				Gender: func() string {
+					if history.User.Profile.Gender != nil {
+						return string(*history.User.Profile.Gender)
+					} else {
+						return ""
+					}
+				}(),
+				JobTitle: history.User.Profile.JobTitle,
+				Smoking: func() string {
+					if history.User.Profile.Smoking != nil {
+						return string(*history.User.Profile.Smoking)
+					} else {
+						return ""
+					}
+				}(),
 				InterestsNote: history.User.Profile.InterestsNote,
 				AvatarURL:     history.User.Profile.AvatarURL,
 				HomeLocation:  history.User.Profile.HomeLocation,
