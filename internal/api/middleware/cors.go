@@ -38,18 +38,10 @@ func CORS() gin.HandlerFunc {
 // CustomCORS is a custom CORS implementation
 func CustomCORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		cfg := config.AppConfig.CORS
-
-		origin := c.Request.Header.Get("Origin")
-
-		// Check if origin is allowed
-		if isOriginAllowed(origin, cfg.AllowedOrigins) {
-			c.Header("Access-Control-Allow-Origin", origin)
-		}
-
-		// Set CORS headers
-		c.Header("Access-Control-Allow-Methods", strings.Join(cfg.AllowedMethods, ", "))
-		c.Header("Access-Control-Allow-Headers", strings.Join(cfg.AllowedHeaders, ", "))
+		// Always allow all origins
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Header("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Max-Age", "86400")
 
