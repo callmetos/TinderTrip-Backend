@@ -1,0 +1,4020 @@
+{
+  "schemes": [],
+  "swagger": "2.0",
+  "info": {
+    "description": "A Tinder-like trip matching API",
+    "title": "TinderTrip API",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact": {
+      "name": "API Support",
+      "url": "http://www.swagger.io/support",
+      "email": "support@swagger.io"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "version": "1.0"
+  },
+  "host": "https://api.tindertrip.phitik.com",
+  "basePath": "/api/v1",
+  "paths": {
+    "/auth/forgot-password": {
+      "post": {
+        "description": "Send password reset email",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Request password reset",
+        "parameters": [
+          {
+            "description": "Email address",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.ForgotPasswordRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "description": "Get Google OAuth authorization URL",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Google OAuth authentication",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.GoogleAuthResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/auth/google/callback": {
+      "get": {
+        "description": "Handle Google OAuth callback and authenticate user",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Google OAuth callback",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Authorization code",
+            "name": "code",
+            "in": "query",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "State parameter",
+            "name": "state",
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.AuthResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "description": "Login user with email and password",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Login user",
+        "parameters": [
+          {
+            "description": "Login data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.LoginRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.AuthResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Logout user and invalidate token",
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Refresh JWT token",
+        "tags": [
+          "auth"
+        ],
+        "summary": "Refresh JWT token",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.AuthResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "description": "Register a new user with email and password",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Register a new user",
+        "parameters": [
+          {
+            "description": "Registration data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.RegisterRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/dto.AuthResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "description": "Reset password with OTP verification",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Reset password with OTP",
+        "parameters": [
+          {
+            "description": "Reset password data with OTP",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.ResetPasswordRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/auth/verify-otp": {
+      "post": {
+        "description": "Verify OTP for password reset",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "auth"
+        ],
+        "summary": "Verify OTP",
+        "parameters": [
+          {
+            "description": "OTP verification data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.VerifyOTPRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/chat/rooms": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get chat rooms for the current user",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "chat"
+        ],
+        "summary": "Get chat rooms",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.ChatRoomListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/chat/rooms/{id}/messages": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get messages from a specific chat room",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "chat"
+        ],
+        "summary": "Get chat messages",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Room ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "integer",
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Items per page",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.ChatMessageListResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Send a message to a specific chat room",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "chat"
+        ],
+        "summary": "Send chat message",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Room ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Message data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.SendMessageRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/dto.ChatMessageResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get events with pagination and filters",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Get events",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Items per page",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Event type filter",
+            "name": "event_type",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Event status filter",
+            "name": "status",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.EventListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Create a new event",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Create event",
+        "parameters": [
+          {
+            "description": "Event data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.CreateEventRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/dto.EventResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events/suggestions": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get event suggestions based on user's interests and tags",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Get event suggestions",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Items per page",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.EventSuggestionResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get a specific event by ID",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Get event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.EventResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Update an existing event",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Update event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Event update data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.UpdateEventRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.EventResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Delete an existing event",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Delete event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}/cancel": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Cancel participation in an event (change status from pending to declined)",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Cancel event participation",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}/complete": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Complete an event (creator only)",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Complete event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}/confirm": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Confirm participation in an event (change status from pending to confirmed)",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Confirm event participation",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}/join": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Join an existing event",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Join event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}/leave": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Leave an existing event",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Leave event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}/swipe": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Swipe on an event (like or pass)",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Swipe event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Swipe data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.SwipeEventRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}/tags": {
+      "get": {
+        "description": "Get tags associated with an event",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tags"
+        ],
+        "summary": "Get event tags",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.EventTagListResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Add a tag to an event",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tags"
+        ],
+        "summary": "Add event tag",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "description": "Tag data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.AddEventTagRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/events/{id}/tags/{tag_id}": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Remove a tag from an event",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tags"
+        ],
+        "summary": "Remove event tag",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Tag ID",
+            "name": "tag_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/food-preferences/categories": {
+      "get": {
+        "description": "Get all available food preference categories",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "food-preferences"
+        ],
+        "summary": "Get food preference categories",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.FoodPreferenceCategoriesResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/history": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get current user's event history",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "history"
+        ],
+        "summary": "Get event history",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Items per page",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "boolean",
+            "description": "Filter by completion status",
+            "name": "completed",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.HistoryListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/history/{id}/complete": {
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Mark an event as completed in user's history",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "history"
+        ],
+        "summary": "Mark event as completed",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/public/events": {
+      "get": {
+        "description": "Get public events without authentication",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Get public events",
+        "parameters": [
+          {
+            "type": "integer",
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Items per page",
+            "name": "limit",
+            "in": "query"
+          },
+          {
+            "type": "string",
+            "description": "Event type filter",
+            "name": "event_type",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.EventListResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/public/events/{id}": {
+      "get": {
+        "description": "Get a specific public event by ID without authentication",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "events"
+        ],
+        "summary": "Get public event",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Event ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.EventResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/tags": {
+      "get": {
+        "description": "Get all tags with optional filtering by kind",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tags"
+        ],
+        "summary": "Get tags",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Filter by tag kind (interest, category, activity, location, food, transport, accommodation)",
+            "name": "kind",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Page number",
+            "name": "page",
+            "in": "query"
+          },
+          {
+            "type": "integer",
+            "description": "Items per page",
+            "name": "limit",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.TagListResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/travel-preferences/styles": {
+      "get": {
+        "description": "Get all available travel preference styles",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "travel-preferences"
+        ],
+        "summary": "Get travel preference styles",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.TravelPreferenceStylesResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/food-preferences": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get the current user's food preferences",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "food-preferences"
+        ],
+        "summary": "Get food preferences",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.FoodPreferenceListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Update a single food preference for the current user",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "food-preferences"
+        ],
+        "summary": "Update food preference",
+        "parameters": [
+          {
+            "description": "Food preference data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.UpdateFoodPreferenceRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/food-preferences/bulk": {
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Update all food preferences for the current user",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "food-preferences"
+        ],
+        "summary": "Update all food preferences",
+        "parameters": [
+          {
+            "description": "All food preferences data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.UpdateAllFoodPreferencesRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/food-preferences/categories": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get all available food preference categories with the current user's preferences",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "food-preferences"
+        ],
+        "summary": "Get food preference categories with user preferences",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.FoodPreferenceCategoriesResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/food-preferences/stats": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get food preference statistics for the current user",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "food-preferences"
+        ],
+        "summary": "Get food preference statistics",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.FoodPreferenceStatsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/food-preferences/{category}": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Delete a food preference for the current user",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "food-preferences"
+        ],
+        "summary": "Delete food preference",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Food category",
+            "name": "category",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/preferences/availability": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get current user's availability preferences",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "preferences"
+        ],
+        "summary": "Get user availability preferences",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.PrefAvailabilityResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Update current user's availability preferences",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "preferences"
+        ],
+        "summary": "Update user availability preferences",
+        "parameters": [
+          {
+            "description": "Availability preferences",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.UpdatePrefAvailabilityRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.PrefAvailabilityResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/preferences/budget": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get current user's budget preferences",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "preferences"
+        ],
+        "summary": "Get user budget preferences",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.PrefBudgetResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Update current user's budget preferences",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "preferences"
+        ],
+        "summary": "Update user budget preferences",
+        "parameters": [
+          {
+            "description": "Budget preferences",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.UpdatePrefBudgetRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.PrefBudgetResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/profile": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get current user's profile information",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "users"
+        ],
+        "summary": "Get user profile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.UserProfileResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Update current user's profile information",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "users"
+        ],
+        "summary": "Update user profile",
+        "parameters": [
+          {
+            "description": "Profile update data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.UpdateProfileRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.UserProfileResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Delete current user's profile (soft delete)",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "users"
+        ],
+        "summary": "Delete user profile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/tags": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get tags associated with the current user",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tags"
+        ],
+        "summary": "Get user tags",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.UserTagListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Add a tag to the current user's interests",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tags"
+        ],
+        "summary": "Add user tag",
+        "parameters": [
+          {
+            "description": "Tag data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.AddUserTagRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/tags/{tag_id}": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Remove a tag from the current user's interests",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "tags"
+        ],
+        "summary": "Remove user tag",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Tag ID",
+            "name": "tag_id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/travel-preferences": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get the current user's travel preferences",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "travel-preferences"
+        ],
+        "summary": "Get travel preferences",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.TravelPreferenceListResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Add a travel preference for the current user",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "travel-preferences"
+        ],
+        "summary": "Add travel preference",
+        "parameters": [
+          {
+            "description": "Travel preference data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.AddTravelPreferenceRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/travel-preferences/bulk": {
+      "put": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Update all travel preferences for the current user (replace all)",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "travel-preferences"
+        ],
+        "summary": "Update all travel preferences",
+        "parameters": [
+          {
+            "description": "All travel preferences data",
+            "name": "request",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/dto.UpdateAllTravelPreferencesRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/travel-preferences/stats": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get travel preference statistics for the current user",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "travel-preferences"
+        ],
+        "summary": "Get travel preference statistics",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.TravelPreferenceStatsResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/travel-preferences/styles": {
+      "get": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Get all available travel preference styles with the current user's preferences",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "travel-preferences"
+        ],
+        "summary": "Get travel preference styles with user preferences",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.TravelPreferenceStylesResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/travel-preferences/{style}": {
+      "delete": {
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "description": "Delete a travel preference for the current user",
+        "produces": [
+          "application/json"
+        ],
+        "tags": [
+          "travel-preferences"
+        ],
+        "summary": "Delete travel preference",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Travel style",
+            "name": "style",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/dto.SuccessResponse"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/dto.ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "dto.AddEventTagRequest": {
+      "type": "object",
+      "required": [
+        "tag_id"
+      ],
+      "properties": {
+        "tag_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.AddTravelPreferenceRequest": {
+      "type": "object",
+      "required": [
+        "travel_style"
+      ],
+      "properties": {
+        "travel_style": {
+          "type": "string",
+          "enum": [
+            "cafe_dessert",
+            "bubble_tea",
+            "bakery_cake",
+            "bingsu_ice_cream",
+            "coffee",
+            "matcha",
+            "pancakes",
+            "social_activity",
+            "karaoke",
+            "gaming",
+            "movie",
+            "board_game",
+            "outdoor_activity",
+            "party_celebration",
+            "swimming",
+            "skateboarding"
+          ]
+        }
+      }
+    },
+    "dto.AddUserTagRequest": {
+      "type": "object",
+      "required": [
+        "tag_id"
+      ],
+      "properties": {
+        "tag_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.AuthResponse": {
+      "type": "object",
+      "properties": {
+        "token": {
+          "type": "string"
+        },
+        "user": {
+          "$ref": "#/definitions/dto.UserResponse"
+        }
+      }
+    },
+    "dto.ChatMessageListResponse": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.ChatMessageResponse"
+          }
+        },
+        "page": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      }
+    },
+    "dto.ChatMessageResponse": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "message_type": {
+          "type": "string"
+        },
+        "room_id": {
+          "type": "string"
+        },
+        "sender": {
+          "$ref": "#/definitions/dto.UserResponse"
+        },
+        "sender_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.ChatRoomListResponse": {
+      "type": "object",
+      "properties": {
+        "rooms": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.ChatRoomResponse"
+          }
+        }
+      }
+    },
+    "dto.ChatRoomResponse": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "event": {
+          "$ref": "#/definitions/dto.EventResponse"
+        },
+        "event_id": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.CreateEventRequest": {
+      "type": "object",
+      "required": [
+        "event_type",
+        "title"
+      ],
+      "properties": {
+        "address_text": {
+          "type": "string"
+        },
+        "capacity": {
+          "type": "integer"
+        },
+        "category_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cover_image_url": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "end_at": {
+          "type": "string"
+        },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "meal",
+            "one_day_trip",
+            "overnight"
+          ]
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "start_at": {
+          "type": "string"
+        },
+        "tag_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.EventListResponse": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.EventResponse"
+          }
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      }
+    },
+    "dto.EventMemberResponse": {
+      "type": "object",
+      "properties": {
+        "confirmed_at": {
+          "type": "string"
+        },
+        "event_id": {
+          "type": "string"
+        },
+        "joined_at": {
+          "type": "string"
+        },
+        "left_at": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.EventPhotoResponse": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "event_id": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "sort_no": {
+          "type": "integer"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.EventResponse": {
+      "type": "object",
+      "properties": {
+        "address_text": {
+          "type": "string"
+        },
+        "capacity": {
+          "type": "integer"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.TagResponse"
+          }
+        },
+        "cover_image_url": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "creator": {
+          "$ref": "#/definitions/dto.UserResponse"
+        },
+        "creator_id": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "end_at": {
+          "type": "string"
+        },
+        "event_type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "is_joined": {
+          "type": "boolean"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "member_count": {
+          "type": "integer"
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.EventMemberResponse"
+          }
+        },
+        "photos": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.EventPhotoResponse"
+          }
+        },
+        "start_at": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.TagResponse"
+          }
+        },
+        "title": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "user_swipe": {
+          "$ref": "#/definitions/dto.EventSwipeResponse"
+        }
+      }
+    },
+    "dto.EventSuggestionItem": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "$ref": "#/definitions/dto.EventResponse"
+        },
+        "match_score": {
+          "type": "number"
+        },
+        "matched_tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.TagResponse"
+          }
+        }
+      }
+    },
+    "dto.EventSuggestionResponse": {
+      "type": "object",
+      "properties": {
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.EventSuggestionItem"
+          }
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      }
+    },
+    "dto.EventSwipeResponse": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "direction": {
+          "type": "string"
+        },
+        "event_id": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.EventTagListResponse": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.TagResponse"
+          }
+        }
+      }
+    },
+    "dto.FoodPreferenceCategoriesResponse": {
+      "type": "object",
+      "properties": {
+        "categories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.FoodPreferenceCategoryResponse"
+          }
+        }
+      }
+    },
+    "dto.FoodPreferenceCategoryResponse": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "preference_level": {
+          "type": "integer"
+        }
+      }
+    },
+    "dto.FoodPreferenceListResponse": {
+      "type": "object",
+      "properties": {
+        "preferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.FoodPreferenceResponse"
+          }
+        }
+      }
+    },
+    "dto.FoodPreferenceResponse": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "food_category": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "preference_level": {
+          "type": "integer"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.FoodPreferenceStatsResponse": {
+      "type": "object",
+      "properties": {
+        "dislike_count": {
+          "type": "integer"
+        },
+        "love_count": {
+          "type": "integer"
+        },
+        "neutral_count": {
+          "type": "integer"
+        },
+        "total_preferences": {
+          "type": "integer"
+        }
+      }
+    },
+    "dto.ForgotPasswordRequest": {
+      "type": "object",
+      "required": [
+        "email"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.GoogleAuthResponse": {
+      "type": "object",
+      "properties": {
+        "auth_url": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.HistoryListResponse": {
+      "type": "object",
+      "properties": {
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.UserEventHistoryResponse"
+          }
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "total": {
+          "type": "integer"
+        }
+      }
+    },
+    "dto.LoginRequest": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.PrefAvailabilityResponse": {
+      "type": "object",
+      "properties": {
+        "afternoon": {
+          "type": "boolean"
+        },
+        "all_day": {
+          "type": "boolean"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "fri": {
+          "type": "boolean"
+        },
+        "id": {
+          "type": "string"
+        },
+        "mon": {
+          "type": "boolean"
+        },
+        "morning": {
+          "type": "boolean"
+        },
+        "sat": {
+          "type": "boolean"
+        },
+        "sun": {
+          "type": "boolean"
+        },
+        "thu": {
+          "type": "boolean"
+        },
+        "time_range": {
+          "type": "string"
+        },
+        "tue": {
+          "type": "boolean"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "wed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "dto.PrefBudgetResponse": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "daytrip_max": {
+          "type": "integer"
+        },
+        "daytrip_min": {
+          "type": "integer"
+        },
+        "id": {
+          "type": "string"
+        },
+        "meal_max": {
+          "type": "integer"
+        },
+        "meal_min": {
+          "type": "integer"
+        },
+        "overnight_max": {
+          "type": "integer"
+        },
+        "overnight_min": {
+          "type": "integer"
+        },
+        "unlimited": {
+          "type": "boolean"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.RegisterRequest": {
+      "type": "object",
+      "required": [
+        "display_name",
+        "email",
+        "password"
+      ],
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "maxLength": 50,
+          "minLength": 2
+        },
+        "email": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string",
+          "minLength": 6
+        }
+      }
+    },
+    "dto.ResetPasswordRequest": {
+      "type": "object",
+      "required": [
+        "email",
+        "otp",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "otp": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string",
+          "minLength": 6
+        }
+      }
+    },
+    "dto.SendMessageRequest": {
+      "type": "object",
+      "required": [
+        "body",
+        "message_type",
+        "room_id"
+      ],
+      "properties": {
+        "body": {
+          "type": "string"
+        },
+        "message_type": {
+          "type": "string"
+        },
+        "room_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.SuccessResponse": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.SwipeEventRequest": {
+      "type": "object",
+      "required": [
+        "direction",
+        "event_id"
+      ],
+      "properties": {
+        "direction": {
+          "type": "string",
+          "enum": [
+            "like",
+            "pass"
+          ]
+        },
+        "event_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.TagListResponse": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer"
+        },
+        "page": {
+          "type": "integer"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.TagResponse"
+          }
+        },
+        "total": {
+          "type": "integer"
+        }
+      }
+    },
+    "dto.TagResponse": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.TravelPreferenceListResponse": {
+      "type": "object",
+      "properties": {
+        "preferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.TravelPreferenceResponse"
+          }
+        }
+      }
+    },
+    "dto.TravelPreferenceResponse": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "travel_style": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.TravelPreferenceStatsResponse": {
+      "type": "object",
+      "properties": {
+        "total_preferences": {
+          "type": "integer"
+        }
+      }
+    },
+    "dto.TravelPreferenceStyleResponse": {
+      "type": "object",
+      "properties": {
+        "display_name": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "is_selected": {
+          "type": "boolean"
+        },
+        "style": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.TravelPreferenceStylesResponse": {
+      "type": "object",
+      "properties": {
+        "styles": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.TravelPreferenceStyleResponse"
+          }
+        }
+      }
+    },
+    "dto.UpdateAllFoodPreferencesRequest": {
+      "type": "object",
+      "required": [
+        "preferences"
+      ],
+      "properties": {
+        "preferences": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/dto.UpdateFoodPreferenceRequest"
+          }
+        }
+      }
+    },
+    "dto.UpdateAllTravelPreferencesRequest": {
+      "type": "object",
+      "required": [
+        "travel_styles"
+      ],
+      "properties": {
+        "travel_styles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "dto.UpdateEventRequest": {
+      "type": "object",
+      "properties": {
+        "address_text": {
+          "type": "string"
+        },
+        "capacity": {
+          "type": "integer"
+        },
+        "category_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cover_image_url": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "end_at": {
+          "type": "string"
+        },
+        "event_type": {
+          "type": "string",
+          "enum": [
+            "meal",
+            "daytrip",
+            "overnight",
+            "activity",
+            "other"
+          ]
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lng": {
+          "type": "number"
+        },
+        "start_at": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "published",
+            "cancelled",
+            "completed"
+          ]
+        },
+        "tag_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "title": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.UpdateFoodPreferenceRequest": {
+      "type": "object",
+      "required": [
+        "food_category",
+        "preference_level"
+      ],
+      "properties": {
+        "food_category": {
+          "type": "string",
+          "enum": [
+            "thai_food",
+            "japanese_food",
+            "chinese_food",
+            "international_food",
+            "halal_food",
+            "buffet",
+            "bbq_grill"
+          ]
+        },
+        "preference_level": {
+          "type": "integer",
+          "maximum": 3,
+          "minimum": 1
+        }
+      }
+    },
+    "dto.UpdatePrefAvailabilityRequest": {
+      "type": "object",
+      "properties": {
+        "afternoon": {
+          "type": "boolean"
+        },
+        "all_day": {
+          "type": "boolean"
+        },
+        "fri": {
+          "type": "boolean"
+        },
+        "mon": {
+          "type": "boolean"
+        },
+        "morning": {
+          "type": "boolean"
+        },
+        "sat": {
+          "type": "boolean"
+        },
+        "sun": {
+          "type": "boolean"
+        },
+        "thu": {
+          "type": "boolean"
+        },
+        "time_range": {
+          "type": "string"
+        },
+        "tue": {
+          "type": "boolean"
+        },
+        "wed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "dto.UpdatePrefBudgetRequest": {
+      "type": "object",
+      "properties": {
+        "currency": {
+          "type": "string"
+        },
+        "daytrip_max": {
+          "type": "integer"
+        },
+        "daytrip_min": {
+          "type": "integer"
+        },
+        "meal_max": {
+          "type": "integer"
+        },
+        "meal_min": {
+          "type": "integer"
+        },
+        "overnight_max": {
+          "type": "integer"
+        },
+        "overnight_min": {
+          "type": "integer"
+        },
+        "unlimited": {
+          "type": "boolean"
+        }
+      }
+    },
+    "dto.UpdateProfileRequest": {
+      "type": "object",
+      "properties": {
+        "avatar_url": {
+          "type": "string"
+        },
+        "bio": {
+          "type": "string"
+        },
+        "date_of_birth": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        },
+        "home_location": {
+          "type": "string"
+        },
+        "interests_note": {
+          "type": "string"
+        },
+        "job_title": {
+          "type": "string"
+        },
+        "languages": {
+          "type": "string"
+        },
+        "smoking": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.UserEventHistoryResponse": {
+      "type": "object",
+      "properties": {
+        "completed": {
+          "type": "boolean"
+        },
+        "completed_at": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "event": {
+          "$ref": "#/definitions/dto.EventResponse"
+        },
+        "event_id": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "user": {
+          "$ref": "#/definitions/dto.UserResponse"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.UserProfileResponse": {
+      "type": "object",
+      "properties": {
+        "avatar_url": {
+          "type": "string"
+        },
+        "bio": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "date_of_birth": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        },
+        "home_location": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "interests_note": {
+          "type": "string"
+        },
+        "job_title": {
+          "type": "string"
+        },
+        "languages": {
+          "type": "string"
+        },
+        "smoking": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.UserResponse": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "profile": {
+          "$ref": "#/definitions/dto.UserProfileResponse"
+        },
+        "provider": {
+          "type": "string"
+        }
+      }
+    },
+    "dto.UserTagListResponse": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/dto.TagResponse"
+          }
+        }
+      }
+    },
+    "dto.VerifyOTPRequest": {
+      "type": "object",
+      "required": [
+        "email",
+        "otp"
+      ],
+      "properties": {
+        "email": {
+          "type": "string"
+        },
+        "otp": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "BearerAuth": {
+      "description": "Type \"Bearer\" followed by a space and JWT token.",
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

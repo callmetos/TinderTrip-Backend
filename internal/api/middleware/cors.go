@@ -26,6 +26,11 @@ func CORS() gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
 		c.HandlerFunc(ctx.Writer, ctx.Request)
+		// If it's a preflight request, rs/cors will have written the response (204) already
+		if ctx.Request.Method == http.MethodOptions {
+			ctx.Abort()
+			return
+		}
 		ctx.Next()
 	}
 }
