@@ -468,6 +468,204 @@ func (h *EventHandler) LeaveEvent(c *gin.Context) {
 	})
 }
 
+// ConfirmEvent confirms participation in an event
+// @Summary Confirm event participation
+// @Description Confirm participation in an event (change status from pending to confirmed)
+// @Tags events
+// @Security BearerAuth
+// @Produce json
+// @Param id path string true "Event ID"
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 409 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /events/{id}/confirm [post]
+func (h *EventHandler) ConfirmEvent(c *gin.Context) {
+	eventID := c.Param("id")
+	if eventID == "" {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Error:   "Invalid event ID",
+			Message: "Event ID is required",
+		})
+		return
+	}
+
+	// Get user ID from context
+	userID, exists := middleware.GetCurrentUserID(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Error:   "Unauthorized",
+			Message: "User not authenticated",
+		})
+		return
+	}
+
+	// Confirm event participation
+	err := h.eventService.ConfirmEventParticipation(eventID, userID)
+	if err != nil {
+		if err.Error() == "event not found" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Error:   "Event not found",
+				Message: err.Error(),
+			})
+			return
+		}
+		if err.Error() == "event is full" {
+			c.JSON(http.StatusConflict, dto.ErrorResponse{
+				Error:   "Event is full",
+				Message: "Cannot confirm participation. Event has reached its capacity.",
+			})
+			return
+		}
+		if err.Error() == "member not found" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Error:   "Member not found",
+				Message: "You are not a member of this event",
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Error:   "Failed to confirm event participation",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Message: "Successfully confirmed participation in the event",
+	})
+}
+
+// CancelEvent cancels participation in an event
+// @Summary Cancel event participation
+// @Description Cancel participation in an event (change status from pending to declined)
+// @Tags events
+// @Security BearerAuth
+// @Produce json
+// @Param id path string true "Event ID"
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /events/{id}/cancel [post]
+func (h *EventHandler) CancelEvent(c *gin.Context) {
+	eventID := c.Param("id")
+	if eventID == "" {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Error:   "Invalid event ID",
+			Message: "Event ID is required",
+		})
+		return
+	}
+
+	// Get user ID from context
+	userID, exists := middleware.GetCurrentUserID(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Error:   "Unauthorized",
+			Message: "User not authenticated",
+		})
+		return
+	}
+
+	// Cancel event participation
+	err := h.eventService.CancelEventParticipation(eventID, userID)
+	if err != nil {
+		if err.Error() == "event not found" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Error:   "Event not found",
+				Message: err.Error(),
+			})
+			return
+		}
+		if err.Error() == "member not found" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Error:   "Member not found",
+				Message: "You are not a member of this event",
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Error:   "Failed to cancel event participation",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Message: "Successfully cancelled participation in the event",
+	})
+}
+
+// CompleteEvent completes an event (creator only)
+// @Summary Complete event
+// @Description Complete an event (creator only)
+// @Tags events
+// @Security BearerAuth
+// @Produce json
+// @Param id path string true "Event ID"
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 403 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /events/{id}/complete [post]
+func (h *EventHandler) CompleteEvent(c *gin.Context) {
+	eventID := c.Param("id")
+	if eventID == "" {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Error:   "Invalid event ID",
+			Message: "Event ID is required",
+		})
+		return
+	}
+
+	// Get user ID from context
+	userID, exists := middleware.GetCurrentUserID(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Error:   "Unauthorized",
+			Message: "User not authenticated",
+		})
+		return
+	}
+
+	// Complete event
+	err := h.eventService.CompleteEvent(eventID, userID)
+	if err != nil {
+		if err.Error() == "event not found" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Error:   "Event not found",
+				Message: err.Error(),
+			})
+			return
+		}
+		if err.Error() == "not authorized" {
+			c.JSON(http.StatusForbidden, dto.ErrorResponse{
+				Error:   "Not authorized",
+				Message: "Only the event creator can complete the event",
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Error:   "Failed to complete event",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Message: "Successfully completed the event",
+	})
+}
+
 // SwipeEvent swipes on an event
 // @Summary Swipe event
 // @Description Swipe on an event (like or pass)
@@ -532,5 +730,51 @@ func (h *EventHandler) SwipeEvent(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Message: "Swipe recorded successfully",
+	})
+}
+
+// GetEventSuggestions gets event suggestions based on user interests
+// @Summary Get event suggestions
+// @Description Get event suggestions based on user's interests and tags
+// @Tags events
+// @Security BearerAuth
+// @Produce json
+// @Param page query int false "Page number"
+// @Param limit query int false "Items per page"
+// @Success 200 {object} dto.EventSuggestionResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /events/suggestions [get]
+func (h *EventHandler) GetEventSuggestions(c *gin.Context) {
+	// Get user ID from context
+	userID, exists := middleware.GetCurrentUserID(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Error:   "Unauthorized",
+			Message: "User not authenticated",
+		})
+		return
+	}
+
+	// Get query parameters
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+
+	// Get event suggestions
+	suggestions, total, err := h.eventService.GetEventSuggestions(userID, page, limit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Error:   "Failed to get event suggestions",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// Send response
+	c.JSON(http.StatusOK, dto.EventSuggestionResponse{
+		Events: suggestions,
+		Total:  total,
+		Page:   page,
+		Limit:  limit,
 	})
 }

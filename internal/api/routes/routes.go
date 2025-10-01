@@ -68,6 +68,9 @@ func SetupRoutes(router *gin.Engine) {
 			events.DELETE("/:id", eventHandler.DeleteEvent)
 			events.POST("/:id/join", eventHandler.JoinEvent)
 			events.POST("/:id/leave", eventHandler.LeaveEvent)
+			events.POST("/:id/confirm", eventHandler.ConfirmEvent)
+			events.POST("/:id/cancel", eventHandler.CancelEvent)
+			events.POST("/:id/complete", eventHandler.CompleteEvent)
 			events.POST("/:id/swipe", eventHandler.SwipeEvent)
 		}
 
@@ -87,6 +90,56 @@ func SetupRoutes(router *gin.Engine) {
 			history.GET("", historyHandler.GetHistory)
 			history.POST("/:id/complete", historyHandler.MarkComplete)
 		}
+
+		// Tag routes
+		tagHandler := handlers.NewTagHandler()
+		tags := protected.Group("/tags")
+		{
+			tags.GET("", tagHandler.GetTags)
+		}
+
+		// User tag routes
+		userTags := protected.Group("/users")
+		{
+			userTags.GET("/tags", tagHandler.GetUserTags)
+			userTags.POST("/tags", tagHandler.AddUserTag)
+			userTags.DELETE("/tags/:tag_id", tagHandler.RemoveUserTag)
+		}
+
+		// Food preference routes
+		foodPreferenceHandler := handlers.NewFoodPreferenceHandler()
+		foodPreferences := protected.Group("/users")
+		{
+			foodPreferences.GET("/food-preferences", foodPreferenceHandler.GetFoodPreferences)
+			foodPreferences.PUT("/food-preferences", foodPreferenceHandler.UpdateFoodPreference)
+			foodPreferences.PUT("/food-preferences/bulk", foodPreferenceHandler.UpdateAllFoodPreferences)
+			foodPreferences.GET("/food-preferences/categories", foodPreferenceHandler.GetFoodPreferenceCategoriesWithUserPreferences)
+			foodPreferences.GET("/food-preferences/stats", foodPreferenceHandler.GetFoodPreferenceStats)
+			foodPreferences.DELETE("/food-preferences/:category", foodPreferenceHandler.DeleteFoodPreference)
+		}
+
+		// Travel preference routes
+		travelPreferenceHandler := handlers.NewTravelPreferenceHandler()
+		travelPreferences := protected.Group("/users")
+		{
+			travelPreferences.GET("/travel-preferences", travelPreferenceHandler.GetTravelPreferences)
+			travelPreferences.POST("/travel-preferences", travelPreferenceHandler.AddTravelPreference)
+			travelPreferences.PUT("/travel-preferences/bulk", travelPreferenceHandler.UpdateAllTravelPreferences)
+			travelPreferences.GET("/travel-preferences/styles", travelPreferenceHandler.GetTravelPreferenceStylesWithUserPreferences)
+			travelPreferences.GET("/travel-preferences/stats", travelPreferenceHandler.GetTravelPreferenceStats)
+			travelPreferences.DELETE("/travel-preferences/:style", travelPreferenceHandler.DeleteTravelPreference)
+		}
+
+		// Event tag routes
+		eventTags := protected.Group("/events")
+		{
+			eventTags.GET("/:id/tags", tagHandler.GetEventTags)
+			eventTags.POST("/:id/tags", tagHandler.AddEventTag)
+			eventTags.DELETE("/:id/tags/:tag_id", tagHandler.RemoveEventTag)
+		}
+
+		// Event suggestions
+		events.GET("/suggestions", eventHandler.GetEventSuggestions)
 	}
 
 	// Public routes (no authentication required)
@@ -98,6 +151,20 @@ func SetupRoutes(router *gin.Engine) {
 		{
 			events.GET("", eventHandler.GetPublicEvents)
 			events.GET("/:id", eventHandler.GetPublicEvent)
+		}
+
+		// Public food preference routes
+		foodPreferenceHandler := handlers.NewFoodPreferenceHandler()
+		foodPreferences := public.Group("/food-preferences")
+		{
+			foodPreferences.GET("/categories", foodPreferenceHandler.GetFoodPreferenceCategories)
+		}
+
+		// Public travel preference routes
+		travelPreferenceHandler := handlers.NewTravelPreferenceHandler()
+		travelPreferences := public.Group("/travel-preferences")
+		{
+			travelPreferences.GET("/styles", travelPreferenceHandler.GetTravelPreferenceStyles)
 		}
 	}
 }

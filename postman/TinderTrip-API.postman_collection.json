@@ -1,77 +1,11 @@
 {
 	"info": {
-		"_postman_id": "tindertrip-api-collection-v2",
-		"name": "TinderTrip API - Complete Collection",
-		"description": "Complete API collection for TinderTrip Backend with all endpoints, examples, and proper formatting",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"version": "2.0.0"
+		"_postman_id": "tindertrip-api-updated",
+		"name": "TinderTrip API - Updated",
+		"description": "Complete API collection for TinderTrip Backend with all new endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:9952",
-			"type": "string"
-		},
-		{
-			"key": "token",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "user_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "event_id",
-			"value": "",
-			"type": "string"
-		},
-		{
-			"key": "room_id",
-			"value": "",
-			"type": "string"
-		}
-	],
 	"item": [
-		{
-			"name": "Health Check",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/health",
-					"host": ["{{base_url}}"],
-					"path": ["health"]
-				},
-				"description": "Check if the API is running"
-			},
-			"response": [
-				{
-					"name": "Success",
-					"originalRequest": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/health",
-							"host": ["{{base_url}}"],
-							"path": ["health"]
-						}
-					},
-					"status": "OK",
-					"code": 200,
-					"_postman_previewlanguage": "json",
-					"header": [
-						{
-							"key": "Content-Type",
-							"value": "application/json"
-						}
-					],
-					"cookie": [],
-					"body": "{\n  \"status\": \"ok\",\n  \"message\": \"TinderTrip API is running\"\n}"
-				}
-			]
-		},
 		{
 			"name": "Authentication",
 			"item": [
@@ -93,41 +27,20 @@
 							"raw": "{{base_url}}/api/v1/auth/register",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "auth", "register"]
-						},
-						"description": "Register a new user account"
+						}
 					},
-					"response": [
+					"event": [
 						{
-							"name": "Success",
-							"originalRequest": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.json() && pm.response.json().token) {",
+									"    pm.collectionVariables.set('token', pm.response.json().token);",
+									"    pm.collectionVariables.set('user_id', pm.response.json().user.id);",
+									"}"
 								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"display_name\": \"Test User\"\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/api/v1/auth/register",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "auth", "register"]
-								}
-							},
-							"status": "Created",
-							"code": 201,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"cookie": [],
-							"body": "{\n  \"success\": true,\n  \"message\": \"User registered successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n      \"email\": \"test@example.com\",\n      \"display_name\": \"Test User\",\n      \"provider\": \"password\",\n      \"created_at\": \"2024-01-01T00:00:00Z\"\n    }\n  }\n}"
+								"type": "text/javascript"
+							}
 						}
 					]
 				},
@@ -149,80 +62,32 @@
 							"raw": "{{base_url}}/api/v1/auth/login",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "auth", "login"]
-						},
-						"description": "Login with email and password"
+						}
 					},
-					"response": [
+					"event": [
 						{
-							"name": "Success",
-							"originalRequest": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									}
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.json() && pm.response.json().token) {",
+									"    pm.collectionVariables.set('token', pm.response.json().token);",
+									"    pm.collectionVariables.set('user_id', pm.response.json().user.id);",
+									"}"
 								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/api/v1/auth/login",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "auth", "login"]
-								}
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"cookie": [],
-							"body": "{\n  \"success\": true,\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n      \"email\": \"test@example.com\",\n      \"display_name\": \"Test User\",\n      \"provider\": \"password\",\n      \"created_at\": \"2024-01-01T00:00:00Z\"\n    },\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"refresh_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n    \"expires_in\": 3600\n  }\n}"
+								"type": "text/javascript"
+							}
 						}
 					]
 				},
 				{
-					"name": "Google OAuth",
+					"name": "Google Auth",
 					"request": {
 						"method": "GET",
-						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/v1/auth/google",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "auth", "google"]
-						},
-						"description": "Initiate Google OAuth login"
-					}
-				},
-				{
-					"name": "Google OAuth Callback",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/auth/google/callback?code=4/0AX4XfWh...&state=random_state_string",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "auth", "google", "callback"],
-							"query": [
-								{
-									"key": "code",
-									"value": "4/0AX4XfWh...",
-									"description": "Authorization code from Google"
-								},
-								{
-									"key": "state",
-									"value": "random_state_string",
-									"description": "State parameter for security"
-								}
-							]
-						},
-						"description": "Handle Google OAuth callback"
+						}
 					}
 				},
 				{
@@ -243,8 +108,7 @@
 							"raw": "{{base_url}}/api/v1/auth/forgot-password",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "auth", "forgot-password"]
-						},
-						"description": "Request password reset"
+						}
 					}
 				},
 				{
@@ -265,58 +129,13 @@
 							"raw": "{{base_url}}/api/v1/auth/reset-password",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "auth", "reset-password"]
-						},
-						"description": "Reset password with token"
-					}
-				},
-				{
-					"name": "Refresh Token",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"refresh_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/auth/refresh",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "auth", "refresh"]
-						},
-						"description": "Refresh access token"
-					}
-				},
-				{
-					"name": "Logout",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/v1/auth/logout",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "auth", "logout"]
-						},
-						"description": "Logout user"
+						}
 					}
 				}
 			]
 		},
 		{
-			"name": "User Management",
+			"name": "User Profile",
 			"item": [
 				{
 					"name": "Get Profile",
@@ -332,13 +151,45 @@
 							"raw": "{{base_url}}/api/v1/users/profile",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Update Profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bio\": \"I love traveling and trying new foods!\",\n  \"languages\": \"English,Thai\",\n  \"date_of_birth\": \"1990-01-01\",\n  \"gender\": \"male\",\n  \"smoking\": \"no\"\n}"
 						},
-						"description": "Get current user profile"
-					},
-					"response": [
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "profile"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Preferences",
+			"item": [
+				{
+					"name": "Availability",
+					"item": [
 						{
-							"name": "Success",
-							"originalRequest": {
+							"name": "Get Availability",
+							"request": {
 								"method": "GET",
 								"header": [
 									{
@@ -347,53 +198,194 @@
 									}
 								],
 								"url": {
-									"raw": "{{base_url}}/api/v1/users/profile",
+									"raw": "{{base_url}}/api/v1/users/preferences/availability",
 									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "users", "profile"]
+									"path": ["api", "v1", "users", "preferences", "availability"]
 								}
-							},
-							"status": "OK",
-							"code": 200,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
+							}
+						},
+						{
+							"name": "Update Availability",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"days\": [\"monday\", \"tuesday\", \"wednesday\", \"thursday\", \"friday\"],\n  \"time_ranges\": [\n    {\n      \"day\": \"monday\",\n      \"start_time\": \"09:00\",\n      \"end_time\": \"18:00\"\n    },\n    {\n      \"day\": \"tuesday\",\n      \"start_time\": \"09:00\",\n      \"end_time\": \"18:00\"\n    }\n  ]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/users/preferences/availability",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "users", "preferences", "availability"]
 								}
-							],
-							"cookie": [],
-							"body": "{\n  \"success\": true,\n  \"message\": \"Profile retrieved successfully\",\n  \"data\": {\n    \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"user_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"bio\": \"I love traveling and meeting new people\",\n    \"languages\": \"English, Thai\",\n    \"date_of_birth\": \"1990-01-01T00:00:00Z\",\n    \"gender\": \"male\",\n    \"job_title\": \"Software Engineer\",\n    \"smoking\": \"no\",\n    \"interests_note\": \"Love hiking, photography, and trying new foods\",\n    \"avatar_url\": \"https://example.com/avatar.jpg\",\n    \"home_location\": \"Bangkok, Thailand\",\n    \"created_at\": \"2024-01-01T00:00:00Z\",\n    \"updated_at\": \"2024-01-01T00:00:00Z\"\n  }\n}"
+							}
 						}
 					]
 				},
 				{
-					"name": "Update Profile",
+					"name": "Budget",
+					"item": [
+						{
+							"name": "Get Budget",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/api/v1/users/preferences/budget",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "users", "preferences", "budget"]
+								}
+							}
+						},
+						{
+							"name": "Update Budget",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"meal_budget_min\": 100,\n  \"meal_budget_max\": 500,\n  \"daytrip_budget_min\": 500,\n  \"daytrip_budget_max\": 2000,\n  \"overnight_budget_min\": 1000,\n  \"overnight_budget_max\": 5000\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/api/v1/users/preferences/budget",
+									"host": ["{{base_url}}"],
+									"path": ["api", "v1", "users", "preferences", "budget"]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Food Preferences",
+			"item": [
+				{
+					"name": "Get Food Preferences",
 					"request": {
-						"method": "PUT",
+						"method": "GET",
 						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
 							{
 								"key": "Authorization",
 								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"bio\": \"I love traveling and meeting new people\",\n  \"languages\": \"English, Thai, Japanese\",\n  \"date_of_birth\": \"1990-01-01\",\n  \"gender\": \"male\",\n  \"job_title\": \"Software Engineer\",\n  \"smoking\": \"no\",\n  \"interests_note\": \"Love hiking, photography, and trying new foods\",\n  \"home_location\": \"Bangkok, Thailand\"\n}"
-						},
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/profile",
+							"raw": "{{base_url}}/api/v1/users/food-preferences",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "users", "profile"]
-						},
-						"description": "Update user profile"
+							"path": ["api", "v1", "users", "food-preferences"]
+						}
 					}
 				},
 				{
-					"name": "Delete Profile",
+					"name": "Update Single Food Preference",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"food_category\": \"thai_food\",\n  \"preference_level\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/food-preferences",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "food-preferences"]
+						}
+					}
+				},
+				{
+					"name": "Update All Food Preferences",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"preferences\": [\n    {\"food_category\": \"thai_food\", \"preference_level\": 3},\n    {\"food_category\": \"japanese_food\", \"preference_level\": 3},\n    {\"food_category\": \"chinese_food\", \"preference_level\": 2},\n    {\"food_category\": \"international_food\", \"preference_level\": 2},\n    {\"food_category\": \"halal_food\", \"preference_level\": 1},\n    {\"food_category\": \"buffet\", \"preference_level\": 3},\n    {\"food_category\": \"bbq_grill\", \"preference_level\": 2}\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/food-preferences/bulk",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "food-preferences", "bulk"]
+						}
+					}
+				},
+				{
+					"name": "Get Food Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/food-preferences/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "food-preferences", "categories"]
+						}
+					}
+				},
+				{
+					"name": "Get Food Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/food-preferences/stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "food-preferences", "stats"]
+						}
+					}
+				},
+				{
+					"name": "Delete Food Preference",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -403,20 +395,19 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/profile",
+							"raw": "{{base_url}}/api/v1/users/food-preferences/thai_food",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "users", "profile"]
-						},
-						"description": "Delete user profile"
+							"path": ["api", "v1", "users", "food-preferences", "thai_food"]
+						}
 					}
 				}
 			]
 		},
 		{
-			"name": "Preferences",
+			"name": "Travel Preferences",
 			"item": [
 				{
-					"name": "Get Availability",
+					"name": "Get Travel Preferences",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -426,41 +417,64 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/preferences/availability",
+							"raw": "{{base_url}}/api/v1/users/travel-preferences",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "users", "preferences", "availability"]
-						},
-						"description": "Get user availability preferences"
+							"path": ["api", "v1", "users", "travel-preferences"]
+						}
 					}
 				},
 				{
-					"name": "Update Availability",
+					"name": "Add Travel Preference",
 					"request": {
-						"method": "PUT",
+						"method": "POST",
 						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
 							{
 								"key": "Authorization",
 								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"mon\": true,\n  \"tue\": true,\n  \"wed\": true,\n  \"thu\": true,\n  \"fri\": true,\n  \"sat\": true,\n  \"sun\": true,\n  \"all_day\": true,\n  \"morning\": false,\n  \"afternoon\": false\n}"
+							"raw": "{\n  \"travel_style\": \"coffee\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/preferences/availability",
+							"raw": "{{base_url}}/api/v1/users/travel-preferences",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "users", "preferences", "availability"]
-						},
-						"description": "Update user availability preferences"
+							"path": ["api", "v1", "users", "travel-preferences"]
+						}
 					}
 				},
 				{
-					"name": "Get Budget",
+					"name": "Update All Travel Preferences",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"travel_styles\": [\"coffee\", \"gaming\", \"movie\", \"social_activity\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/travel-preferences/bulk",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "travel-preferences", "bulk"]
+						}
+					}
+				},
+				{
+					"name": "Get Travel Styles",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -470,37 +484,44 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/preferences/budget",
+							"raw": "{{base_url}}/api/v1/users/travel-preferences/styles",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "users", "preferences", "budget"]
-						},
-						"description": "Get user budget preferences"
+							"path": ["api", "v1", "users", "travel-preferences", "styles"]
+						}
 					}
 				},
 				{
-					"name": "Update Budget",
+					"name": "Get Travel Stats",
 					"request": {
-						"method": "PUT",
+						"method": "GET",
 						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
 							{
 								"key": "Authorization",
 								"value": "Bearer {{token}}"
 							}
 						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"meal_budget_min\": 100,\n  \"meal_budget_max\": 500,\n  \"daytrip_budget_min\": 500,\n  \"daytrip_budget_max\": 2000,\n  \"overnight_budget_min\": 1000,\n  \"overnight_budget_max\": 5000\n}"
-						},
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/preferences/budget",
+							"raw": "{{base_url}}/api/v1/users/travel-preferences/stats",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "users", "preferences", "budget"]
-						},
-						"description": "Update user budget preferences"
+							"path": ["api", "v1", "users", "travel-preferences", "stats"]
+						}
+					}
+				},
+				{
+					"name": "Delete Travel Preference",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/travel-preferences/coffee",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "travel-preferences", "coffee"]
+						}
 					}
 				}
 			]
@@ -519,33 +540,24 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/v1/events?page=1&limit=10&event_type=overnight&status=published",
+							"raw": "{{base_url}}/api/v1/events?page=1&limit=10&status=published",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "events"],
 							"query": [
 								{
 									"key": "page",
-									"value": "1",
-									"description": "Page number"
+									"value": "1"
 								},
 								{
 									"key": "limit",
-									"value": "10",
-									"description": "Items per page"
-								},
-								{
-									"key": "event_type",
-									"value": "overnight",
-									"description": "Filter by event type (meal, daytrip, overnight, activity, other)"
+									"value": "10"
 								},
 								{
 									"key": "status",
-									"value": "published",
-									"description": "Filter by status (draft, published, cancelled, completed)"
+									"value": "published"
 								}
 							]
-						},
-						"description": "Get events with pagination and filters"
+						}
 					}
 				},
 				{
@@ -554,66 +566,40 @@
 						"method": "POST",
 						"header": [
 							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
 								"key": "Authorization",
 								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"title\": \"Weekend Trip to Chiang Mai\",\n  \"description\": \"Explore the beautiful mountains and temples of Chiang Mai\",\n  \"event_type\": \"overnight\",\n  \"address_text\": \"Chiang Mai, Thailand\",\n  \"lat\": 18.7883,\n  \"lng\": 98.9853,\n  \"start_at\": \"2024-02-01 08:00:00\",\n  \"end_at\": \"2024-02-03 18:00:00\",\n  \"capacity\": 10,\n  \"cover_image_url\": \"https://example.com/chiangmai.jpg\"\n}"
+							"raw": "{\n  \"title\": \"Coffee & Gaming Meetup\",\n  \"description\": \"Lets grab coffee and play some board games together!\",\n  \"event_type\": \"meal\",\n  \"address_text\": \"Central World, Bangkok\",\n  \"lat\": 13.7473,\n  \"lng\": 100.5396,\n  \"start_at\": \"2025-10-15T14:00:00+07:00\",\n  \"end_at\": \"2025-10-15T18:00:00+07:00\",\n  \"capacity\": 6,\n  \"cover_image_url\": \"https://example.com/coffee-gaming.jpg\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/events",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "events"]
-						},
-						"description": "Create a new event"
+						}
 					},
-					"response": [
+					"event": [
 						{
-							"name": "Success",
-							"originalRequest": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Content-Type",
-										"value": "application/json"
-									},
-									{
-										"key": "Authorization",
-										"value": "Bearer {{token}}"
-									}
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.json() && pm.response.json().id) {",
+									"    pm.collectionVariables.set('event_id', pm.response.json().id);",
+									"}"
 								],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"title\": \"Weekend Trip to Chiang Mai\",\n  \"description\": \"Explore the beautiful mountains and temples of Chiang Mai\",\n  \"event_type\": \"overnight\",\n  \"address_text\": \"Chiang Mai, Thailand\",\n  \"lat\": 18.7883,\n  \"lng\": 98.9853,\n  \"start_at\": \"2024-02-01 08:00:00\",\n  \"end_at\": \"2024-02-03 18:00:00\",\n  \"capacity\": 10,\n  \"cover_image_url\": \"https://example.com/chiangmai.jpg\"\n}"
-								},
-								"url": {
-									"raw": "{{base_url}}/api/v1/events",
-									"host": ["{{base_url}}"],
-									"path": ["api", "v1", "events"]
-								}
-							},
-							"status": "Created",
-							"code": 201,
-							"_postman_previewlanguage": "json",
-							"header": [
-								{
-									"key": "Content-Type",
-									"value": "application/json"
-								}
-							],
-							"cookie": [],
-							"body": "{\n  \"success\": true,\n  \"message\": \"Event created successfully\",\n  \"data\": {\n    \"id\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"creator_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n    \"title\": \"Weekend Trip to Chiang Mai\",\n    \"description\": \"Explore the beautiful mountains and temples of Chiang Mai\",\n    \"event_type\": \"overnight\",\n    \"address_text\": \"Chiang Mai, Thailand\",\n    \"lat\": 18.7883,\n    \"lng\": 98.9853,\n    \"start_at\": \"2024-02-01T08:00:00Z\",\n    \"end_at\": \"2024-02-03T18:00:00Z\",\n    \"capacity\": 10,\n    \"status\": \"draft\",\n    \"cover_image_url\": \"https://example.com/chiangmai.jpg\",\n    \"created_at\": \"2024-01-01T00:00:00Z\",\n    \"updated_at\": \"2024-01-01T00:00:00Z\"\n  }\n}"
+								"type": "text/javascript"
+							}
 						}
 					]
 				},
 				{
-					"name": "Get Event by ID",
+					"name": "Get Event Details",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -626,8 +612,7 @@
 							"raw": "{{base_url}}/api/v1/events/{{event_id}}",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "events", "{{event_id}}"]
-						},
-						"description": "Get event by ID"
+						}
 					}
 				},
 				{
@@ -636,28 +621,200 @@
 						"method": "PUT",
 						"header": [
 							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
 								"key": "Authorization",
 								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
 							}
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"title\": \"Updated Weekend Trip to Chiang Mai\",\n  \"description\": \"Updated description for the trip\",\n  \"event_type\": \"overnight\",\n  \"status\": \"published\",\n  \"capacity\": 15\n}"
+							"raw": "{\n  \"title\": \"Updated Coffee & Gaming Meetup\",\n  \"description\": \"Updated description\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/events/{{event_id}}",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "events", "{{event_id}}"]
-						},
-						"description": "Update event by ID"
+						}
 					}
 				},
 				{
-					"name": "Delete Event",
+					"name": "Swipe Event (Like)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event_id\": \"{{event_id}}\",\n  \"direction\": \"like\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/swipe",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "swipe"]
+						}
+					}
+				},
+				{
+					"name": "Confirm Event Participation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/confirm",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "confirm"]
+						}
+					}
+				},
+				{
+					"name": "Cancel Event Participation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/cancel",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "cancel"]
+						}
+					}
+				},
+				{
+					"name": "Complete Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/complete",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "complete"]
+						}
+					}
+				},
+				{
+					"name": "Get Event Suggestions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/suggestions?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "suggestions"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Tags",
+			"item": [
+				{
+					"name": "Get Tags",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/tags?kind=interest",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tags"],
+							"query": [
+								{
+									"key": "kind",
+									"value": "interest"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get User Tags",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/tags",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "tags"]
+						}
+					}
+				},
+				{
+					"name": "Add User Tag",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tag_id\": \"tag_id_here\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/tags",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "tags"]
+						}
+					}
+				},
+				{
+					"name": "Remove User Tag",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -667,200 +824,10 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/v1/events/{{event_id}}",
+							"raw": "{{base_url}}/api/v1/users/tags/tag_id_here",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "events", "{{event_id}}"]
-						},
-						"description": "Delete event by ID"
-					}
-				},
-				{
-					"name": "Join Event",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/v1/events/{{event_id}}/join",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "events", "{{event_id}}", "join"]
-						},
-						"description": "Join an event"
-					}
-				},
-				{
-					"name": "Leave Event",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/v1/events/{{event_id}}/leave",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "events", "{{event_id}}", "leave"]
-						},
-						"description": "Leave an event"
-					}
-				},
-				{
-					"name": "Swipe Event",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"direction\": \"right\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/events/{{event_id}}/swipe",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "events", "{{event_id}}", "swipe"]
-						},
-						"description": "Swipe on an event (left/right)"
-					}
-				}
-			]
-		},
-		{
-			"name": "Public Events",
-			"item": [
-				{
-					"name": "Get Public Events",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/public/events?page=1&limit=10&event_type=overnight",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "public", "events"],
-							"query": [
-								{
-									"key": "page",
-									"value": "1",
-									"description": "Page number"
-								},
-								{
-									"key": "limit",
-									"value": "10",
-									"description": "Items per page"
-								},
-								{
-									"key": "event_type",
-									"value": "overnight",
-									"description": "Filter by event type"
-								}
-							]
-						},
-						"description": "Get public events (no authentication required)"
-					}
-				},
-				{
-					"name": "Get Public Event by ID",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{base_url}}/api/v1/public/events/{{event_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "public", "events", "{{event_id}}"]
-						},
-						"description": "Get public event by ID (no authentication required)"
-					}
-				}
-			]
-		},
-		{
-			"name": "Chat",
-			"item": [
-				{
-					"name": "Get Chat Rooms",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/v1/chat/rooms",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "chat", "rooms"]
-						},
-						"description": "Get user's chat rooms"
-					}
-				},
-				{
-					"name": "Get Messages",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/api/v1/chat/rooms/{{room_id}}/messages?page=1&limit=20",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "chat", "rooms", "{{room_id}}", "messages"],
-							"query": [
-								{
-									"key": "page",
-									"value": "1",
-									"description": "Page number"
-								},
-								{
-									"key": "limit",
-									"value": "20",
-									"description": "Messages per page"
-								}
-							]
-						},
-						"description": "Get messages from a chat room"
-					}
-				},
-				{
-					"name": "Send Message",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"content\": \"Hello! Looking forward to the trip!\",\n  \"message_type\": \"text\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/api/v1/chat/rooms/{{room_id}}/messages",
-							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "chat", "rooms", "{{room_id}}", "messages"]
-						},
-						"description": "Send a message to a chat room"
+							"path": ["api", "v1", "users", "tags", "tag_id_here"]
+						}
 					}
 				}
 			]
@@ -885,65 +852,109 @@
 							"query": [
 								{
 									"key": "page",
-									"value": "1",
-									"description": "Page number"
+									"value": "1"
 								},
 								{
 									"key": "limit",
-									"value": "10",
-									"description": "Items per page"
+									"value": "10"
 								}
 							]
-						},
-						"description": "Get user's event history"
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Public Endpoints",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						}
 					}
 				},
 				{
-					"name": "Mark Event Complete",
+					"name": "Get Public Events",
 					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{token}}"
-							}
-						],
+						"method": "GET",
 						"url": {
-							"raw": "{{base_url}}/api/v1/history/{{event_id}}/complete",
+							"raw": "{{base_url}}/api/v1/public/events?page=1&limit=10",
 							"host": ["{{base_url}}"],
-							"path": ["api", "v1", "history", "{{event_id}}", "complete"]
-						},
-						"description": "Mark an event as completed"
+							"path": ["api", "v1", "public", "events"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Public Event Details",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/public/events/{{event_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "public", "events", "{{event_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Food Categories (Public)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/public/food-preferences/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "public", "food-preferences", "categories"]
+						}
+					}
+				},
+				{
+					"name": "Get Travel Styles (Public)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/public/travel-preferences/styles",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "public", "travel-preferences", "styles"]
+						}
 					}
 				}
 			]
 		}
 	],
-	"event": [
+	"variable": [
 		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					"// Auto-extract token from login response",
-					"if (pm.response && pm.response.json() && pm.response.json().data && pm.response.json().data.access_token) {",
-					"    pm.collectionVariables.set('token', pm.response.json().data.access_token);",
-					"    pm.collectionVariables.set('user_id', pm.response.json().data.user.id);",
-					"}"
-				]
-			}
+			"key": "base_url",
+			"value": "http://localhost:9952",
+			"type": "string"
 		},
 		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					"// Auto-extract event_id from create event response",
-					"if (pm.response && pm.response.json() && pm.response.json().data && pm.response.json().data.id) {",
-					"    pm.collectionVariables.set('event_id', pm.response.json().data.id);",
-					"}"
-				]
-			}
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "event_id",
+			"value": "",
+			"type": "string"
 		}
 	]
 }

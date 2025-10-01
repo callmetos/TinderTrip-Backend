@@ -25,7 +25,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
-  CREATE TYPE event_status AS ENUM ('draft','active','closed','cancelled','completed');
+  CREATE TYPE event_status AS ENUM ('published','cancelled','completed');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 DO $$ BEGIN
@@ -156,7 +156,7 @@ CREATE TABLE events (
   start_at         TIMESTAMPTZ,
   end_at           TIMESTAMPTZ,
   capacity         INT CHECK (capacity IS NULL OR capacity >= 1),
-  status           event_status NOT NULL DEFAULT 'draft',
+  status           event_status NOT NULL DEFAULT 'published',
   cover_image_url  TEXT,
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at       TIMESTAMPTZ NOT NULL DEFAULT now(),

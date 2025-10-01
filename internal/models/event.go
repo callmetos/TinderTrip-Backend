@@ -22,7 +22,6 @@ const (
 type EventStatus string
 
 const (
-	EventStatusDraft     EventStatus = "draft"
 	EventStatusPublished EventStatus = "published"
 	EventStatusCancelled EventStatus = "cancelled"
 	EventStatusCompleted EventStatus = "completed"
@@ -41,7 +40,7 @@ type Event struct {
 	StartAt       *time.Time  `json:"start_at" gorm:"type:timestamptz"`
 	EndAt         *time.Time  `json:"end_at" gorm:"type:timestamptz"`
 	Capacity      *int        `json:"capacity" gorm:"type:int;check:capacity IS NULL OR capacity >= 1"`
-	Status        EventStatus `json:"status" gorm:"type:event_status;not null;default:'draft'"`
+	Status        EventStatus `json:"status" gorm:"type:event_status;not null;default:'published'"`
 	CoverImageURL *string     `json:"cover_image_url" gorm:"type:text"`
 	CreatedAt     time.Time   `json:"created_at" gorm:"type:timestamptz;not null;default:now()"`
 	UpdatedAt     time.Time   `json:"updated_at" gorm:"type:timestamptz;not null;default:now()"`
@@ -74,11 +73,6 @@ func (e *Event) BeforeCreate(tx *gorm.DB) error {
 // IsPublished checks if the event is published
 func (e *Event) IsPublished() bool {
 	return e.Status == EventStatusPublished
-}
-
-// IsDraft checks if the event is in draft status
-func (e *Event) IsDraft() bool {
-	return e.Status == EventStatusDraft
 }
 
 // IsCompleted checks if the event is completed

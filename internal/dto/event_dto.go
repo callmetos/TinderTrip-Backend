@@ -58,18 +58,11 @@ type EventSwipeResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// TagResponse represents a tag response
-type TagResponse struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-	Kind string `json:"kind"`
-}
-
 // CreateEventRequest represents a create event request
 type CreateEventRequest struct {
 	Title         string     `json:"title" binding:"required"`
 	Description   *string    `json:"description,omitempty"`
-	EventType     string     `json:"event_type" binding:"required,oneof=meal daytrip overnight activity other"`
+	EventType     string     `json:"event_type" binding:"required,oneof=meal one_day_trip overnight"`
 	AddressText   *string    `json:"address_text,omitempty"`
 	Lat           *float64   `json:"lat,omitempty"`
 	Lng           *float64   `json:"lng,omitempty"`
@@ -92,7 +85,7 @@ type UpdateEventRequest struct {
 	StartAt       *time.Time `json:"start_at,omitempty"`
 	EndAt         *time.Time `json:"end_at,omitempty"`
 	Capacity      *int       `json:"capacity,omitempty"`
-	Status        *string    `json:"status,omitempty" binding:"omitempty,oneof=draft published cancelled completed"`
+	Status        *string    `json:"status,omitempty" binding:"omitempty,oneof=published cancelled completed"`
 	CoverImageURL *string    `json:"cover_image_url,omitempty"`
 	CategoryIDs   []string   `json:"category_ids,omitempty"`
 	TagIDs        []string   `json:"tag_ids,omitempty"`

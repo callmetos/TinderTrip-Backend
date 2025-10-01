@@ -44,7 +44,7 @@ func (s *EventService) GetEvents(userID string, page, limit int, eventType, stat
 	// Get events with pagination
 	var events []models.Event
 	offset := (page - 1) * limit
-	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").
+	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
 		Offset(offset).Limit(limit).Order("created_at DESC").Find(&events).Error
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get events: %w", err)
@@ -79,7 +79,7 @@ func (s *EventService) GetPublicEvents(page, limit int, eventType string) ([]dto
 	// Get events with pagination
 	var events []models.Event
 	offset := (page - 1) * limit
-	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").
+	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
 		Offset(offset).Limit(limit).Order("created_at DESC").Find(&events).Error
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get events: %w", err)
@@ -104,7 +104,7 @@ func (s *EventService) GetEvent(eventID, userID string) (*dto.EventResponse, err
 
 	// Get event
 	var event models.Event
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").
+	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
 		Where("id = ? AND deleted_at IS NULL", eventUUID).First(&event).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -127,7 +127,7 @@ func (s *EventService) GetPublicEvent(eventID string) (*dto.EventResponse, error
 
 	// Get event (only active events)
 	var event models.Event
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").
+	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
 		Where("id = ? AND deleted_at IS NULL AND status = ?", eventUUID, models.EventStatusPublished).First(&event).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -160,7 +160,7 @@ func (s *EventService) CreateEvent(userID string, req dto.CreateEventRequest) (*
 		StartAt:       req.StartAt,
 		EndAt:         req.EndAt,
 		Capacity:      req.Capacity,
-		Status:        models.EventStatusDraft,
+		Status:        models.EventStatusPublished,
 		CoverImageURL: req.CoverImageURL,
 	}
 
@@ -192,7 +192,7 @@ func (s *EventService) CreateEvent(userID string, req dto.CreateEventRequest) (*
 	}
 
 	// Load event with relationships
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").
+	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
 		Where("id = ?", event.ID).First(event).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to load event: %w", err)
@@ -271,7 +271,7 @@ func (s *EventService) UpdateEvent(eventID, userID string, req dto.UpdateEventRe
 	}
 
 	// Load updated event with relationships
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").
+	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
 		Where("id = ?", event.ID).First(&event).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to load event: %w", err)
@@ -447,6 +447,29 @@ func (s *EventService) SwipeEvent(eventID, userID, direction string) error {
 		return fmt.Errorf("failed to swipe event: %w", err)
 	}
 
+	// If swipe is like, create member as pending
+	if direction == "like" {
+		// Check if user is already a member
+		var existingMember models.EventMember
+		err = database.GetDB().Where("event_id = ? AND user_id = ?", eventUUID, userUUID).First(&existingMember).Error
+		if err == gorm.ErrRecordNotFound {
+			// Create member as pending
+			member := &models.EventMember{
+				EventID: eventUUID,
+				UserID:  userUUID,
+				Role:    models.MemberRoleParticipant,
+				Status:  models.MemberStatusPending,
+			}
+
+			err = database.GetDB().Create(member).Error
+			if err != nil {
+				return fmt.Errorf("failed to create member: %w", err)
+			}
+		} else if err != nil {
+			return fmt.Errorf("failed to check member: %w", err)
+		}
+	}
+
 	return nil
 }
 
@@ -532,7 +555,14 @@ func (s *EventService) convertEventToResponse(event models.Event, userID string)
 		}
 	}
 
-	response.MemberCount = len(event.Members)
+	// Count confirmed members
+	confirmedCount := 0
+	for _, member := range event.Members {
+		if member.Status == models.MemberStatusConfirmed {
+			confirmedCount++
+		}
+	}
+	response.MemberCount = confirmedCount
 
 	// Check if user is joined
 	if userID != "" {
@@ -566,4 +596,187 @@ func (s *EventService) convertEventToResponse(event models.Event, userID string)
 	}
 
 	return response
+}
+
+// ConfirmEventParticipation confirms participation in an event
+func (s *EventService) ConfirmEventParticipation(eventID, userID string) error {
+	// Parse UUIDs
+	eventUUID, err := uuid.Parse(eventID)
+	if err != nil {
+		return fmt.Errorf("invalid event ID")
+	}
+
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return fmt.Errorf("invalid user ID")
+	}
+
+	// Check if event exists
+	var event models.Event
+	err = database.GetDB().Where("id = ? AND deleted_at IS NULL", eventUUID).First(&event).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("event not found")
+		}
+		return fmt.Errorf("failed to get event: %w", err)
+	}
+
+	// Check if user is a member
+	var member models.EventMember
+	err = database.GetDB().Where("event_id = ? AND user_id = ?", eventUUID, userUUID).First(&member).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("member not found")
+		}
+		return fmt.Errorf("failed to get member: %w", err)
+	}
+
+	// Check if already confirmed
+	if member.Status == models.MemberStatusConfirmed {
+		return fmt.Errorf("already confirmed")
+	}
+
+	// Check if event has capacity
+	if event.Capacity != nil {
+		var confirmedCount int64
+		err = database.GetDB().Model(&models.EventMember{}).
+			Where("event_id = ? AND status = ?", eventUUID, models.MemberStatusConfirmed).
+			Count(&confirmedCount).Error
+		if err != nil {
+			return fmt.Errorf("failed to count confirmed members: %w", err)
+		}
+
+		if int(confirmedCount) >= *event.Capacity {
+			return fmt.Errorf("event is full")
+		}
+	}
+
+	// Update member status to confirmed
+	now := time.Now()
+	err = database.GetDB().Model(&member).Updates(map[string]interface{}{
+		"status":       models.MemberStatusConfirmed,
+		"confirmed_at": &now,
+	}).Error
+	if err != nil {
+		return fmt.Errorf("failed to confirm participation: %w", err)
+	}
+
+	return nil
+}
+
+// CancelEventParticipation cancels participation in an event
+func (s *EventService) CancelEventParticipation(eventID, userID string) error {
+	// Parse UUIDs
+	eventUUID, err := uuid.Parse(eventID)
+	if err != nil {
+		return fmt.Errorf("invalid event ID")
+	}
+
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return fmt.Errorf("invalid user ID")
+	}
+
+	// Check if event exists
+	var event models.Event
+	err = database.GetDB().Where("id = ? AND deleted_at IS NULL", eventUUID).First(&event).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("event not found")
+		}
+		return fmt.Errorf("failed to get event: %w", err)
+	}
+
+	// Check if user is a member
+	var member models.EventMember
+	err = database.GetDB().Where("event_id = ? AND user_id = ?", eventUUID, userUUID).First(&member).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("member not found")
+		}
+		return fmt.Errorf("failed to get member: %w", err)
+	}
+
+	// Update member status to declined
+	err = database.GetDB().Model(&member).Updates(map[string]interface{}{
+		"status": models.MemberStatusDeclined,
+	}).Error
+	if err != nil {
+		return fmt.Errorf("failed to cancel participation: %w", err)
+	}
+
+	return nil
+}
+
+// CompleteEvent completes an event (creator only)
+func (s *EventService) CompleteEvent(eventID, userID string) error {
+	// Parse UUIDs
+	eventUUID, err := uuid.Parse(eventID)
+	if err != nil {
+		return fmt.Errorf("invalid event ID")
+	}
+
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return fmt.Errorf("invalid user ID")
+	}
+
+	// Check if event exists and user is creator
+	var event models.Event
+	err = database.GetDB().Where("id = ? AND creator_id = ? AND deleted_at IS NULL", eventUUID, userUUID).First(&event).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("event not found")
+		}
+		return fmt.Errorf("failed to get event: %w", err)
+	}
+
+	// Check if user is creator
+	if event.CreatorID != userUUID {
+		return fmt.Errorf("not authorized")
+	}
+
+	// Update event status to completed
+	now := time.Now()
+	err = database.GetDB().Model(&event).Updates(map[string]interface{}{
+		"status":     models.EventStatusCompleted,
+		"updated_at": now,
+	}).Error
+	if err != nil {
+		return fmt.Errorf("failed to complete event: %w", err)
+	}
+
+	// Create history records for all confirmed members
+	var confirmedMembers []models.EventMember
+	err = database.GetDB().Where("event_id = ? AND status = ?", eventUUID, models.MemberStatusConfirmed).Find(&confirmedMembers).Error
+	if err != nil {
+		return fmt.Errorf("failed to get confirmed members: %w", err)
+	}
+
+	// Create history record for each confirmed member
+	for _, member := range confirmedMembers {
+		history := &models.UserEventHistory{
+			UserID:      member.UserID,
+			EventID:     eventUUID,
+			Completed:   true,
+			CompletedAt: &now,
+		}
+
+		err = database.GetDB().Create(history).Error
+		if err != nil {
+			// Log error but don't fail the whole operation
+			fmt.Printf("Failed to create history for user %s: %v\n", member.UserID, err)
+		}
+	}
+
+	return nil
+}
+
+// GetEventSuggestions gets event suggestions based on user interests
+func (s *EventService) GetEventSuggestions(userID string, page, limit int) ([]dto.EventSuggestionItem, int64, error) {
+	// Create tag service
+	tagService := NewTagService()
+
+	// Get event suggestions from tag service
+	return tagService.GetEventSuggestions(userID, page, limit)
 }
