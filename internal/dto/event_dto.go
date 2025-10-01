@@ -69,7 +69,7 @@ type TagResponse struct {
 type CreateEventRequest struct {
 	Title         string     `json:"title" binding:"required"`
 	Description   *string    `json:"description,omitempty"`
-	EventType     string     `json:"event_type" binding:"required"`
+	EventType     string     `json:"event_type" binding:"required,oneof=meal daytrip overnight activity other"`
 	AddressText   *string    `json:"address_text,omitempty"`
 	Lat           *float64   `json:"lat,omitempty"`
 	Lng           *float64   `json:"lng,omitempty"`
@@ -85,14 +85,14 @@ type CreateEventRequest struct {
 type UpdateEventRequest struct {
 	Title         *string    `json:"title,omitempty"`
 	Description   *string    `json:"description,omitempty"`
-	EventType     *string    `json:"event_type,omitempty"`
+	EventType     *string    `json:"event_type,omitempty" binding:"omitempty,oneof=meal daytrip overnight activity other"`
 	AddressText   *string    `json:"address_text,omitempty"`
 	Lat           *float64   `json:"lat,omitempty"`
 	Lng           *float64   `json:"lng,omitempty"`
 	StartAt       *time.Time `json:"start_at,omitempty"`
 	EndAt         *time.Time `json:"end_at,omitempty"`
 	Capacity      *int       `json:"capacity,omitempty"`
-	Status        *string    `json:"status,omitempty"`
+	Status        *string    `json:"status,omitempty" binding:"omitempty,oneof=draft published cancelled completed"`
 	CoverImageURL *string    `json:"cover_image_url,omitempty"`
 	CategoryIDs   []string   `json:"category_ids,omitempty"`
 	TagIDs        []string   `json:"tag_ids,omitempty"`

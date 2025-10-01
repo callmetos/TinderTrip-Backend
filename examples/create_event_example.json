@@ -1,0 +1,14 @@
+{
+  "title": "Weekend Trip to Chiang Mai",
+  "description": "Explore the beautiful mountains and temples of Chiang Mai",
+  "event_type": "overnight",
+  "address_text": "Chiang Mai, Thailand",
+  "lat": 18.7883,
+  "lng": 98.9853,
+  "start_at": "2024-02-01T08:00:00Z",
+  "end_at": "2024-02-03T18:00:00Z",
+  "capacity": 10,
+  "cover_image_url": "https://example.com/chiangmai.jpg",
+  "category_ids": ["adventure", "travel"],
+  "tag_ids": ["mountains", "temples", "culture"]
+}
