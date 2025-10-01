@@ -141,6 +141,14 @@ func SetupRoutes(router *gin.Engine) {
 
 		// Event suggestions
 		events.GET("/suggestions", eventHandler.GetEventSuggestions)
+
+		// Audit routes
+		auditHandler := handlers.NewAuditHandler()
+		audit := protected.Group("/audit")
+		{
+			audit.GET("/logs", auditHandler.GetAuditLogs)
+			audit.GET("/entities/:entity_table/:entity_id", auditHandler.GetEntityAuditHistory)
+		}
 	}
 
 	// Public routes (no authentication required)

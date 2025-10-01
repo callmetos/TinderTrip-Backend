@@ -6,6 +6,7 @@ import (
 
 	"TinderTrip-Backend/internal/dto"
 	"TinderTrip-Backend/internal/models"
+	"TinderTrip-Backend/pkg/audit"
 	"TinderTrip-Backend/pkg/database"
 
 	"github.com/google/uuid"
@@ -14,11 +15,14 @@ import (
 
 // EventService handles event business logic
 type EventService struct {
+	auditLogger *audit.AuditLogger
 }
 
 // NewEventService creates a new event service
 func NewEventService() *EventService {
-	return &EventService{}
+	return &EventService{
+		auditLogger: audit.NewAuditLogger(),
+	}
 }
 
 // GetEvents gets events with pagination and filters
@@ -169,6 +173,10 @@ func (s *EventService) CreateEvent(userID string, req dto.CreateEventRequest) (*
 	if err != nil {
 		return nil, fmt.Errorf("failed to create event: %w", err)
 	}
+
+	// Log event creation
+	eventID := event.ID.String()
+	s.auditLogger.LogCreate(&userID, "events", &eventID, event)
 
 	// Add creator as member
 	member := &models.EventMember{
@@ -361,6 +369,9 @@ func (s *EventService) JoinEvent(eventID, userID string) error {
 	if err != nil {
 		return fmt.Errorf("failed to join event: %w", err)
 	}
+
+	// Log event join
+	s.auditLogger.LogEventJoin(&userID, eventID)
 
 	return nil
 }
@@ -745,6 +756,9 @@ func (s *EventService) CompleteEvent(eventID, userID string) error {
 	if err != nil {
 		return fmt.Errorf("failed to complete event: %w", err)
 	}
+
+	// Log event completion
+	s.auditLogger.LogEventComplete(&userID, eventID)
 
 	// Create history records for all confirmed members
 	var confirmedMembers []models.EventMember

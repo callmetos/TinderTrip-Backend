@@ -9,6 +9,7 @@ import (
 
 	"TinderTrip-Backend/internal/models"
 	"TinderTrip-Backend/internal/utils"
+	"TinderTrip-Backend/pkg/audit"
 	"TinderTrip-Backend/pkg/database"
 	"TinderTrip-Backend/pkg/email"
 
@@ -18,6 +19,7 @@ import (
 // AuthService handles authentication business logic
 type AuthService struct {
 	emailService *email.SMTPClient
+	auditLogger  *audit.AuditLogger
 	stopCleanup  chan bool
 }
 
@@ -25,6 +27,7 @@ type AuthService struct {
 func NewAuthService() *AuthService {
 	service := &AuthService{
 		emailService: email.NewSMTPClient(),
+		auditLogger:  audit.NewAuditLogger(),
 		stopCleanup:  make(chan bool),
 	}
 
@@ -65,6 +68,10 @@ func (s *AuthService) Register(email, password, displayName string) (*models.Use
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
+	// Log user registration
+	userIDStr := user.ID.String()
+	s.auditLogger.LogCreate(&userIDStr, "users", &userIDStr, user)
+
 	return user, nil
 }
 
@@ -93,6 +100,20 @@ func (s *AuthService) Login(email, password string) (*models.User, error) {
 	if !valid {
 		return nil, fmt.Errorf("invalid credentials")
 	}
+
+	// Update last login time
+	now := time.Now()
+	user.LastLoginAt = &now
+	if err := database.GetDB().Save(&user).Error; err != nil {
+		return nil, fmt.Errorf("failed to update last login time: %w", err)
+	}
+
+	// Log login action
+	userIDStr := user.ID.String()
+	s.auditLogger.LogLogin(&userIDStr, map[string]interface{}{
+		"email":      email,
+		"login_time": now,
+	})
 
 	return &user, nil
 }
@@ -172,6 +193,10 @@ func (s *AuthService) ResetPassword(email, otp, newPassword string) error {
 	if err != nil {
 		return fmt.Errorf("failed to update password: %w", err)
 	}
+
+	// Log password reset
+	userIDStr := passwordReset.UserID.String()
+	s.auditLogger.LogPasswordReset(&userIDStr)
 
 	// Delete password reset record
 	err = database.GetDB().Delete(&passwordReset).Error
