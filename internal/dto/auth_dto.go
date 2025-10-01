@@ -28,9 +28,16 @@ type ForgotPasswordRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
-// ResetPasswordRequest represents a reset password request
+// VerifyOTPRequest represents a verify OTP request
+type VerifyOTPRequest struct {
+	Email string `json:"email" binding:"required,email"`
+	OTP   string `json:"otp" binding:"required,len=6"`
+}
+
+// ResetPasswordRequest represents a reset password request with OTP
 type ResetPasswordRequest struct {
-	Token    string `json:"token" binding:"required"`
+	Email    string `json:"email" binding:"required,email"`
+	OTP      string `json:"otp" binding:"required,len=6"`
 	Password string `json:"password" binding:"required,min=6"`
 }
 

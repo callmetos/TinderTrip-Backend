@@ -21,9 +21,9 @@ func (s *EmailService) SendWelcomeEmail(to, name string) error {
 	return s.smtpClient.SendWelcomeEmail(to, name)
 }
 
-// SendPasswordResetEmail sends a password reset email
-func (s *EmailService) SendPasswordResetEmail(to, token, resetURL string) error {
-	return s.smtpClient.SendPasswordResetEmail(to, token, resetURL)
+// SendPasswordResetOTP sends a password reset OTP email
+func (s *EmailService) SendPasswordResetOTP(to, otp string) error {
+	return s.smtpClient.SendPasswordResetOTP(to, otp)
 }
 
 // SendEventConfirmationEmail sends an event confirmation email

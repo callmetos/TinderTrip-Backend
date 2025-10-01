@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"TinderTrip-Backend/docs"
+	"TinderTrip-Backend/internal/api/handlers"
 	"TinderTrip-Backend/internal/api/middleware"
 	"TinderTrip-Backend/internal/api/routes"
 	"TinderTrip-Backend/pkg/config"
@@ -18,8 +19,9 @@ import (
 )
 
 type Server struct {
-	httpServer *http.Server
-	router     *gin.Engine
+	httpServer  *http.Server
+	router      *gin.Engine
+	authHandler *handlers.AuthHandler
 }
 
 func NewServer() *Server {
@@ -47,11 +49,15 @@ func NewServer() *Server {
 	docs.SwaggerInfo.Title = "TinderTrip API"
 	docs.SwaggerInfo.Description = "A Tinder-like trip matching API"
 	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "localhost:9952"
+	docs.SwaggerInfo.Host = "https://api.tindertrip.phitik.com"
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
+	// Create auth handler for cleanup
+	authHandler := handlers.NewAuthHandler()
+
 	return &Server{
-		router: router,
+		router:      router,
+		authHandler: authHandler,
 	}
 }
 
@@ -76,4 +82,11 @@ func (s *Server) Shutdown() error {
 	defer cancel()
 
 	return s.httpServer.Shutdown(ctx)
+}
+
+// StopCleanup stops background cleanup routines
+func (s *Server) StopCleanup() {
+	if s.authHandler != nil {
+		s.authHandler.StopCleanup()
+	}
 }

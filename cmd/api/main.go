@@ -64,6 +64,9 @@ func main() {
 
 	log.Println("Shutting down server...")
 
+	// Stop background cleanup routines
+	srv.StopCleanup()
+
 	// Graceful shutdown
 	if err := srv.Shutdown(); err != nil {
 		log.Fatal("Server forced to shutdown:", err)

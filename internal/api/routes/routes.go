@@ -29,6 +29,7 @@ func SetupRoutes(router *gin.Engine) {
 		auth.GET("/google", authHandler.GoogleAuth)
 		auth.GET("/google/callback", authHandler.GoogleCallback)
 		auth.POST("/forgot-password", authHandler.ForgotPassword)
+		auth.POST("/verify-otp", authHandler.VerifyOTP)
 		auth.POST("/reset-password", authHandler.ResetPassword)
 		auth.POST("/logout", middleware.AuthMiddleware(), authHandler.Logout)
 		auth.POST("/refresh", middleware.AuthMiddleware(), authHandler.RefreshToken)

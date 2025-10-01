@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	mathrand "math/rand"
 	"time"
 
 	"TinderTrip-Backend/internal/models"
@@ -17,13 +18,20 @@ import (
 // AuthService handles authentication business logic
 type AuthService struct {
 	emailService *email.SMTPClient
+	stopCleanup  chan bool
 }
 
 // NewAuthService creates a new auth service
 func NewAuthService() *AuthService {
-	return &AuthService{
+	service := &AuthService{
 		emailService: email.NewSMTPClient(),
+		stopCleanup:  make(chan bool),
 	}
+
+	// Start background cleanup
+	go service.startCleanupRoutine()
+
+	return service
 }
 
 // Register registers a new user
@@ -89,8 +97,8 @@ func (s *AuthService) Login(email, password string) (*models.User, error) {
 	return &user, nil
 }
 
-// SendPasswordResetEmail sends a password reset email
-func (s *AuthService) SendPasswordResetEmail(email string) error {
+// SendPasswordResetOTP sends a password reset OTP email
+func (s *AuthService) SendPasswordResetOTP(email string) error {
 	// Find user by email
 	var user models.User
 	err := database.GetDB().Where("email = ?", email).First(&user).Error
@@ -102,17 +110,20 @@ func (s *AuthService) SendPasswordResetEmail(email string) error {
 		return fmt.Errorf("database error: %w", err)
 	}
 
-	// Generate reset token
-	token, err := s.generateResetToken()
-	if err != nil {
-		return fmt.Errorf("token generation failed: %w", err)
-	}
+	// Generate 6-digit OTP
+	otp := s.generateOTP()
 
-	// Create password reset record
+	// Delete existing reset tokens for this user
+	database.GetDB().Where("user_id = ?", user.ID).Delete(&models.PasswordReset{})
+
+	// Clean up expired tokens
+	database.GetDB().Where("expires_at < ?", time.Now()).Delete(&models.PasswordReset{})
+
+	// Create password reset record with OTP
 	passwordReset := &models.PasswordReset{
 		UserID:    user.ID,
-		Token:     token,
-		ExpiresAt: time.Now().Add(24 * time.Hour), // 24 hours expiry
+		Token:     otp,
+		ExpiresAt: time.Now().Add(3 * time.Minute), // 3 minutes expiry
 	}
 
 	// Save password reset to database
@@ -120,28 +131,34 @@ func (s *AuthService) SendPasswordResetEmail(email string) error {
 		return fmt.Errorf("failed to create password reset: %w", err)
 	}
 
-	// Send email
-	resetURL := "http://localhost:3001/reset-password.html" // Frontend URL
-	fmt.Printf("DEBUG: Attempting to send email to %s with token %s\n", email, token)
-	err = s.emailService.SendPasswordResetEmail(email, token, resetURL)
+	// Send OTP email
+	fmt.Printf("DEBUG: Attempting to send OTP to %s: %s\n", email, otp)
+	err = s.emailService.SendPasswordResetOTP(email, otp)
 	if err != nil {
-		fmt.Printf("DEBUG: Email sending failed: %v\n", err)
-		return fmt.Errorf("failed to send email: %w", err)
+		fmt.Printf("DEBUG: OTP email sending failed: %v\n", err)
+		return fmt.Errorf("failed to send OTP email: %w", err)
 	}
-	fmt.Printf("DEBUG: Email sent successfully to %s\n", email)
+	fmt.Printf("DEBUG: OTP email sent successfully to %s\n", email)
 	return nil
 }
 
-// ResetPassword resets user password
-func (s *AuthService) ResetPassword(token, newPassword string) error {
+// ResetPassword resets user password with OTP
+func (s *AuthService) ResetPassword(email, otp, newPassword string) error {
 	// Find password reset record
 	var passwordReset models.PasswordReset
-	err := database.GetDB().Where("token = ? AND expires_at > ?", token, time.Now()).First(&passwordReset).Error
+	err := database.GetDB().Where("token = ? AND expires_at > ?", otp, time.Now()).First(&passwordReset).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return fmt.Errorf("invalid or expired token")
+			return fmt.Errorf("invalid or expired OTP")
 		}
 		return fmt.Errorf("database error: %w", err)
+	}
+
+	// Verify the email matches the OTP
+	var user models.User
+	err = database.GetDB().Where("id = ? AND email = ?", passwordReset.UserID, email).First(&user).Error
+	if err != nil {
+		return fmt.Errorf("invalid email for this OTP")
 	}
 
 	// Hash new password
@@ -162,7 +179,56 @@ func (s *AuthService) ResetPassword(token, newPassword string) error {
 		return fmt.Errorf("failed to delete password reset record: %w", err)
 	}
 
+	// Clean up expired tokens
+	database.GetDB().Where("expires_at < ?", time.Now()).Delete(&models.PasswordReset{})
+
 	return nil
+}
+
+// VerifyOTP verifies OTP for password reset
+func (s *AuthService) VerifyOTP(email, otp string) error {
+	// Find password reset record
+	var passwordReset models.PasswordReset
+	err := database.GetDB().Where("token = ? AND expires_at > ?", otp, time.Now()).First(&passwordReset).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return fmt.Errorf("invalid or expired OTP")
+		}
+		return fmt.Errorf("database error: %w", err)
+	}
+
+	// Verify the email matches the OTP
+	var user models.User
+	err = database.GetDB().Where("id = ? AND email = ?", passwordReset.UserID, email).First(&user).Error
+	if err != nil {
+		return fmt.Errorf("invalid email for this OTP")
+	}
+
+	// Clean up expired tokens
+	database.GetDB().Where("expires_at < ?", time.Now()).Delete(&models.PasswordReset{})
+
+	return nil
+}
+
+// startCleanupRoutine starts background cleanup for expired OTPs
+func (s *AuthService) startCleanupRoutine() {
+	ticker := time.NewTicker(1 * time.Minute) // Run every minute
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			// Clean up expired OTPs
+			database.GetDB().Where("expires_at < ?", time.Now()).Delete(&models.PasswordReset{})
+		case <-s.stopCleanup:
+			return
+		}
+	}
+}
+
+// StopCleanup stops the background cleanup routine
+func (s *AuthService) StopCleanup() {
+	close(s.stopCleanup)
 }
 
 // generateResetToken generates a secure random token
@@ -172,6 +238,13 @@ func (s *AuthService) generateResetToken() (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
+}
+
+// generateOTP generates a 6-digit OTP
+func (s *AuthService) generateOTP() string {
+	// Generate a random 6-digit number
+	otp := mathrand.Intn(900000) + 100000 // 100000 to 999999
+	return fmt.Sprintf("%06d", otp)
 }
 
 // ValidateToken validates a password reset token

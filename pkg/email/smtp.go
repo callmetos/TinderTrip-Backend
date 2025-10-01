@@ -127,26 +127,24 @@ func (c *SMTPClient) createMessage(message *EmailMessage) []byte {
 	return []byte(msg.String())
 }
 
-// SendPasswordResetEmail sends a password reset email
-func (c *SMTPClient) SendPasswordResetEmail(to, resetToken, resetURL string) error {
-	subject := "Reset Your Password - TinderTrip"
-
-	// Create reset URL with token
-	fullResetURL := fmt.Sprintf("%s?token=%s", resetURL, resetToken)
+// SendPasswordResetOTP sends a password reset OTP email
+func (c *SMTPClient) SendPasswordResetOTP(to, otp string) error {
+	subject := "Password Reset OTP - TinderTrip"
 
 	htmlBody := fmt.Sprintf(`
 		<!DOCTYPE html>
 		<html>
 		<head>
 			<meta charset="UTF-8">
-			<title>Reset Your Password</title>
+			<title>Password Reset OTP</title>
 			<style>
 				body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
 				.container { max-width: 600px; margin: 0 auto; padding: 20px; }
 				.header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
 				.content { padding: 20px; background-color: #f9f9f9; }
-				.button { display: inline-block; padding: 12px 24px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+				.otp-code { font-size: 32px; font-weight: bold; color: #4CAF50; text-align: center; padding: 20px; background-color: white; border: 2px dashed #4CAF50; margin: 20px 0; letter-spacing: 5px; }
 				.footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+				.warning { background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 4px; margin: 15px 0; }
 			</style>
 		</head>
 		<body>
@@ -155,14 +153,14 @@ func (c *SMTPClient) SendPasswordResetEmail(to, resetToken, resetURL string) err
 					<h1>TinderTrip</h1>
 				</div>
 				<div class="content">
-					<h2>Reset Your Password</h2>
+					<h2>Password Reset Verification Code</h2>
 					<p>Hello,</p>
 					<p>We received a request to reset your password for your TinderTrip account.</p>
-					<p>Click the button below to reset your password:</p>
-					<a href="%s" class="button">Reset Password</a>
-					<p>If the button doesn't work, you can copy and paste this link into your browser:</p>
-					<p><a href="%s">%s</a></p>
-					<p>This link will expire in 24 hours for security reasons.</p>
+					<p>Please use the following verification code to reset your password:</p>
+					<div class="otp-code">%s</div>
+					<div class="warning">
+						<strong>Important:</strong> This code will expire in 3 minutes for security reasons.
+					</div>
 					<p>If you didn't request this password reset, please ignore this email.</p>
 				</div>
 				<div class="footer">
@@ -171,7 +169,7 @@ func (c *SMTPClient) SendPasswordResetEmail(to, resetToken, resetURL string) err
 			</div>
 		</body>
 		</html>
-	`, fullResetURL, fullResetURL, fullResetURL)
+	`, otp)
 
 	message := &EmailMessage{
 		To:      []string{to},

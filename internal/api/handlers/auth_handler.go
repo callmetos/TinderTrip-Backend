@@ -30,6 +30,13 @@ func NewAuthHandler() *AuthHandler {
 	}
 }
 
+// StopCleanup stops background cleanup routines
+func (h *AuthHandler) StopCleanup() {
+	if h.authService != nil {
+		h.authService.StopCleanup()
+	}
+}
+
 // Register handles user registration
 // @Summary Register a new user
 // @Description Register a new user with email and password
@@ -327,28 +334,28 @@ func (h *AuthHandler) ForgotPassword(c *gin.Context) {
 		return
 	}
 
-	// Send password reset email
-	err := h.authService.SendPasswordResetEmail(req.Email)
+	// Send password reset OTP
+	err := h.authService.SendPasswordResetOTP(req.Email)
 	if err != nil {
 		// Don't reveal if email exists or not
 		c.JSON(http.StatusOK, dto.SuccessResponse{
-			Message: "If the email exists, a password reset link has been sent",
+			Message: "If the email exists, a password reset OTP has been sent",
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "If the email exists, a password reset link has been sent",
+		Message: "If the email exists, a password reset OTP has been sent",
 	})
 }
 
 // ResetPassword handles password reset
-// @Summary Reset password
-// @Description Reset password with token
+// @Summary Reset password with OTP
+// @Description Reset password with OTP verification
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param request body dto.ResetPasswordRequest true "Reset password data"
+// @Param request body dto.ResetPasswordRequest true "Reset password data with OTP"
 // @Success 200 {object} dto.SuccessResponse
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
@@ -363,8 +370,8 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	// Reset password
-	err := h.authService.ResetPassword(req.Token, req.Password)
+	// Reset password with OTP
+	err := h.authService.ResetPassword(req.Email, req.OTP, req.Password)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Error:   "Password reset failed",
@@ -375,6 +382,42 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Message: "Password has been reset successfully",
+	})
+}
+
+// VerifyOTP handles OTP verification
+// @Summary Verify OTP
+// @Description Verify OTP for password reset
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.VerifyOTPRequest true "OTP verification data"
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /auth/verify-otp [post]
+func (h *AuthHandler) VerifyOTP(c *gin.Context) {
+	var req dto.VerifyOTPRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Error:   "Invalid request",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// Verify OTP
+	err := h.authService.VerifyOTP(req.Email, req.OTP)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Error:   "OTP verification failed",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Message: "OTP verified successfully",
 	})
 }
 
