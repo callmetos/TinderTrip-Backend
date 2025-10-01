@@ -36,7 +36,7 @@ func NewServer() *Server {
 	router.Use(middleware.AuthContext()) // Extract user ID from JWT for API logging
 	router.Use(middleware.APILogger())   // Add API logging to database
 	router.Use(middleware.Recovery())
-	router.Use(middleware.CORS())
+	// router.Use(middleware.CORS()) // CORS disabled
 	router.Use(middleware.RateLimit())
 
 	// Setup routes
