@@ -268,7 +268,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	}
 
 	// Create or update user
-	user, err := h.googleOAuthService.CreateOrUpdateUser(ctx, userInfo)
+	user, isNewUser, err := h.googleOAuthService.CreateOrUpdateUser(ctx, userInfo)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Error:   "User creation failed",
@@ -290,16 +290,18 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	// Clean up state
 	database.DeleteCache(ctx, "oauth_state:"+state)
 
-	// Send welcome email for new Google OAuth users
-	go func() {
-		if err := h.emailService.SendWelcomeEmail(userInfo.Email, userInfo.Name); err != nil {
-			utils.Logger().WithFields(map[string]interface{}{
-				"error":   err,
-				"user_id": user.ID.String(),
-				"email":   userInfo.Email,
-			}).Error("Failed to send welcome email for Google OAuth user")
-		}
-	}()
+	// Send welcome email only for new Google OAuth users
+	if isNewUser {
+		go func() {
+			if err := h.emailService.SendWelcomeEmail(userInfo.Email, userInfo.Name); err != nil {
+				utils.Logger().WithFields(map[string]interface{}{
+					"error":   err,
+					"user_id": user.ID.String(),
+					"email":   userInfo.Email,
+				}).Error("Failed to send welcome email for Google OAuth user")
+			}
+		}()
+	}
 
 	c.JSON(http.StatusOK, dto.AuthResponse{
 		Token: jwtToken,

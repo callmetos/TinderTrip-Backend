@@ -99,14 +99,17 @@ func (s *GoogleOAuthService) GetUserInfo(ctx context.Context, token *oauth2.Toke
 }
 
 // CreateOrUpdateUser creates or updates a user from Google user info
-func (s *GoogleOAuthService) CreateOrUpdateUser(ctx context.Context, userInfo *GoogleUserInfo) (*models.User, error) {
+func (s *GoogleOAuthService) CreateOrUpdateUser(ctx context.Context, userInfo *GoogleUserInfo) (*models.User, bool, error) {
 	// Check if user already exists by Google ID
 	var user models.User
 	err := database.GetDB().Where("google_id = ? AND provider = ?", userInfo.ID, models.AuthProviderGoogle).First(&user).Error
 
+	isNewUser := false
+
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			// User doesn't exist, create new user
+			isNewUser = true
 			user = models.User{
 				Email:       &userInfo.Email,
 				Provider:    models.AuthProviderGoogle,
@@ -117,10 +120,10 @@ func (s *GoogleOAuthService) CreateOrUpdateUser(ctx context.Context, userInfo *G
 
 			err = database.GetDB().Create(&user).Error
 			if err != nil {
-				return nil, fmt.Errorf("failed to create user: %w", err)
+				return nil, false, fmt.Errorf("failed to create user: %w", err)
 			}
 		} else {
-			return nil, fmt.Errorf("failed to check user existence: %w", err)
+			return nil, false, fmt.Errorf("failed to check user existence: %w", err)
 		}
 	} else {
 		// User exists, update last login
@@ -130,11 +133,11 @@ func (s *GoogleOAuthService) CreateOrUpdateUser(ctx context.Context, userInfo *G
 
 		err = database.GetDB().Save(&user).Error
 		if err != nil {
-			return nil, fmt.Errorf("failed to update user: %w", err)
+			return nil, false, fmt.Errorf("failed to update user: %w", err)
 		}
 	}
 
-	return &user, nil
+	return &user, isNewUser, nil
 }
 
 // ValidateToken validates a Google access token
