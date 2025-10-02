@@ -147,6 +147,9 @@ pipeline {
         }
         
         stage('Deploy to Coolify') {
+            when {
+                branch 'main'
+            }
             steps {
                 script {
                     notifyN8N("INFO", "Preparing deployment to Coolify...")
