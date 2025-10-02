@@ -303,16 +303,17 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		}()
 	}
 
-	c.JSON(http.StatusOK, dto.AuthResponse{
-		Token: jwtToken,
-		User: dto.UserResponse{
-			ID:          user.ID.String(),
-			Email:       userInfo.Email,
-			DisplayName: userInfo.Name,
-			Provider:    string(user.Provider),
-			CreatedAt:   user.CreatedAt,
-		},
-	})
+	// Redirect to frontend with token
+	frontendURL := "http://localhost:5501/auth/callback"
+	redirectURL := fmt.Sprintf("%s?token=%s&user_id=%s&email=%s&display_name=%s&provider=%s",
+		frontendURL,
+		jwtToken,
+		user.ID.String(),
+		userInfo.Email,
+		userInfo.Name,
+		string(user.Provider))
+
+	c.Redirect(http.StatusFound, redirectURL)
 }
 
 // ForgotPassword handles password reset request
