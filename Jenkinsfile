@@ -8,11 +8,11 @@ pipeline {
     }
 
     environment {
-        REPO_URL = 'https://github.com/callmetos/TinderTrip-Backend.git'
-        REPO_BRANCH = 'main'
-        REPO_CREDENTIALS = 'github-token'
-        PROJECT_NAME = 'tindertrip-backend'
-        PROJECT_BRANCH = 'main'
+        REPO_URL        = 'https://github.com/callmetos/TinderTrip-Backend.git'
+        REPO_BRANCH     = 'main'
+        REPO_CREDENTIALS= 'github-token'
+        PROJECT_NAME    = 'tindertrip-backend'
+        PROJECT_BRANCH  = 'main'
     }
 
     stages {
@@ -26,83 +26,45 @@ pipeline {
                     credentialsId: "${env.REPO_CREDENTIALS}"
             }
             post {
-                failure {
-                    script { notifyN8N("FAILURE", "Stage: Checkout failed") }
-                }
+                failure { script { notifyN8N("FAILURE", "Stage: Checkout failed") } }
             }
         }
 
         stage('Verify Go') {
-            steps {
-                sh 'go version'
-            }
+            steps { sh 'go version' }
             post {
-                failure {
-                    script { notifyN8N("FAILURE", "Stage: Verify Go failed") }
-                }
+                failure { script { notifyN8N("FAILURE", "Stage: Verify Go failed") } }
             }
         }
 
-        stage('Download dependencies') {
-            steps {
-                sh 'go mod download'
-            }
-            post {
-                failure {
-                    script { notifyN8N("FAILURE", "Stage: Download dependencies failed") }
+        stage('Quality Checks (parallel)') {
+            parallel {
+                stage('Download & Verify Deps') {
+                    steps {
+                        sh 'go mod download'
+                        sh 'go mod verify'
+                    }
                 }
-            }
-        }
 
-        stage('Verify dependencies') {
-            steps {
-                sh 'go mod verify'
-            }
-            post {
-                failure {
-                    script { notifyN8N("FAILURE", "Stage: Verify dependencies failed") }
+                stage('Fmt Check') {
+                    steps {
+                        sh '''
+                          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
+                            echo "❌ Some files are not formatted:"
+                            gofmt -s -l .
+                            exit 1
+                          fi
+                        '''
+                    }
                 }
-            }
-        }
 
-        // stage('Run go vet') {
-        //     steps {
-        //         sh 'go vet ./...'
-        //     }
-        //     post {
-        //         failure {
-        //             script { notifyN8N("FAILURE", "Stage: Run go vet failed") }
-        //         }
-        //     }
-        // }
-
-        stage('Run go fmt check') {
-            steps {
-                sh '''
-                  if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
-                    echo "❌ Some files are not formatted:"
-                    gofmt -s -l .
-                    exit 1
-                  fi
-                '''
-            }
-            post {
-                failure {
-                    script { notifyN8N("FAILURE", "Stage: Run go fmt check failed") }
-                }
-            }
-        }
-
-        stage('Run tests (non-blocking)') {
-            steps {
-                sh '''
-                  echo "🧪 Running tests (will not fail pipeline if tests fail)..."
-                  go test -v ./... || echo "⚠️ Tests failed or skipped (likely due to sqlite/CGO). Continuing..."
-                '''
-            }
-            post {
-                failure {
-                    script { notifyN8N("FAILURE", "Stage: Run tests failed") }
+                stage('Tests (non-blocking)') {
+                    steps {
+                        sh '''
+                          echo "🧪 Running tests (will not fail pipeline if tests fail)..."
+                          go test -v ./... || echo "⚠️ Tests failed or skipped (likely due to sqlite/CGO). Continuing..."
+                        '''
+                    }
                 }
             }
         }
@@ -112,9 +74,7 @@ pipeline {
                 sh 'go build -o app ./cmd/api/main.go'
             }
             post {
-                failure {
-                    script { notifyN8N("FAILURE", "Stage: Build project failed") }
-                }
+                failure { script { notifyN8N("FAILURE", "Stage: Build project failed") } }
             }
         }
 
@@ -140,9 +100,7 @@ pipeline {
                 '''
             }
             post {
-                failure {
-                    script { notifyN8N("FAILURE", "Stage: Health Check failed") }
-                }
+                failure { script { notifyN8N("FAILURE", "Stage: Health Check failed") } }
             }
         }
 
@@ -155,29 +113,23 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Deploy to Coolify') {
-            when {
-                branch 'main'
-            }
+            when { branch 'main' }
             steps {
                 script {
                     notifyN8N("INFO", "Preparing deployment to Coolify...")
-                    
                     deployToCoolify(
                         "TinderTrip Backend",                
                         "COOLIFY_UUID_tindertrip",
                         "COOLIFY_TOKEN",
                         "COOLIFY_BASEURL"
                     )
-        
                     notifyN8N("SUCCESS", "Deployment request has been successfully sent to Coolify.")
                 }
             }
             post {
-                failure {
-                    script { notifyN8N("FAILURE", "Stage: Deploy to Coolify failed") }
-                }
+                failure { script { notifyN8N("FAILURE", "Stage: Deploy to Coolify failed") } }
             }
         }
     }
