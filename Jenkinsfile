@@ -145,6 +145,16 @@ pipeline {
                 }
             }
         }
+
+        stage('Skip Deploy') {
+            when { not { branch 'main' } }
+            steps {
+                script {
+                    echo "⏭️ Skipping deploy: branch = ${env.BRANCH_NAME}, only main can deploy."
+                    notifyN8N("INFO", "⏭️ Deploy skipped because branch is ${env.BRANCH_NAME}, only main can deploy.")
+                }
+            }
+        }
         
         stage('Deploy to Coolify') {
             when {
