@@ -49,7 +49,7 @@ func NewServer() *Server {
 	docs.SwaggerInfo.Title = "TinderTrip API"
 	docs.SwaggerInfo.Description = "A Tinder-like trip matching API"
 	docs.SwaggerInfo.Version = "1.0"
-	docs.SwaggerInfo.Host = "https://api.tindertrip.phitik.com"
+	docs.SwaggerInfo.Host = "api.tindertrip.phitik.com"
 	docs.SwaggerInfo.BasePath = "/api/v1"
 
 	// Create auth handler for cleanup
