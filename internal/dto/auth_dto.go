@@ -82,6 +82,20 @@ type ResendVerificationRequest struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
+// VerifyEmailOTPRequest represents a verify email OTP request
+type VerifyEmailOTPRequest struct {
+	Email string `json:"email" binding:"required,email"`
+	OTP   string `json:"otp" binding:"required,len=6"`
+}
+
+// RegisterWithOTPRequest represents a registration request that requires OTP verification
+type RegisterWithOTPRequest struct {
+	Email       string `json:"email" binding:"required,email"`
+	Password    string `json:"password" binding:"required,min=6"`
+	DisplayName string `json:"display_name" binding:"required,min=2,max=50"`
+	OTP         string `json:"otp" binding:"required,len=6"`
+}
+
 // AuthResponse represents an authentication response
 type AuthResponse struct {
 	Token string       `json:"token"`

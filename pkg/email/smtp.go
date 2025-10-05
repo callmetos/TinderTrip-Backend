@@ -289,3 +289,56 @@ func (c *SMTPClient) SendEventConfirmationEmail(to, name, eventTitle, eventDate 
 
 	return c.SendEmail(message)
 }
+
+// SendVerificationOTP sends an email verification OTP email
+func (c *SMTPClient) SendVerificationOTP(to, otp string) error {
+	subject := "Email Verification - TinderTrip"
+
+	htmlBody := fmt.Sprintf(`
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<meta charset="UTF-8">
+			<title>Email Verification</title>
+			<style>
+				body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+				.container { max-width: 600px; margin: 0 auto; padding: 20px; }
+				.header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
+				.content { padding: 20px; background-color: #f9f9f9; }
+				.otp-code { font-size: 32px; font-weight: bold; color: #4CAF50; text-align: center; padding: 20px; background-color: white; border: 2px dashed #4CAF50; margin: 20px 0; letter-spacing: 5px; }
+				.footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+				.warning { background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; padding: 15px; border-radius: 4px; margin: 15px 0; }
+			</style>
+		</head>
+		<body>
+			<div class="container">
+				<div class="header">
+					<h1>TinderTrip</h1>
+				</div>
+				<div class="content">
+					<h2>Email Verification</h2>
+					<p>Hello,</p>
+					<p>Thank you for registering with TinderTrip! To complete your registration, please verify your email address using the code below:</p>
+					<div class="otp-code">%s</div>
+					<div class="warning">
+						<strong>Important:</strong> This verification code will expire in 10 minutes for security reasons.
+					</div>
+					<p>If you didn't create an account with TinderTrip, please ignore this email.</p>
+					<p>Welcome to TinderTrip!</p>
+				</div>
+				<div class="footer">
+					<p>&copy; 2024 TinderTrip. All rights reserved.</p>
+				</div>
+			</div>
+		</body>
+		</html>
+	`, otp)
+
+	message := &EmailMessage{
+		To:      []string{to},
+		Subject: subject,
+		HTML:    htmlBody,
+	}
+
+	return c.SendEmail(message)
+}

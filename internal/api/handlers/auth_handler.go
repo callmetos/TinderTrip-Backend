@@ -37,14 +37,14 @@ func (h *AuthHandler) StopCleanup() {
 	}
 }
 
-// Register handles user registration
+// Register handles user registration - sends OTP for email verification
 // @Summary Register a new user
-// @Description Register a new user with email and password
+// @Description Register a new user with email and password, sends OTP for verification
 // @Tags auth
 // @Accept json
 // @Produce json
 // @Param request body dto.RegisterRequest true "Registration data"
-// @Success 201 {object} dto.AuthResponse
+// @Success 200 {object} dto.SuccessResponse
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 409 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
@@ -59,8 +59,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Create user
-	user, err := h.authService.Register(req.Email, req.Password, req.DisplayName)
+	// Send email verification OTP
+	err := h.authService.SendEmailVerificationOTP(req.Email)
 	if err != nil {
 		if err.Error() == "user already exists" {
 			c.JSON(http.StatusConflict, dto.ErrorResponse{
@@ -77,36 +77,8 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	// Generate JWT token
-	token, err := utils.GenerateToken(user.ID.String(), *user.Email, string(user.Provider))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Token generation failed",
-			Message: "Failed to generate authentication token",
-		})
-		return
-	}
-
-	// Send welcome email
-	go func() {
-		if err := h.emailService.SendWelcomeEmail(*user.Email, user.GetDisplayName()); err != nil {
-			utils.Logger().WithFields(map[string]interface{}{
-				"error":   err,
-				"user_id": user.ID.String(),
-				"email":   *user.Email,
-			}).Error("Failed to send welcome email")
-		}
-	}()
-
-	c.JSON(http.StatusCreated, dto.AuthResponse{
-		Token: token,
-		User: dto.UserResponse{
-			ID:          user.ID.String(),
-			Email:       *user.Email,
-			DisplayName: user.GetDisplayName(),
-			Provider:    string(user.Provider),
-			CreatedAt:   user.CreatedAt,
-		},
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Message: "Verification OTP sent to your email. Please check your inbox and verify your email to complete registration.",
 	})
 }
 
@@ -421,6 +393,114 @@ func (h *AuthHandler) VerifyOTP(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Message: "OTP verified successfully",
+	})
+}
+
+// VerifyEmail handles email verification with OTP
+// @Summary Verify email with OTP
+// @Description Verify email with OTP and complete user registration
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.RegisterWithOTPRequest true "Email verification data"
+// @Success 201 {object} dto.AuthResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /auth/verify-email [post]
+func (h *AuthHandler) VerifyEmail(c *gin.Context) {
+	var req dto.RegisterWithOTPRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Error:   "Invalid request",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// Verify OTP and create user
+	user, err := h.authService.VerifyEmailOTP(req.Email, req.OTP, req.Password, req.DisplayName)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Error:   "Email verification failed",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// Generate JWT token
+	token, err := utils.GenerateToken(user.ID.String(), *user.Email, string(user.Provider))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Error:   "Token generation failed",
+			Message: "Failed to generate authentication token",
+		})
+		return
+	}
+
+	// Send welcome email
+	go func() {
+		if err := h.emailService.SendWelcomeEmail(*user.Email, user.GetDisplayName()); err != nil {
+			utils.Logger().WithFields(map[string]interface{}{
+				"error":   err,
+				"user_id": user.ID.String(),
+				"email":   *user.Email,
+			}).Error("Failed to send welcome email")
+		}
+	}()
+
+	c.JSON(http.StatusCreated, dto.AuthResponse{
+		Token: token,
+		User: dto.UserResponse{
+			ID:          user.ID.String(),
+			Email:       *user.Email,
+			DisplayName: user.GetDisplayName(),
+			Provider:    string(user.Provider),
+			CreatedAt:   user.CreatedAt,
+		},
+	})
+}
+
+// ResendVerification handles resending verification OTP
+// @Summary Resend verification OTP
+// @Description Resend verification OTP to email
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param request body dto.ResendVerificationRequest true "Email address"
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /auth/resend-verification [post]
+func (h *AuthHandler) ResendVerification(c *gin.Context) {
+	var req dto.ResendVerificationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Error:   "Invalid request",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	// Resend verification OTP
+	err := h.authService.ResendEmailVerificationOTP(req.Email)
+	if err != nil {
+		if err.Error() == "user already exists" {
+			c.JSON(http.StatusConflict, dto.ErrorResponse{
+				Error:   "User already exists",
+				Message: "An account with this email already exists",
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Error:   "Failed to resend verification",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Message: "Verification OTP resent to your email. Please check your inbox.",
 	})
 }
 

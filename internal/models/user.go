@@ -19,16 +19,17 @@ const (
 
 // User represents the users table
 type User struct {
-	ID           uuid.UUID    `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
-	Email        *string      `json:"email" gorm:"type:citext;uniqueIndex"`
-	Provider     AuthProvider `json:"provider" gorm:"type:auth_provider;not null"`
-	PasswordHash *string      `json:"-" gorm:"type:text"`
-	GoogleID     *string      `json:"google_id" gorm:"type:text;uniqueIndex:ux_users_google_id,where:provider='google'"`
-	DisplayName  *string      `json:"display_name" gorm:"type:text"`
-	LastLoginAt  *time.Time   `json:"last_login_at" gorm:"type:timestamptz"`
-	CreatedAt    time.Time    `json:"created_at" gorm:"type:timestamptz;not null;default:now()"`
-	UpdatedAt    time.Time    `json:"updated_at" gorm:"type:timestamptz;not null;default:now()"`
-	DeletedAt    *time.Time   `json:"deleted_at" gorm:"type:timestamptz;index"`
+	ID            uuid.UUID    `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
+	Email         *string      `json:"email" gorm:"type:citext;uniqueIndex"`
+	Provider      AuthProvider `json:"provider" gorm:"type:auth_provider;not null"`
+	PasswordHash  *string      `json:"-" gorm:"type:text"`
+	EmailVerified bool         `json:"email_verified" gorm:"type:boolean;not null;default:false"`
+	GoogleID      *string      `json:"google_id" gorm:"type:text;uniqueIndex:ux_users_google_id,where:provider='google'"`
+	DisplayName   *string      `json:"display_name" gorm:"type:text"`
+	LastLoginAt   *time.Time   `json:"last_login_at" gorm:"type:timestamptz"`
+	CreatedAt     time.Time    `json:"created_at" gorm:"type:timestamptz;not null;default:now()"`
+	UpdatedAt     time.Time    `json:"updated_at" gorm:"type:timestamptz;not null;default:now()"`
+	DeletedAt     *time.Time   `json:"deleted_at" gorm:"type:timestamptz;index"`
 
 	// Relationships
 	Profile        *UserProfile      `json:"profile,omitempty" gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`

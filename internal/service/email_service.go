@@ -30,3 +30,8 @@ func (s *EmailService) SendPasswordResetOTP(to, otp string) error {
 func (s *EmailService) SendEventConfirmationEmail(to, name, eventTitle, eventDate string) error {
 	return s.smtpClient.SendEventConfirmationEmail(to, name, eventTitle, eventDate)
 }
+
+// SendVerificationOTP sends an email verification OTP email
+func (s *EmailService) SendVerificationOTP(to, otp string) error {
+	return s.smtpClient.SendVerificationOTP(to, otp)
+}

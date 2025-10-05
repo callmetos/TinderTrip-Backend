@@ -34,6 +34,8 @@ func SetupRoutes(router *gin.Engine) {
 	auth := v1.Group("/auth")
 	{
 		auth.POST("/register", authHandler.Register)
+		auth.POST("/verify-email", authHandler.VerifyEmail)
+		auth.POST("/resend-verification", authHandler.ResendVerification)
 		auth.POST("/login", authHandler.Login)
 		auth.GET("/google", authHandler.GoogleAuth)
 		auth.GET("/google/callback", authHandler.GoogleCallback)

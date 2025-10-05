@@ -334,3 +334,140 @@ func (s *AuthService) DeleteUser(userID string) error {
 
 	return nil
 }
+
+// SendEmailVerificationOTP sends an email verification OTP
+func (s *AuthService) SendEmailVerificationOTP(email string) error {
+	// Check if user already exists
+	var existingUser models.User
+	err := database.GetDB().Where("email = ?", email).First(&existingUser).Error
+	if err == nil {
+		return fmt.Errorf("user already exists")
+	}
+	if err != gorm.ErrRecordNotFound {
+		return fmt.Errorf("database error: %w", err)
+	}
+
+	// Generate 6-digit OTP
+	otp := s.generateOTP()
+
+	// Delete existing verification OTPs for this email
+	database.GetDB().Where("email = ?", email).Delete(&models.EmailVerification{})
+
+	// Clean up expired OTPs
+	database.GetDB().Where("expires_at < ?", time.Now()).Delete(&models.EmailVerification{})
+
+	// Create email verification record
+	emailVerification := &models.EmailVerification{
+		Email:     email,
+		OTP:       otp,
+		ExpiresAt: time.Now().Add(10 * time.Minute), // 10 minutes expiry
+	}
+
+	// Save email verification to database
+	if err := database.GetDB().Create(emailVerification).Error; err != nil {
+		return fmt.Errorf("failed to create email verification: %w", err)
+	}
+
+	// Send OTP email
+	fmt.Printf("DEBUG: Attempting to send verification OTP to %s: %s\n", email, otp)
+	err = s.emailService.SendVerificationOTP(email, otp)
+	if err != nil {
+		fmt.Printf("DEBUG: Verification OTP email sending failed: %v\n", err)
+		return fmt.Errorf("failed to send verification OTP email: %w", err)
+	}
+	fmt.Printf("DEBUG: Verification OTP email sent successfully to %s\n", email)
+	return nil
+}
+
+// VerifyEmailOTP verifies email OTP and creates user
+func (s *AuthService) VerifyEmailOTP(email, otp, password, displayName string) (*models.User, error) {
+	// Find email verification record
+	var emailVerification models.EmailVerification
+	err := database.GetDB().Where("email = ? AND otp = ? AND expires_at > ?", email, otp, time.Now()).First(&emailVerification).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("invalid or expired OTP")
+		}
+		return nil, fmt.Errorf("database error: %w", err)
+	}
+
+	// Hash password
+	hashedPassword, err := utils.HashPassword(password)
+	if err != nil {
+		return nil, fmt.Errorf("password hashing failed: %w", err)
+	}
+
+	// Create user
+	user := &models.User{
+		Email:         &email,
+		Provider:      models.AuthProviderPassword,
+		PasswordHash:  &hashedPassword,
+		DisplayName:   &displayName,
+		EmailVerified: true, // Set as verified since OTP was validated
+	}
+
+	// Save user to database
+	if err := database.GetDB().Create(user).Error; err != nil {
+		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	// Log user registration
+	userIDStr := user.ID.String()
+	s.auditLogger.LogCreate(&userIDStr, "users", &userIDStr, user)
+
+	// Delete email verification record
+	err = database.GetDB().Delete(&emailVerification).Error
+	if err != nil {
+		// Log error but don't fail the registration
+		fmt.Printf("Warning: Failed to delete email verification record: %v\n", err)
+	}
+
+	// Clean up expired OTPs
+	database.GetDB().Where("expires_at < ?", time.Now()).Delete(&models.EmailVerification{})
+
+	return user, nil
+}
+
+// ResendEmailVerificationOTP resends email verification OTP
+func (s *AuthService) ResendEmailVerificationOTP(email string) error {
+	// Check if user already exists
+	var existingUser models.User
+	err := database.GetDB().Where("email = ?", email).First(&existingUser).Error
+	if err == nil {
+		return fmt.Errorf("user already exists")
+	}
+	if err != gorm.ErrRecordNotFound {
+		return fmt.Errorf("database error: %w", err)
+	}
+
+	// Generate new 6-digit OTP
+	otp := s.generateOTP()
+
+	// Delete existing verification OTPs for this email
+	database.GetDB().Where("email = ?", email).Delete(&models.EmailVerification{})
+
+	// Clean up expired OTPs
+	database.GetDB().Where("expires_at < ?", time.Now()).Delete(&models.EmailVerification{})
+
+	// Create new email verification record
+	emailVerification := &models.EmailVerification{
+		Email:     email,
+		OTP:       otp,
+		ExpiresAt: time.Now().Add(10 * time.Minute), // 10 minutes expiry
+	}
+
+	// Save email verification to database
+	if err := database.GetDB().Create(emailVerification).Error; err != nil {
+		return fmt.Errorf("failed to create email verification: %w", err)
+	}
+
+	// Send OTP email
+	fmt.Printf("DEBUG: Attempting to resend verification OTP to %s: %s\n", email, otp)
+	err = s.emailService.SendVerificationOTP(email, otp)
+	if err != nil {
+		fmt.Printf("DEBUG: Verification OTP email sending failed: %v\n", err)
+		return fmt.Errorf("failed to send verification OTP email: %w", err)
+	}
+	fmt.Printf("DEBUG: Verification OTP email resent successfully to %s\n", email)
+	return nil
+}
