@@ -48,7 +48,7 @@ func (s *EventService) GetEvents(userID string, page, limit int, eventType, stat
 	// Get events with pagination
 	var events []models.Event
 	offset := (page - 1) * limit
-	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
+	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
 		Offset(offset).Limit(limit).Order("created_at DESC").Find(&events).Error
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get events: %w", err)
@@ -83,7 +83,7 @@ func (s *EventService) GetPublicEvents(page, limit int, eventType string) ([]dto
 	// Get events with pagination
 	var events []models.Event
 	offset := (page - 1) * limit
-	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
+	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
 		Offset(offset).Limit(limit).Order("created_at DESC").Find(&events).Error
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get events: %w", err)
@@ -108,7 +108,7 @@ func (s *EventService) GetEvent(eventID, userID string) (*dto.EventResponse, err
 
 	// Get event
 	var event models.Event
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
+	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
 		Where("id = ? AND deleted_at IS NULL", eventUUID).First(&event).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -131,7 +131,7 @@ func (s *EventService) GetPublicEvent(eventID string) (*dto.EventResponse, error
 
 	// Get event (only active events)
 	var event models.Event
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
+	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
 		Where("id = ? AND deleted_at IS NULL AND status = ?", eventUUID, models.EventStatusPublished).First(&event).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -200,7 +200,7 @@ func (s *EventService) CreateEvent(userID string, req dto.CreateEventRequest) (*
 	}
 
 	// Load event with relationships
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
+	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
 		Where("id = ?", event.ID).First(event).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to load event: %w", err)
@@ -279,7 +279,7 @@ func (s *EventService) UpdateEvent(eventID, userID string, req dto.UpdateEventRe
 	}
 
 	// Load updated event with relationships
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").
+	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
 		Where("id = ?", event.ID).First(&event).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to load event: %w", err)
@@ -793,4 +793,55 @@ func (s *EventService) GetEventSuggestions(userID string, page, limit int) ([]dt
 
 	// Get event suggestions from tag service
 	return tagService.GetEventSuggestions(userID, page, limit)
+}
+
+// UpdateCoverImageURL sets the cover image URL; only creator can update.
+func (s *EventService) UpdateCoverImageURL(userID string, eventID string, url *string) error {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return fmt.Errorf("invalid user id")
+	}
+	eid, err := uuid.Parse(eventID)
+	if err != nil {
+		return fmt.Errorf("invalid event id")
+	}
+
+	db := database.GetDB()
+	var ev models.Event
+	if err := db.Where("id = ?", eid).First(&ev).Error; err != nil {
+		return err
+	}
+	if ev.CreatorID != uid {
+		return fmt.Errorf("permission denied")
+	}
+	ev.CoverImageURL = url
+	return db.Save(&ev).Error
+}
+
+// AppendEventPhotos appends photo URLs to event_photos in order.
+func (s *EventService) AppendEventPhotos(userID string, eventID string, urls []string) error {
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		return fmt.Errorf("invalid user id")
+	}
+	eid, err := uuid.Parse(eventID)
+	if err != nil {
+		return fmt.Errorf("invalid event id")
+	}
+
+	db := database.GetDB()
+	var ev models.Event
+	if err := db.Where("id = ?", eid).First(&ev).Error; err != nil {
+		return err
+	}
+	if ev.CreatorID != uid {
+		return fmt.Errorf("permission denied")
+	}
+
+	photos := make([]models.EventPhoto, 0, len(urls))
+	for i, u := range urls {
+		order := i
+		photos = append(photos, models.EventPhoto{EventID: eid, URL: u, SortNo: &order})
+	}
+	return db.Create(&photos).Error
 }

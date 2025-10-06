@@ -84,6 +84,9 @@ func SetupRoutes(router *gin.Engine) {
 			events.POST("/:id/cancel", eventHandler.CancelEvent)
 			events.POST("/:id/complete", eventHandler.CompleteEvent)
 			events.POST("/:id/swipe", eventHandler.SwipeEvent)
+			events.PUT("/:id/cover", eventHandler.UpdateCover)
+			events.POST("/:id/photos", eventHandler.AddPhotos)
+			events.GET("/suggestions", eventHandler.GetEventSuggestions)
 		}
 
 		// Chat routes
@@ -149,9 +152,6 @@ func SetupRoutes(router *gin.Engine) {
 			eventTags.POST("/:id/tags", tagHandler.AddEventTag)
 			eventTags.DELETE("/:id/tags/:tag_id", tagHandler.RemoveEventTag)
 		}
-
-		// Event suggestions
-		events.GET("/suggestions", eventHandler.GetEventSuggestions)
 
 		// Audit routes
 		auditHandler := handlers.NewAuditHandler()

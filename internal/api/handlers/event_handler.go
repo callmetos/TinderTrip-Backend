@@ -129,10 +129,17 @@ func (h *EventHandler) GetEvent(c *gin.Context) {
 	// Get event
 	event, err := h.eventService.GetEvent(eventID, userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{
-			Error:   "Event not found",
-			Message: err.Error(),
-		})
+		if err.Error() == "event not found" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Error:   "Event not found",
+				Message: "The requested event does not exist",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Error:   "Failed to get event",
+				Message: err.Error(),
+			})
+		}
 		return
 	}
 
@@ -163,10 +170,17 @@ func (h *EventHandler) GetPublicEvent(c *gin.Context) {
 	// Get public event
 	event, err := h.eventService.GetPublicEvent(eventID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, dto.ErrorResponse{
-			Error:   "Event not found",
-			Message: err.Error(),
-		})
+		if err.Error() == "event not found" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Error:   "Event not found",
+				Message: "The requested event does not exist or is not public",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Error:   "Failed to get event",
+				Message: err.Error(),
+			})
+		}
 		return
 	}
 
@@ -395,15 +409,19 @@ func (h *EventHandler) JoinEvent(c *gin.Context) {
 		if err.Error() == "event not found" {
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{
 				Error:   "Event not found",
+				Message: "The requested event does not exist",
+			})
+		} else if err.Error() == "user is already a member" {
+			c.JSON(http.StatusConflict, dto.ErrorResponse{
+				Error:   "Already a member",
+				Message: "You are already a member of this event",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Error:   "Failed to join event",
 				Message: err.Error(),
 			})
-			return
 		}
-
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to join event",
-			Message: err.Error(),
-		})
 		return
 	}
 
@@ -451,15 +469,19 @@ func (h *EventHandler) LeaveEvent(c *gin.Context) {
 		if err.Error() == "event not found" {
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{
 				Error:   "Event not found",
+				Message: "The requested event does not exist",
+			})
+		} else if err.Error() == "user is not a member" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Error:   "Not a member",
+				Message: "You are not a member of this event",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Error:   "Failed to leave event",
 				Message: err.Error(),
 			})
-			return
 		}
-
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to leave event",
-			Message: err.Error(),
-		})
 		return
 	}
 
@@ -716,15 +738,14 @@ func (h *EventHandler) SwipeEvent(c *gin.Context) {
 		if err.Error() == "event not found" {
 			c.JSON(http.StatusNotFound, dto.ErrorResponse{
 				Error:   "Event not found",
+				Message: "The requested event does not exist",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Error:   "Failed to swipe event",
 				Message: err.Error(),
 			})
-			return
 		}
-
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to swipe event",
-			Message: err.Error(),
-		})
 		return
 	}
 
@@ -777,4 +798,106 @@ func (h *EventHandler) GetEventSuggestions(c *gin.Context) {
 		Page:   page,
 		Limit:  limit,
 	})
+}
+
+// UpdateCover updates event cover image (multipart: file)
+// @Summary Update event cover image
+// @Tags events
+// @Security BearerAuth
+// @Accept mpfd
+// @Produce json
+// @Param id path string true "Event ID"
+// @Param file formData file true "Cover image file"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 403 {object} dto.ErrorResponse
+// @Failure 415 {object} dto.ErrorResponse
+// @Router /events/{id}/cover [put]
+func (h *EventHandler) UpdateCover(c *gin.Context) {
+	userID, _ := middleware.GetCurrentUserID(c)
+	eventID := c.Param("id")
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "file required"})
+		return
+	}
+	src, err := file.Open()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid file"})
+		return
+	}
+	defer src.Close()
+
+	fs, err := service.NewFileService()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "storage init failed"})
+		return
+	}
+
+	_, url, _, _, _, err := fs.UploadImage(c, "event_covers", file.Filename, src)
+	if err != nil {
+		c.JSON(http.StatusUnsupportedMediaType, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	if err := h.eventService.UpdateCoverImageURL(userID, eventID, &url); err != nil {
+		c.JSON(http.StatusForbidden, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"cover_image_url": url})
+}
+
+// AddPhotos appends photos to event gallery (multipart: files[])
+// @Summary Add event photos
+// @Tags events
+// @Security BearerAuth
+// @Accept mpfd
+// @Produce json
+// @Param id path string true "Event ID"
+// @Param files[] formData file true "Gallery images (multiple)"
+// @Success 201 {object} map[string][]string
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 403 {object} dto.ErrorResponse
+// @Failure 415 {object} dto.ErrorResponse
+// @Router /events/{id}/photos [post]
+func (h *EventHandler) AddPhotos(c *gin.Context) {
+	userID, _ := middleware.GetCurrentUserID(c)
+	eventID := c.Param("id")
+
+	form, err := c.MultipartForm()
+	if err != nil || form.File["files[]"] == nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "files[] required"})
+		return
+	}
+
+	fs, err := service.NewFileService()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "storage init failed"})
+		return
+	}
+
+	var urls []string
+	for _, f := range form.File["files[]"] {
+		src, err := f.Open()
+		if err != nil {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid file"})
+			return
+		}
+		_, url, _, _, _, err := fs.UploadImage(c, "event_photos", f.Filename, src)
+		src.Close()
+		if err != nil {
+			c.JSON(http.StatusUnsupportedMediaType, dto.ErrorResponse{Error: err.Error()})
+			return
+		}
+		urls = append(urls, url)
+	}
+
+	if err := h.eventService.AppendEventPhotos(userID, eventID, urls); err != nil {
+		c.JSON(http.StatusForbidden, dto.ErrorResponse{Error: err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, gin.H{"urls": urls})
 }
