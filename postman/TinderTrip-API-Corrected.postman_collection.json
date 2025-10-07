@@ -741,7 +741,7 @@
 					}
 				},
 				{
-					"name": "Create Event",
+					"name": "Create Event (JSON Only)",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -751,6 +751,196 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n  \"title\": \"Dinner at Central World\",\n  \"description\": \"Let's have dinner together at Central World\",\n  \"event_type\": \"meal\",\n  \"address_text\": \"Central World, Bangkok\",\n  \"lat\": 13.7473,\n  \"lng\": 100.5396,\n  \"start_at\": \"2024-12-01T18:00:00Z\",\n  \"end_at\": \"2024-12-01T20:00:00Z\",\n  \"capacity\": 4,\n  \"category_ids\": [\"1\", \"2\"],\n  \"tag_ids\": [\"1\", \"3\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.json() && pm.response.json().data && pm.response.json().data.id) {",
+									"    pm.collectionVariables.set('event_id', pm.response.json().data.id);",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Create Event with Cover Photo (Multipart)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Dinner at Central World with Photo",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Let's have dinner together at Central World with a beautiful cover photo",
+									"type": "text"
+								},
+								{
+									"key": "event_type",
+									"value": "meal",
+									"type": "text"
+								},
+								{
+									"key": "address_text",
+									"value": "Central World, Bangkok",
+									"type": "text"
+								},
+								{
+									"key": "lat",
+									"value": "13.7473",
+									"type": "text"
+								},
+								{
+									"key": "lng",
+									"value": "100.5396",
+									"type": "text"
+								},
+								{
+									"key": "start_at",
+									"value": "2024-12-01T18:00:00Z",
+									"type": "text"
+								},
+								{
+									"key": "end_at",
+									"value": "2024-12-01T20:00:00Z",
+									"type": "text"
+								},
+								{
+									"key": "capacity",
+									"value": "4",
+									"type": "text"
+								},
+								{
+									"key": "category_ids",
+									"value": "1,2",
+									"type": "text"
+								},
+								{
+									"key": "tag_ids",
+									"value": "1,3",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "test-event-cover.jpg",
+									"description": "Select an image file for event cover (JPG, PNG, GIF supported)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.json() && pm.response.json().data && pm.response.json().data.id) {",
+									"    pm.collectionVariables.set('event_id', pm.response.json().data.id);",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Create Event with Multiple Photos (Multipart)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "title",
+									"value": "Amazing Trip with Multiple Photos",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Let's explore beautiful places together with multiple photos",
+									"type": "text"
+								},
+								{
+									"key": "event_type",
+									"value": "trip",
+									"type": "text"
+								},
+								{
+									"key": "address_text",
+									"value": "Chiang Mai, Thailand",
+									"type": "text"
+								},
+								{
+									"key": "lat",
+									"value": "18.7883",
+									"type": "text"
+								},
+								{
+									"key": "lng",
+									"value": "98.9853",
+									"type": "text"
+								},
+								{
+									"key": "start_at",
+									"value": "2024-12-15T09:00:00Z",
+									"type": "text"
+								},
+								{
+									"key": "end_at",
+									"value": "2024-12-15T18:00:00Z",
+									"type": "text"
+								},
+								{
+									"key": "capacity",
+									"value": "6",
+									"type": "text"
+								},
+								{
+									"key": "category_ids",
+									"value": "1,3",
+									"type": "text"
+								},
+								{
+									"key": "tag_ids",
+									"value": "2,4",
+									"type": "text"
+								},
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": "test-event-photo1.jpg",
+									"description": "First event photo (JPG, PNG, GIF supported)"
+								},
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": "test-event-photo2.jpg",
+									"description": "Second event photo (JPG, PNG, GIF supported)"
+								}
+							]
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/events",
@@ -908,16 +1098,22 @@
 					}
 				},
 				{
-					"name": "Update Event Cover Photo",
+					"name": "Update Event Cover Photo (Multipart)",
 					"request": {
 						"method": "PUT",
 						"header": [
-							{"key": "Authorization", "value": "Bearer {{token}}"},
-							{"key": "Content-Type", "value": "application/json"}
+							{"key": "Authorization", "value": "Bearer {{token}}"}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"cover_image_url\": \"https://example.com/cover.jpg\"\n}"
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "test-event-cover.jpg",
+									"description": "Select an image file for event cover (JPG, PNG, GIF supported)"
+								}
+							]
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/events/{{event_id}}/cover",
@@ -927,16 +1123,28 @@
 					}
 				},
 				{
-					"name": "Add Event Photos",
+					"name": "Add Event Photos (Multipart)",
 					"request": {
 						"method": "POST",
 						"header": [
-							{"key": "Authorization", "value": "Bearer {{token}}"},
-							{"key": "Content-Type", "value": "application/json"}
+							{"key": "Authorization", "value": "Bearer {{token}}"}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"photo_urls\": [\n    \"https://example.com/photo1.jpg\",\n    \"https://example.com/photo2.jpg\"\n  ]\n}"
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": "test-event-photo1.jpg",
+									"description": "First event photo (JPG, PNG, GIF supported)"
+								},
+								{
+									"key": "files[]",
+									"type": "file",
+									"src": "test-event-photo2.jpg",
+									"description": "Second event photo (JPG, PNG, GIF supported)"
+								}
+							]
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/events/{{event_id}}/photos",

@@ -246,6 +246,13 @@ func (s *HistoryService) convertHistoryToResponse(history models.UserEventHistor
 
 	// Add event info
 	if history.Event != nil {
+		// Convert cover image URL to public URL
+		var publicCoverURL *string
+		if history.Event.CoverImageURL != nil && *history.Event.CoverImageURL != "" {
+			publicURL := fmt.Sprintf("https://api.tindertrip.phitik.com/images/events/%s", history.Event.ID.String())
+			publicCoverURL = &publicURL
+		}
+
 		response.Event = &dto.EventResponse{
 			ID:            history.Event.ID.String(),
 			CreatorID:     history.Event.CreatorID.String(),
@@ -259,7 +266,7 @@ func (s *HistoryService) convertHistoryToResponse(history models.UserEventHistor
 			EndAt:         history.Event.EndAt,
 			Capacity:      history.Event.Capacity,
 			Status:        string(history.Event.Status),
-			CoverImageURL: history.Event.CoverImageURL,
+			CoverImageURL: publicCoverURL,
 			CreatedAt:     history.Event.CreatedAt,
 			UpdatedAt:     history.Event.UpdatedAt,
 		}
@@ -278,10 +285,16 @@ func (s *HistoryService) convertHistoryToResponse(history models.UserEventHistor
 		// Add photos
 		response.Event.Photos = make([]dto.EventPhotoResponse, len(history.Event.Photos))
 		for i, photo := range history.Event.Photos {
+			// Convert photo URL to public URL
+			var publicURL string
+			if photo.URL != "" {
+				publicURL = fmt.Sprintf("https://api.tindertrip.phitik.com/images/events/%s", history.Event.ID.String())
+			}
+
 			response.Event.Photos[i] = dto.EventPhotoResponse{
 				ID:        photo.ID.String(),
 				EventID:   photo.EventID.String(),
-				URL:       photo.URL,
+				URL:       publicURL,
 				SortNo:    photo.SortNo,
 				CreatedAt: photo.CreatedAt,
 			}

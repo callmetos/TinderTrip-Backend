@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -14,6 +13,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 // ImageHandler handles image serving requests
@@ -154,15 +154,50 @@ func (h *ImageHandler) ServeEventImage(c *gin.Context) {
 	// Clean the event ID
 	eventID = strings.TrimSpace(eventID)
 
-	// TODO: Implement logic to retrieve event image key from eventID
-	// For now, construct storage key for event image
-	// Assuming event image is stored as: tindertrip/events/{event_id}.jpg
-	key := fmt.Sprintf("tindertrip/events/%s.jpg", eventID)
-
-	// Get image from storage
-	imageData, contentType, err := h.imageService.GetImageFromKey(c.Request.Context(), key)
+	// Parse event ID
+	eventUUID, err := uuid.Parse(eventID)
 	if err != nil {
-		utils.Logger().WithField("error", err).WithField("event_id", eventID).Error("Failed to get event image from storage")
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Error:   "Invalid event ID",
+			Message: "Event ID format is invalid",
+		})
+		return
+	}
+
+	// Get event from database to find the actual image URL
+	var event models.Event
+	err = database.GetDB().Where("id = ? AND deleted_at IS NULL", eventUUID).First(&event).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Error:   "Event not found",
+				Message: "The requested event does not exist",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Error:   "Database error",
+				Message: "Failed to retrieve event information",
+			})
+		}
+		return
+	}
+
+	// Check if event has cover image
+	if event.CoverImageURL == nil || *event.CoverImageURL == "" {
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{
+			Error:   "Event image not found",
+			Message: "The requested event has no cover image",
+		})
+		return
+	}
+
+	// Use the stored URL directly - it's already a full Nextcloud URL
+	coverURL := *event.CoverImageURL
+
+	// Get image from storage using the full URL
+	imageData, contentType, err := h.imageService.GetImageFromURL(c.Request.Context(), coverURL)
+	if err != nil {
+		utils.Logger().WithField("error", err).WithField("event_id", eventID).WithField("url", coverURL).Error("Failed to get event image from storage")
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{
 			Error:   "Event image not found",
 			Message: "The requested event image could not be found",

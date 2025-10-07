@@ -469,6 +469,13 @@ func (s *TagService) calculateMatchScore(userTags []models.UserTag, eventTags []
 
 // convertEventToResponse converts event model to response DTO
 func (s *TagService) convertEventToResponse(event models.Event, userID string) dto.EventResponse {
+	// Convert cover image URL to public URL
+	var publicCoverURL *string
+	if event.CoverImageURL != nil && *event.CoverImageURL != "" {
+		publicURL := fmt.Sprintf("https://api.tindertrip.phitik.com/images/events/%s", event.ID.String())
+		publicCoverURL = &publicURL
+	}
+
 	response := dto.EventResponse{
 		ID:            event.ID.String(),
 		CreatorID:     event.CreatorID.String(),
@@ -482,7 +489,7 @@ func (s *TagService) convertEventToResponse(event models.Event, userID string) d
 		EndAt:         event.EndAt,
 		Capacity:      event.Capacity,
 		Status:        string(event.Status),
-		CoverImageURL: event.CoverImageURL,
+		CoverImageURL: publicCoverURL,
 		CreatedAt:     event.CreatedAt,
 		UpdatedAt:     event.UpdatedAt,
 	}
@@ -501,10 +508,16 @@ func (s *TagService) convertEventToResponse(event models.Event, userID string) d
 	// Add photos
 	response.Photos = make([]dto.EventPhotoResponse, len(event.Photos))
 	for i, photo := range event.Photos {
+		// Convert photo URL to public URL
+		var publicURL string
+		if photo.URL != "" {
+			publicURL = fmt.Sprintf("https://api.tindertrip.phitik.com/images/events/%s", event.ID.String())
+		}
+
 		response.Photos[i] = dto.EventPhotoResponse{
 			ID:        photo.ID.String(),
 			EventID:   photo.EventID.String(),
-			URL:       photo.URL,
+			URL:       publicURL,
 			SortNo:    photo.SortNo,
 			CreatedAt: photo.CreatedAt,
 		}

@@ -486,6 +486,13 @@ func (s *EventService) SwipeEvent(eventID, userID, direction string) error {
 
 // Helper function to convert event to response DTO
 func (s *EventService) convertEventToResponse(event models.Event, userID string) dto.EventResponse {
+	// Convert cover image URL to public URL
+	var publicCoverURL *string
+	if event.CoverImageURL != nil && *event.CoverImageURL != "" {
+		publicURL := fmt.Sprintf("https://api.tindertrip.phitik.com/images/events/%s", event.ID.String())
+		publicCoverURL = &publicURL
+	}
+
 	response := dto.EventResponse{
 		ID:            event.ID.String(),
 		CreatorID:     event.CreatorID.String(),
@@ -499,7 +506,7 @@ func (s *EventService) convertEventToResponse(event models.Event, userID string)
 		EndAt:         event.EndAt,
 		Capacity:      event.Capacity,
 		Status:        string(event.Status),
-		CoverImageURL: event.CoverImageURL,
+		CoverImageURL: publicCoverURL,
 		CreatedAt:     event.CreatedAt,
 		UpdatedAt:     event.UpdatedAt,
 	}
@@ -518,10 +525,16 @@ func (s *EventService) convertEventToResponse(event models.Event, userID string)
 	// Add photos
 	response.Photos = make([]dto.EventPhotoResponse, len(event.Photos))
 	for i, photo := range event.Photos {
+		// Convert photo URL to public URL
+		var publicURL string
+		if photo.URL != "" {
+			publicURL = fmt.Sprintf("https://api.tindertrip.phitik.com/images/events/%s", event.ID.String())
+		}
+
 		response.Photos[i] = dto.EventPhotoResponse{
 			ID:        photo.ID.String(),
 			EventID:   photo.EventID.String(),
-			URL:       photo.URL,
+			URL:       publicURL,
 			SortNo:    photo.SortNo,
 			CreatedAt: photo.CreatedAt,
 		}

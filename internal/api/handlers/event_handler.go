@@ -1,12 +1,16 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"TinderTrip-Backend/internal/api/middleware"
 	"TinderTrip-Backend/internal/dto"
 	"TinderTrip-Backend/internal/service"
+	"TinderTrip-Backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -189,12 +193,25 @@ func (h *EventHandler) GetPublicEvent(c *gin.Context) {
 
 // CreateEvent creates a new event
 // @Summary Create event
-// @Description Create a new event
+// @Description Create a new event with optional file uploads
 // @Tags events
 // @Security BearerAuth
-// @Accept json
+// @Accept json,mpfd
 // @Produce json
-// @Param request body dto.CreateEventRequest true "Event data"
+// @Param request body dto.CreateEventRequest true "Event data (JSON)"
+// @Param title formData string false "Event title (multipart)"
+// @Param description formData string false "Event description (multipart)"
+// @Param event_type formData string false "Event type (multipart)"
+// @Param address_text formData string false "Address text (multipart)"
+// @Param lat formData number false "Latitude (multipart)"
+// @Param lng formData number false "Longitude (multipart)"
+// @Param start_at formData string false "Start time (multipart)"
+// @Param end_at formData string false "End time (multipart)"
+// @Param capacity formData int false "Capacity (multipart)"
+// @Param category_ids formData string false "Category IDs comma separated (multipart)"
+// @Param tag_ids formData string false "Tag IDs comma separated (multipart)"
+// @Param file formData file false "Cover image file (multipart)"
+// @Param files[] formData file false "Event photos (multipart)"
 // @Success 201 {object} dto.EventResponse
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 401 {object} dto.ErrorResponse
@@ -211,13 +228,38 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 		return
 	}
 
+	// Check content type to determine if it's multipart or JSON
+	contentType := c.GetHeader("Content-Type")
+
 	var req dto.CreateEventRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-		})
-		return
+	var photoURLs []string
+
+	if strings.Contains(contentType, "multipart/form-data") {
+		// Handle multipart form data
+		var coverImageURL *string
+		var err error
+		req, coverImageURL, photoURLs, err = h.parseCreateEventMultipart(c)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+				Error:   "Invalid request",
+				Message: err.Error(),
+			})
+			return
+		}
+
+		// Set cover image URL if provided
+		if coverImageURL != nil {
+			req.CoverImageURL = coverImageURL
+		}
+	} else {
+		// Handle JSON request
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+				Error:   "Invalid request",
+				Message: err.Error(),
+			})
+			return
+		}
 	}
 
 	// Create event
@@ -228,6 +270,14 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 			Message: err.Error(),
 		})
 		return
+	}
+
+	// Add photos if provided in multipart
+	if len(photoURLs) > 0 {
+		if err := h.eventService.AppendEventPhotos(userID, event.ID, photoURLs); err != nil {
+			// Log error but don't fail the event creation
+			utils.Logger().WithField("error", err).Error("Failed to add event photos")
+		}
 	}
 
 	c.JSON(http.StatusCreated, event)
@@ -900,4 +950,138 @@ func (h *EventHandler) AddPhotos(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, gin.H{"urls": urls})
+}
+
+// parseCreateEventMultipart parses multipart form data for event creation
+func (h *EventHandler) parseCreateEventMultipart(c *gin.Context) (dto.CreateEventRequest, *string, []string, error) {
+	var req dto.CreateEventRequest
+	var coverImageURL *string
+	var photoURLs []string
+
+	// Parse text fields
+	title := c.PostForm("title")
+	description := c.PostForm("description")
+	eventType := c.PostForm("event_type")
+	addressText := c.PostForm("address_text")
+	latStr := c.PostForm("lat")
+	lngStr := c.PostForm("lng")
+	startAtStr := c.PostForm("start_at")
+	endAtStr := c.PostForm("end_at")
+	capacityStr := c.PostForm("capacity")
+	categoryIDsStr := c.PostForm("category_ids")
+	tagIDsStr := c.PostForm("tag_ids")
+
+	// Validate required fields
+	if title == "" {
+		return req, nil, nil, fmt.Errorf("title is required")
+	}
+	if eventType == "" {
+		return req, nil, nil, fmt.Errorf("event_type is required")
+	}
+
+	req.Title = title
+	if description != "" {
+		req.Description = &description
+	}
+	req.EventType = eventType
+	if addressText != "" {
+		req.AddressText = &addressText
+	}
+
+	// Parse latitude
+	if latStr != "" {
+		if lat, err := strconv.ParseFloat(latStr, 64); err == nil {
+			req.Lat = &lat
+		}
+	}
+
+	// Parse longitude
+	if lngStr != "" {
+		if lng, err := strconv.ParseFloat(lngStr, 64); err == nil {
+			req.Lng = &lng
+		}
+	}
+
+	// Parse start time
+	if startAtStr != "" {
+		if startAt, err := time.Parse(time.RFC3339, startAtStr); err == nil {
+			req.StartAt = &startAt
+		}
+	}
+
+	// Parse end time
+	if endAtStr != "" {
+		if endAt, err := time.Parse(time.RFC3339, endAtStr); err == nil {
+			req.EndAt = &endAt
+		}
+	}
+
+	// Parse capacity
+	if capacityStr != "" {
+		if capacity, err := strconv.Atoi(capacityStr); err == nil {
+			req.Capacity = &capacity
+		}
+	}
+
+	// Parse category IDs
+	if categoryIDsStr != "" {
+		categoryIDs := strings.Split(categoryIDsStr, ",")
+		for i, id := range categoryIDs {
+			categoryIDs[i] = strings.TrimSpace(id)
+		}
+		req.CategoryIDs = categoryIDs
+	}
+
+	// Parse tag IDs
+	if tagIDsStr != "" {
+		tagIDs := strings.Split(tagIDsStr, ",")
+		for i, id := range tagIDs {
+			tagIDs[i] = strings.TrimSpace(id)
+		}
+		req.TagIDs = tagIDs
+	}
+
+	// Handle cover image upload
+	if fileHeader, err := c.FormFile("file"); err == nil && fileHeader != nil {
+		src, err := fileHeader.Open()
+		if err != nil {
+			return req, nil, nil, fmt.Errorf("invalid cover image file: %w", err)
+		}
+		defer src.Close()
+
+		fs, err := service.NewFileService()
+		if err != nil {
+			return req, nil, nil, fmt.Errorf("storage init failed: %w", err)
+		}
+
+		_, url, _, _, _, err := fs.UploadImage(c, "event_covers", fileHeader.Filename, src)
+		if err != nil {
+			return req, nil, nil, fmt.Errorf("cover image upload failed: %w", err)
+		}
+		coverImageURL = &url
+	}
+
+	// Handle multiple photos upload
+	if form, err := c.MultipartForm(); err == nil && form.File["files[]"] != nil {
+		fs, err := service.NewFileService()
+		if err != nil {
+			return req, nil, nil, fmt.Errorf("storage init failed: %w", err)
+		}
+
+		for _, f := range form.File["files[]"] {
+			src, err := f.Open()
+			if err != nil {
+				return req, nil, nil, fmt.Errorf("invalid photo file: %w", err)
+			}
+
+			_, url, _, _, _, err := fs.UploadImage(c, "event_photos", f.Filename, src)
+			src.Close()
+			if err != nil {
+				return req, nil, nil, fmt.Errorf("photo upload failed: %w", err)
+			}
+			photoURLs = append(photoURLs, url)
+		}
+	}
+
+	return req, coverImageURL, photoURLs, nil
 }
