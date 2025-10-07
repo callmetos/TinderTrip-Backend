@@ -61,7 +61,7 @@ func (s *UserService) GetProfile(userID string) (*dto.UserProfileResponse, error
 		AvatarURL: func() *string {
 			if profile.AvatarURL != nil && *profile.AvatarURL != "" {
 				userID := profile.UserID.String()
-				publicURL := fmt.Sprintf("https://api.tindertrip.com/images/avatars/%s", userID)
+				publicURL := fmt.Sprintf("https://api.tindertrip.phitik.com/images/avatars/%s", userID)
 				return &publicURL
 			}
 			return nil
@@ -161,7 +161,7 @@ func (s *UserService) UpdateProfile(userID string, req dto.UpdateProfileRequest)
 		AvatarURL: func() *string {
 			if profile.AvatarURL != nil && *profile.AvatarURL != "" {
 				userID := profile.UserID.String()
-				publicURL := fmt.Sprintf("https://api.tindertrip.com/images/avatars/%s", userID)
+				publicURL := fmt.Sprintf("https://api.tindertrip.phitik.com/images/avatars/%s", userID)
 				return &publicURL
 			}
 			return nil
