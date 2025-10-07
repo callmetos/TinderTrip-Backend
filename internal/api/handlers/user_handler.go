@@ -256,6 +256,7 @@ func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
 			c.JSON(http.StatusUnsupportedMediaType, dto.ErrorResponse{Error: "Upload failed", Message: err.Error()})
 			return
 		}
+		// Store the full Nextcloud URL
 		avatarURL = &url
 	}
 

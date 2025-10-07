@@ -1,0 +1,1431 @@
+{
+	"info": {
+		"_postman_id": "tindertrip-api-corrected",
+		"name": "TinderTrip API - Corrected",
+		"description": "Complete and accurate API collection for TinderTrip Backend with correct request/response structures based on actual code analysis",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"version": {
+			"major": 1,
+			"minor": 0,
+			"patch": 0
+		}
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"description": "User authentication and account management endpoints",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"display_name\": \"Test User\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "register"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Registration sends OTP', function () {",
+									"    pm.response.to.have.status(200);",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.success).to.be.true;",
+									"    pm.expect(response.message).to.include('OTP sent');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Verify Email with OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\",\n  \"display_name\": \"Test User\",\n  \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/verify-email",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "verify-email"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.json() && pm.response.json().data && pm.response.json().data.token) {",
+									"    pm.collectionVariables.set('token', pm.response.json().data.token);",
+									"    pm.collectionVariables.set('user_id', pm.response.json().data.user.id);",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Resend Verification OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/resend-verification",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "resend-verification"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "login"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.json() && pm.response.json().data && pm.response.json().data.access_token) {",
+									"    pm.collectionVariables.set('token', pm.response.json().data.access_token);",
+									"    pm.collectionVariables.set('user_id', pm.response.json().data.user.id);",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Google OAuth",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/google",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "google"]
+						}
+					}
+				},
+				{
+					"name": "Google OAuth Callback",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/google/callback?code=GOOGLE_AUTH_CODE&state=STATE",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "google", "callback"],
+							"query": [
+								{"key": "code", "value": "GOOGLE_AUTH_CODE"},
+								{"key": "state", "value": "STATE"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Forgot Password (Send OTP)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/forgot-password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "forgot-password"]
+						}
+					}
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"otp\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/verify-otp",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "verify-otp"]
+						}
+					}
+				},
+				{
+					"name": "Reset Password",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test@example.com\",\n  \"otp\": \"123456\",\n  \"password\": \"newpassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/reset-password",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "reset-password"]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "logout"]
+						}
+					}
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/auth/refresh",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "auth", "refresh"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "👤 User Management",
+			"description": "User profile and account management",
+			"item": [
+				{
+					"name": "Get User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Update User Profile (JSON)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"bio\": \"Updated bio about myself\",\n  \"languages\": \"th,en,ja\",\n  \"gender\": \"male\",\n  \"job_title\": \"Software Developer\",\n  \"smoking\": \"no\",\n  \"interests_note\": \"Travel, Food, Technology, Photography\",\n  \"home_location\": \"Bangkok, Thailand\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Update User Profile with Avatar (Multipart)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "bio",
+									"value": "Updated bio with new avatar",
+									"type": "text"
+								},
+								{
+									"key": "languages",
+									"value": "th,en,ja",
+									"type": "text"
+								},
+								{
+									"key": "gender",
+									"value": "male",
+									"type": "text"
+								},
+								{
+									"key": "job_title",
+									"value": "Senior Developer",
+									"type": "text"
+								},
+								{
+									"key": "smoking",
+									"value": "no",
+									"type": "text"
+								},
+								{
+									"key": "interests_note",
+									"value": "Travel, Food, Technology, Photography, Music",
+									"type": "text"
+								},
+								{
+									"key": "home_location",
+									"value": "Bangkok, Thailand",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "Select an image file for avatar (JPG, PNG, GIF supported)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Update Avatar Only",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "",
+									"description": "Select an image file for avatar (JPG, PNG, GIF supported)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "profile"]
+						}
+					}
+				},
+				{
+					"name": "Delete User Profile",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/profile",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "profile"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "⚙️ User Preferences",
+			"description": "User availability and budget preferences",
+			"item": [
+				{
+					"name": "Get Availability Preferences",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/preferences/availability",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "preferences", "availability"]
+						}
+					}
+				},
+				{
+					"name": "Update Availability Preferences",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"mon\": true,\n  \"tue\": true,\n  \"wed\": false,\n  \"thu\": true,\n  \"fri\": true,\n  \"sat\": true,\n  \"sun\": true,\n  \"all_day\": false,\n  \"morning\": true,\n  \"afternoon\": true,\n  \"time_range\": \"09:00-18:00\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/preferences/availability",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "preferences", "availability"]
+						}
+					}
+				},
+				{
+					"name": "Get Budget Preferences",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/preferences/budget",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "preferences", "budget"]
+						}
+					}
+				},
+				{
+					"name": "Update Budget Preferences",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"meal_min\": 100,\n  \"meal_max\": 500,\n  \"daytrip_min\": 500,\n  \"daytrip_max\": 2000,\n  \"overnight_min\": 1000,\n  \"overnight_max\": 5000,\n  \"unlimited\": false,\n  \"currency\": \"THB\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/preferences/budget",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "preferences", "budget"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🍽️ Food Preferences",
+			"description": "User food preference management",
+			"item": [
+				{
+					"name": "Get Food Preferences",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/food-preferences",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "food-preferences"]
+						}
+					}
+				},
+				{
+					"name": "Update Food Preference",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"food_category\": \"thai_food\",\n  \"preference_level\": 3\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/food-preferences",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "food-preferences"]
+						}
+					}
+				},
+				{
+					"name": "Update All Food Preferences (Bulk)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"preferences\": [\n    {\"food_category\": \"thai_food\", \"preference_level\": 3},\n    {\"food_category\": \"japanese_food\", \"preference_level\": 2},\n    {\"food_category\": \"chinese_food\", \"preference_level\": 1},\n    {\"food_category\": \"international_food\", \"preference_level\": 2},\n    {\"food_category\": \"halal_food\", \"preference_level\": 1}\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/food-preferences/bulk",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "food-preferences", "bulk"]
+						}
+					}
+				},
+				{
+					"name": "Get Food Categories with User Preferences",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/food-preferences/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "food-preferences", "categories"]
+						}
+					}
+				},
+				{
+					"name": "Get Food Preference Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/food-preferences/stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "food-preferences", "stats"]
+						}
+					}
+				},
+				{
+					"name": "Delete Food Preference",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/food-preferences/thai_food",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "food-preferences", "thai_food"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "✈️ Travel Preferences",
+			"description": "User travel preference management",
+			"item": [
+				{
+					"name": "Get Travel Preferences",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/travel-preferences",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "travel-preferences"]
+						}
+					}
+				},
+				{
+					"name": "Add Travel Preference",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"travel_style\": \"cafe_dessert\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/travel-preferences",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "travel-preferences"]
+						}
+					}
+				},
+				{
+					"name": "Update All Travel Preferences (Bulk)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"travel_styles\": [\"cafe_dessert\", \"bubble_tea\", \"coffee\", \"movie\", \"outdoor_activity\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/travel-preferences/bulk",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "travel-preferences", "bulk"]
+						}
+					}
+				},
+				{
+					"name": "Get Travel Styles with User Preferences",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/travel-preferences/styles",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "travel-preferences", "styles"]
+						}
+					}
+				},
+				{
+					"name": "Get Travel Preference Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/travel-preferences/stats",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "travel-preferences", "stats"]
+						}
+					}
+				},
+				{
+					"name": "Delete Travel Preference",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/travel-preferences/cafe_dessert",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "travel-preferences", "cafe_dessert"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏷️ Tags Management",
+			"description": "Tag management for users and events",
+			"item": [
+				{
+					"name": "Get All Tags",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/tags",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "tags"]
+						}
+					}
+				},
+				{
+					"name": "Get User Tags",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/tags",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "tags"]
+						}
+					}
+				},
+				{
+					"name": "Add User Tag",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tag_id\": \"1\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/tags",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "tags"]
+						}
+					}
+				},
+				{
+					"name": "Remove User Tag",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/tags/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "users", "tags", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🎉 Events Management",
+			"description": "Event creation, management, and interaction",
+			"item": [
+				{
+					"name": "Get Events",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events?page=1&limit=10&status=published",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "10"},
+								{"key": "status", "value": "published"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Dinner at Central World\",\n  \"description\": \"Let's have dinner together at Central World\",\n  \"event_type\": \"meal\",\n  \"address_text\": \"Central World, Bangkok\",\n  \"lat\": 13.7473,\n  \"lng\": 100.5396,\n  \"start_at\": \"2024-12-01T18:00:00Z\",\n  \"end_at\": \"2024-12-01T20:00:00Z\",\n  \"capacity\": 4,\n  \"category_ids\": [\"1\", \"2\"],\n  \"tag_ids\": [\"1\", \"3\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/events",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response && pm.response.json() && pm.response.json().data && pm.response.json().data.id) {",
+									"    pm.collectionVariables.set('event_id', pm.response.json().data.id);",
+									"}"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Event Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Event",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated Event Title\",\n  \"description\": \"Updated event description\",\n  \"capacity\": 6,\n  \"status\": \"published\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Event",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Join Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/join",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "join"]
+						}
+					}
+				},
+				{
+					"name": "Leave Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/leave",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "leave"]
+						}
+					}
+				},
+				{
+					"name": "Confirm Event Participation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/confirm",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "confirm"]
+						}
+					}
+				},
+				{
+					"name": "Cancel Event Participation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/cancel",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "cancel"]
+						}
+					}
+				},
+				{
+					"name": "Complete Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/complete",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "complete"]
+						}
+					}
+				},
+				{
+					"name": "Swipe Event (Like/Pass)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event_id\": \"{{event_id}}\",\n  \"direction\": \"like\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/swipe",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "swipe"]
+						}
+					}
+				},
+				{
+					"name": "Update Event Cover Photo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cover_image_url\": \"https://example.com/cover.jpg\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/cover",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "cover"]
+						}
+					}
+				},
+				{
+					"name": "Add Event Photos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"photo_urls\": [\n    \"https://example.com/photo1.jpg\",\n    \"https://example.com/photo2.jpg\"\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/photos",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "photos"]
+						}
+					}
+				},
+				{
+					"name": "Get Event Suggestions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/suggestions?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "suggestions"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏷️ Event Tags",
+			"description": "Event tag management",
+			"item": [
+				{
+					"name": "Get Event Tags",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/tags",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "tags"]
+						}
+					}
+				},
+				{
+					"name": "Add Event Tag",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tag_id\": \"1\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/tags",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "tags"]
+						}
+					}
+				},
+				{
+					"name": "Remove Event Tag",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/events/{{event_id}}/tags/1",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "events", "{{event_id}}", "tags", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "💬 Chat Management",
+			"description": "Chat rooms and messaging",
+			"item": [
+				{
+					"name": "Get Chat Rooms",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/chat/rooms?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "chat", "rooms"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Chat Messages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/chat/rooms/{{room_id}}/messages?page=1&limit=50",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "chat", "rooms", "{{room_id}}", "messages"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "50"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Send Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"},
+							{"key": "Content-Type", "value": "application/json"}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"room_id\": \"{{room_id}}\",\n  \"body\": \"Hello! How are you?\",\n  \"message_type\": \"text\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/chat/rooms/{{room_id}}/messages",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "chat", "rooms", "{{room_id}}", "messages"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📚 History Management",
+			"description": "User event history",
+			"item": [
+				{
+					"name": "Get User History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/history?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "history"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Mark Event as Complete",
+					"request": {
+						"method": "POST",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/history/{{event_id}}/complete",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "history", "{{event_id}}", "complete"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🔍 Audit & Monitoring",
+			"description": "System audit and monitoring endpoints",
+			"item": [
+				{
+					"name": "Get Audit Logs",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/audit/logs?page=1&limit=50&entity_type=user",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "audit", "logs"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "50"},
+								{"key": "entity_type", "value": "user"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Entity Audit History",
+					"request": {
+						"method": "GET",
+						"header": [
+							{"key": "Authorization", "value": "Bearer {{token}}"}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/audit/entities/users/{{user_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "audit", "entities", "users", "{{user_id}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🌐 Public Endpoints",
+			"description": "Public endpoints that don't require authentication",
+			"item": [
+				{
+					"name": "Get Public Events",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/public/events?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "public", "events"],
+							"query": [
+								{"key": "page", "value": "1"},
+								{"key": "limit", "value": "10"}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Public Event Details",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/public/events/{{event_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "public", "events", "{{event_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Get Public Food Categories",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/public/food-preferences/categories",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "public", "food-preferences", "categories"]
+						}
+					}
+				},
+				{
+					"name": "Get Public Travel Styles",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/api/v1/public/travel-preferences/styles",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "public", "travel-preferences", "styles"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🏥 System Health",
+			"description": "System health and status endpoints",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Health check returns 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Health check returns status ok', function () {",
+									"    pm.expect(pm.response.json().status).to.eql('ok');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "API Documentation (Swagger)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/swagger/index.html",
+							"host": ["{{base_url}}"],
+							"path": ["swagger", "index.html"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "🖼️ Image Serving",
+			"description": "Image serving endpoints with authentication",
+			"item": [
+				{
+					"name": "Get User Avatar",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/images/avatars/{{user_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["images", "avatars", "{{user_id}}"]
+						},
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Avatar returns 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Avatar has correct content type', function () {",
+									"    const contentType = pm.response.headers.get('Content-Type');",
+									"    pm.expect(contentType).to.match(/^image\\//);",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Get Event Image",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/images/events/{{event_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["images", "events", "{{event_id}}"]
+						},
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Event image returns 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('Event image has correct content type', function () {",
+									"    const contentType = pm.response.headers.get('Content-Type');",
+									"    pm.expect(contentType).to.match(/^image\\//);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "🔧 Development Tools",
+			"description": "Development and debugging endpoints",
+			"item": [
+				{
+					"name": "Get OTPs (Monitoring)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{base_url}}/dev/otp",
+							"host": ["{{base_url}}"],
+							"path": ["dev", "otp"]
+						}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('OTP monitoring returns 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test('OTP monitoring returns success', function () {",
+									"    const response = pm.response.json();",
+									"    pm.expect(response.success).to.be.true;",
+									"    pm.expect(response.data).to.have.property('otps');",
+									"    pm.expect(response.data).to.have.property('count');",
+									"    console.log('Active OTPs:', response.data.otps);",
+									"});"
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string",
+			"description": "Base URL for the TinderTrip API"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string",
+			"description": "JWT access token for authenticated requests"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string",
+			"description": "Current user ID"
+		},
+		{
+			"key": "event_id",
+			"value": "",
+			"type": "string",
+			"description": "Event ID for testing"
+		},
+		{
+			"key": "room_id",
+			"value": "",
+			"type": "string",
+			"description": "Chat room ID for testing"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script",
+					"console.log('Making request to:', pm.request.url.toString());"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script",
+					"pm.test('Response time is less than 5000ms', function () {",
+					"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+					"});",
+					"",
+					"pm.test('Response has proper structure', function () {",
+					"    const response = pm.response.json();",
+					"    if (pm.response.code === 200) {",
+					"        pm.expect(response).to.have.property('success');",
+					"        pm.expect(response.success).to.be.true;",
+					"    }",
+					"});"
+				]
+			}
+		}
+	]
+}

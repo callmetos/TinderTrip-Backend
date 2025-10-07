@@ -58,10 +58,17 @@ func (s *UserService) GetProfile(userID string) (*dto.UserProfileResponse, error
 		JobTitle:      profile.JobTitle,
 		Smoking:       smoking,
 		InterestsNote: profile.InterestsNote,
-		AvatarURL:     profile.AvatarURL,
-		HomeLocation:  profile.HomeLocation,
-		CreatedAt:     profile.CreatedAt,
-		UpdatedAt:     profile.UpdatedAt,
+		AvatarURL: func() *string {
+			if profile.AvatarURL != nil && *profile.AvatarURL != "" {
+				userID := profile.UserID.String()
+				publicURL := fmt.Sprintf("https://api.tindertrip.com/images/avatars/%s", userID)
+				return &publicURL
+			}
+			return nil
+		}(),
+		HomeLocation: profile.HomeLocation,
+		CreatedAt:    profile.CreatedAt,
+		UpdatedAt:    profile.UpdatedAt,
 	}
 
 	return response, nil
@@ -151,10 +158,17 @@ func (s *UserService) UpdateProfile(userID string, req dto.UpdateProfileRequest)
 		JobTitle:      profile.JobTitle,
 		Smoking:       smoking,
 		InterestsNote: profile.InterestsNote,
-		AvatarURL:     profile.AvatarURL,
-		HomeLocation:  profile.HomeLocation,
-		CreatedAt:     profile.CreatedAt,
-		UpdatedAt:     profile.UpdatedAt,
+		AvatarURL: func() *string {
+			if profile.AvatarURL != nil && *profile.AvatarURL != "" {
+				userID := profile.UserID.String()
+				publicURL := fmt.Sprintf("https://api.tindertrip.com/images/avatars/%s", userID)
+				return &publicURL
+			}
+			return nil
+		}(),
+		HomeLocation: profile.HomeLocation,
+		CreatedAt:    profile.CreatedAt,
+		UpdatedAt:    profile.UpdatedAt,
 	}
 
 	return response, nil

@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"fmt"
+
 	"TinderTrip-Backend/internal/api/handlers"
 	"TinderTrip-Backend/internal/api/middleware"
 
@@ -19,6 +21,25 @@ func SetupRoutes(router *gin.Engine) {
 			"message": "TinderTrip API is running",
 		})
 	})
+
+	// OTP monitoring for development
+	otpHandler := handlers.NewOTPHandler()
+	router.GET("/dev/otp", otpHandler.GetOTPs)
+
+	// Image serving
+	imageHandler, err := handlers.NewImageHandler()
+	if err != nil {
+		// Log error but don't fail startup
+		fmt.Printf("Warning: Failed to initialize image handler: %v\n", err)
+	} else {
+		// Serve images with authentication
+		imageGroup := router.Group("/images")
+		imageGroup.Use(middleware.AuthMiddleware())
+		{
+			imageGroup.GET("/avatars/:user_id", imageHandler.ServeAvatar)
+			imageGroup.GET("/events/:event_id", imageHandler.ServeEventImage)
+		}
+	}
 
 	// OPTIONS handler for CORS preflight
 	router.OPTIONS("/*path", func(c *gin.Context) {
