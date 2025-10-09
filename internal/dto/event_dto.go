@@ -15,6 +15,9 @@ type EventResponse struct {
 	StartAt       *time.Time            `json:"start_at,omitempty"`
 	EndAt         *time.Time            `json:"end_at,omitempty"`
 	Capacity      *int                  `json:"capacity,omitempty"`
+	BudgetMin     *int                  `json:"budget_min,omitempty"`
+	BudgetMax     *int                  `json:"budget_max,omitempty"`
+	Currency      *string               `json:"currency,omitempty"`
 	Status        string                `json:"status"`
 	CoverImageURL *string               `json:"cover_image_url,omitempty"`
 	Creator       *UserResponse         `json:"creator,omitempty"`
@@ -69,6 +72,9 @@ type CreateEventRequest struct {
 	StartAt       *time.Time `json:"start_at,omitempty"`
 	EndAt         *time.Time `json:"end_at,omitempty"`
 	Capacity      *int       `json:"capacity,omitempty"`
+	BudgetMin     *int       `json:"budget_min,omitempty"`
+	BudgetMax     *int       `json:"budget_max,omitempty"`
+	Currency      *string    `json:"currency,omitempty"`
 	CoverImageURL *string    `json:"cover_image_url,omitempty"`
 	CategoryIDs   []string   `json:"category_ids,omitempty"`
 	TagIDs        []string   `json:"tag_ids,omitempty"`
@@ -85,6 +91,9 @@ type UpdateEventRequest struct {
 	StartAt       *time.Time `json:"start_at,omitempty"`
 	EndAt         *time.Time `json:"end_at,omitempty"`
 	Capacity      *int       `json:"capacity,omitempty"`
+	BudgetMin     *int       `json:"budget_min,omitempty"`
+	BudgetMax     *int       `json:"budget_max,omitempty"`
+	Currency      *string    `json:"currency,omitempty"`
 	Status        *string    `json:"status,omitempty" binding:"omitempty,oneof=published cancelled completed"`
 	CoverImageURL *string    `json:"cover_image_url,omitempty"`
 	CategoryIDs   []string   `json:"category_ids,omitempty"`

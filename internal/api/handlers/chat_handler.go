@@ -45,7 +45,7 @@ func (h *ChatHandler) GetRooms(c *gin.Context) {
 	}
 
 	// Get chat rooms
-	rooms, err := h.chatService.GetRooms(userID)
+	rooms, err := h.chatService.GetChatRooms(userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Error:   "Failed to get chat rooms",

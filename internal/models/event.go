@@ -40,6 +40,9 @@ type Event struct {
 	StartAt       *time.Time  `json:"start_at" gorm:"type:timestamptz"`
 	EndAt         *time.Time  `json:"end_at" gorm:"type:timestamptz"`
 	Capacity      *int        `json:"capacity" gorm:"type:int;check:capacity IS NULL OR capacity >= 1"`
+	BudgetMin     *int        `json:"budget_min" gorm:"type:int;check:budget_min IS NULL OR budget_min >= 0"`
+	BudgetMax     *int        `json:"budget_max" gorm:"type:int;check:budget_max IS NULL OR budget_max >= 0"`
+	Currency      *string     `json:"currency" gorm:"type:varchar(3);default:'THB'"`
 	Status        EventStatus `json:"status" gorm:"type:event_status;not null;default:'published'"`
 	CoverImageURL *string     `json:"cover_image_url" gorm:"type:text"`
 	CreatedAt     time.Time   `json:"created_at" gorm:"type:timestamptz;not null;default:now()"`

@@ -28,11 +28,11 @@ func (s *ChatService) GetChatRooms(userID string) ([]dto.ChatRoomResponse, error
 		return nil, fmt.Errorf("invalid user ID: %w", err)
 	}
 
-	// Get chat rooms where user is a member
+	// Get chat rooms where user is a member (both pending and confirmed)
 	var rooms []models.ChatRoom
 	err = database.GetDB().Preload("Event").Preload("Event.Creator").
 		Joins("JOIN event_members ON chat_rooms.event_id = event_members.event_id").
-		Where("event_members.user_id = ? AND event_members.status = ?", userUUID, models.MemberStatusConfirmed).
+		Where("event_members.user_id = ? AND event_members.status IN (?, ?)", userUUID, models.MemberStatusPending, models.MemberStatusConfirmed).
 		Find(&rooms).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to get chat rooms: %w", err)
@@ -59,10 +59,10 @@ func (s *ChatService) GetMessages(roomID, userID string, page, limit int) ([]dto
 		return nil, 0, fmt.Errorf("invalid user ID: %w", err)
 	}
 
-	// Check if user is a member of the room
+	// Check if user is a member of the room (both pending and confirmed)
 	var member models.EventMember
 	err = database.GetDB().Joins("JOIN chat_rooms ON event_members.event_id = chat_rooms.event_id").
-		Where("chat_rooms.id = ? AND event_members.user_id = ? AND event_members.status = ?", roomUUID, userUUID, models.MemberStatusConfirmed).
+		Where("chat_rooms.id = ? AND event_members.user_id = ? AND event_members.status IN (?, ?)", roomUUID, userUUID, models.MemberStatusPending, models.MemberStatusConfirmed).
 		First(&member).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -108,10 +108,10 @@ func (s *ChatService) SendMessage(roomID, userID string, req dto.SendMessageRequ
 		return nil, fmt.Errorf("invalid user ID: %w", err)
 	}
 
-	// Check if user is a member of the room
+	// Check if user is a member of the room (both pending and confirmed)
 	var member models.EventMember
 	err = database.GetDB().Joins("JOIN chat_rooms ON event_members.event_id = chat_rooms.event_id").
-		Where("chat_rooms.id = ? AND event_members.user_id = ? AND event_members.status = ?", roomUUID, userUUID, models.MemberStatusConfirmed).
+		Where("chat_rooms.id = ? AND event_members.user_id = ? AND event_members.status IN (?, ?)", roomUUID, userUUID, models.MemberStatusPending, models.MemberStatusConfirmed).
 		First(&member).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {

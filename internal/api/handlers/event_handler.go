@@ -968,6 +968,9 @@ func (h *EventHandler) parseCreateEventMultipart(c *gin.Context) (dto.CreateEven
 	startAtStr := c.PostForm("start_at")
 	endAtStr := c.PostForm("end_at")
 	capacityStr := c.PostForm("capacity")
+	budgetMinStr := c.PostForm("budget_min")
+	budgetMaxStr := c.PostForm("budget_max")
+	currency := c.PostForm("currency")
 	categoryIDsStr := c.PostForm("category_ids")
 	tagIDsStr := c.PostForm("tag_ids")
 
@@ -1021,6 +1024,25 @@ func (h *EventHandler) parseCreateEventMultipart(c *gin.Context) (dto.CreateEven
 		if capacity, err := strconv.Atoi(capacityStr); err == nil {
 			req.Capacity = &capacity
 		}
+	}
+
+	// Parse budget min
+	if budgetMinStr != "" {
+		if budgetMin, err := strconv.Atoi(budgetMinStr); err == nil {
+			req.BudgetMin = &budgetMin
+		}
+	}
+
+	// Parse budget max
+	if budgetMaxStr != "" {
+		if budgetMax, err := strconv.Atoi(budgetMaxStr); err == nil {
+			req.BudgetMax = &budgetMax
+		}
+	}
+
+	// Parse currency
+	if currency != "" {
+		req.Currency = &currency
 	}
 
 	// Parse category IDs
