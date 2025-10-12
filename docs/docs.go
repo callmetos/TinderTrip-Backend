@@ -4758,6 +4758,9 @@ const docTemplate = `{
         "handlers.CheckResponse": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },

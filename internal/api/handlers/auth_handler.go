@@ -560,9 +560,10 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 
 // CheckResponse represents the check endpoint response
 type CheckResponse struct {
-	Status   string `json:"status"`
-	Email    string `json:"email"`
-	Username string `json:"username"`
+	Status    string    `json:"status"`
+	Email     string    `json:"email"`
+	Username  string    `json:"username"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // Check validates JWT token and returns user info
@@ -608,8 +609,9 @@ func (h *AuthHandler) Check(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, CheckResponse{
-		Status:   "valid",
-		Email:    email,
-		Username: username,
+		Status:    "valid",
+		Email:     email,
+		Username:  username,
+		CreatedAt: user.CreatedAt,
 	})
 }
