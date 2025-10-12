@@ -391,7 +391,7 @@ const docTemplate = `{
         },
         "/auth/register": {
             "post": {
-                "description": "Register a new user with email and password, sends OTP for verification",
+                "description": "Register a new user with email and password, creates user with unverified status and sends OTP",
                 "consumes": [
                     "application/json"
                 ],
@@ -417,7 +417,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "$ref": "#/definitions/dto.AuthResponse"
                         }
                     },
                     "400": {
@@ -896,9 +896,10 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Create a new event",
+                "description": "Create a new event with optional file uploads",
                 "consumes": [
-                    "application/json"
+                    "application/json",
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -909,13 +910,91 @@ const docTemplate = `{
                 "summary": "Create event",
                 "parameters": [
                     {
-                        "description": "Event data",
+                        "description": "Event data (JSON)",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/dto.CreateEventRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Event title (multipart)",
+                        "name": "title",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Event description (multipart)",
+                        "name": "description",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Event type (multipart)",
+                        "name": "event_type",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Address text (multipart)",
+                        "name": "address_text",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Latitude (multipart)",
+                        "name": "lat",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Longitude (multipart)",
+                        "name": "lng",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Start time (multipart)",
+                        "name": "start_at",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End time (multipart)",
+                        "name": "end_at",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Capacity (multipart)",
+                        "name": "capacity",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Category IDs comma separated (multipart)",
+                        "name": "category_ids",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Tag IDs comma separated (multipart)",
+                        "name": "tag_ids",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Cover image file (multipart)",
+                        "name": "file",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "file",
+                        "description": "Event photos (multipart)",
+                        "name": "files[]",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -3543,6 +3622,12 @@ const docTemplate = `{
                 "address_text": {
                     "type": "string"
                 },
+                "budget_max": {
+                    "type": "integer"
+                },
+                "budget_min": {
+                    "type": "integer"
+                },
                 "capacity": {
                     "type": "integer"
                 },
@@ -3553,6 +3638,9 @@ const docTemplate = `{
                     }
                 },
                 "cover_image_url": {
+                    "type": "string"
+                },
+                "currency": {
                     "type": "string"
                 },
                 "description": {
@@ -3675,6 +3763,12 @@ const docTemplate = `{
                 "address_text": {
                     "type": "string"
                 },
+                "budget_max": {
+                    "type": "integer"
+                },
+                "budget_min": {
+                    "type": "integer"
+                },
                 "capacity": {
                     "type": "integer"
                 },
@@ -3694,6 +3788,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/dto.UserResponse"
                 },
                 "creator_id": {
+                    "type": "string"
+                },
+                "currency": {
                     "type": "string"
                 },
                 "description": {
@@ -4312,6 +4409,12 @@ const docTemplate = `{
                 "address_text": {
                     "type": "string"
                 },
+                "budget_max": {
+                    "type": "integer"
+                },
+                "budget_min": {
+                    "type": "integer"
+                },
                 "capacity": {
                     "type": "integer"
                 },
@@ -4322,6 +4425,9 @@ const docTemplate = `{
                     }
                 },
                 "cover_image_url": {
+                    "type": "string"
+                },
+                "currency": {
                     "type": "string"
                 },
                 "description": {

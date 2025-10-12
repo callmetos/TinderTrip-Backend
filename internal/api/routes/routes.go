@@ -24,7 +24,9 @@ func SetupRoutes(router *gin.Engine) {
 
 	// OTP monitoring for development
 	otpHandler := handlers.NewOTPHandler()
-	router.GET("/dev/otp", otpHandler.GetOTPs)
+
+	// Add dev/otp to v1 group (no auth required)
+	v1.GET("/dev/otp", otpHandler.GetOTPs)
 
 	// Image serving
 	imageHandler, err := handlers.NewImageHandler()
@@ -65,6 +67,7 @@ func SetupRoutes(router *gin.Engine) {
 		auth.POST("/reset-password", authHandler.ResetPassword)
 		auth.POST("/logout", middleware.AuthMiddleware(), authHandler.Logout)
 		auth.POST("/refresh", middleware.AuthMiddleware(), authHandler.RefreshToken)
+		auth.GET("/check", middleware.AuthMiddleware(), authHandler.Check)
 	}
 
 	// Protected routes

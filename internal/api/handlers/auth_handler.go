@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"time"
 
+	"TinderTrip-Backend/internal/api/middleware"
 	"TinderTrip-Backend/internal/dto"
+	"TinderTrip-Backend/internal/models"
 	"TinderTrip-Backend/internal/service"
 	"TinderTrip-Backend/internal/utils"
 	"TinderTrip-Backend/pkg/database"
@@ -37,14 +39,14 @@ func (h *AuthHandler) StopCleanup() {
 	}
 }
 
-// Register handles user registration - sends OTP for email verification
+// Register handles user registration - creates user and sends OTP for email verification
 // @Summary Register a new user
-// @Description Register a new user with email and password, sends OTP for verification
+// @Description Register a new user with email and password, creates user with unverified status and sends OTP
 // @Tags auth
 // @Accept json
 // @Produce json
 // @Param request body dto.RegisterRequest true "Registration data"
-// @Success 200 {object} dto.SuccessResponse
+// @Success 200 {object} dto.AuthResponse
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 409 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
@@ -62,23 +64,15 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	// Send email verification OTP
 	err := h.authService.SendEmailVerificationOTP(req.Email)
 	if err != nil {
-		if err.Error() == "user already exists" {
-			c.JSON(http.StatusConflict, dto.ErrorResponse{
-				Error:   "User already exists",
-				Message: "An account with this email already exists",
-			})
-			return
-		}
-
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Registration failed",
+			Error:   "Failed to send verification OTP",
 			Message: err.Error(),
 		})
 		return
 	}
 
 	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Verification OTP sent to your email. Please check your inbox and verify your email to complete registration.",
+		Message: "Verification OTP sent to your email",
 	})
 }
 
@@ -561,5 +555,52 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.AuthResponse{
 		Token: newToken,
+	})
+}
+
+// CheckResponse represents the check endpoint response
+type CheckResponse struct {
+	Status   string `json:"status"`
+	Email    string `json:"email"`
+	Username string `json:"username"`
+}
+
+// Check validates JWT token and returns user info
+func (h *AuthHandler) Check(c *gin.Context) {
+	// Get user ID from context (set by AuthMiddleware)
+	userID, exists := middleware.GetCurrentUserID(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Error:   "Unauthorized",
+			Message: "Authentication token is required",
+		})
+		return
+	}
+
+	// Get user from database
+	var user models.User
+	err := database.GetDB().Where("id = ? AND deleted_at IS NULL", userID).First(&user).Error
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Error:   "User not found",
+			Message: "User account not found or has been deleted",
+		})
+		return
+	}
+
+	// Return user info
+	email := ""
+	if user.Email != nil {
+		email = *user.Email
+	}
+	username := ""
+	if user.DisplayName != nil {
+		username = *user.DisplayName
+	}
+
+	c.JSON(http.StatusOK, CheckResponse{
+		Status:   "valid",
+		Email:    email,
+		Username: username,
 	})
 }

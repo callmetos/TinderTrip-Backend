@@ -57,10 +57,11 @@ func (s *AuthService) Register(email, password, displayName string) (*models.Use
 
 	// Create user
 	user := &models.User{
-		Email:        &email,
-		Provider:     models.AuthProviderPassword,
-		PasswordHash: &hashedPassword,
-		DisplayName:  &displayName,
+		Email:         &email,
+		Provider:      models.AuthProviderPassword,
+		PasswordHash:  &hashedPassword,
+		DisplayName:   &displayName,
+		EmailVerified: true, // Set as verified initially
 	}
 
 	// Save user to database
@@ -391,6 +392,16 @@ func (s *AuthService) VerifyEmailOTP(email, otp, password, displayName string) (
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 
+	// Check if user already exists
+	var existingUser models.User
+	err = database.GetDB().Where("email = ?", email).First(&existingUser).Error
+	if err == nil {
+		return nil, fmt.Errorf("user already exists")
+	}
+	if err != gorm.ErrRecordNotFound {
+		return nil, fmt.Errorf("database error: %w", err)
+	}
+
 	// Hash password
 	hashedPassword, err := utils.HashPassword(password)
 	if err != nil {
@@ -418,7 +429,7 @@ func (s *AuthService) VerifyEmailOTP(email, otp, password, displayName string) (
 	// Delete email verification record
 	err = database.GetDB().Delete(&emailVerification).Error
 	if err != nil {
-		// Log error but don't fail the registration
+		// Log error but don't fail the verification
 		fmt.Printf("Warning: Failed to delete email verification record: %v\n", err)
 	}
 
