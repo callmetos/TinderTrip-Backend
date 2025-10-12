@@ -158,6 +158,40 @@ const docTemplate = `{
                 }
             }
         },
+        "/auth/check": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Validate JWT token and return user information",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Check JWT token",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CheckResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/forgot-password": {
             "post": {
                 "description": "Send password reset email",
@@ -4717,6 +4751,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "otp": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CheckResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }

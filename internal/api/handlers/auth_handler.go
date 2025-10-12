@@ -566,6 +566,15 @@ type CheckResponse struct {
 }
 
 // Check validates JWT token and returns user info
+// @Summary Check JWT token
+// @Description Validate JWT token and return user information
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Security ApiKeyAuth
+// @Success 200 {object} CheckResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Router /auth/check [get]
 func (h *AuthHandler) Check(c *gin.Context) {
 	// Get user ID from context (set by AuthMiddleware)
 	userID, exists := middleware.GetCurrentUserID(c)
