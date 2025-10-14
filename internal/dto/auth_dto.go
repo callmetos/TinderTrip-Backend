@@ -104,12 +104,13 @@ type AuthResponse struct {
 
 // UserResponse represents a user response
 type UserResponse struct {
-	ID          string               `json:"id"`
-	Email       string               `json:"email"`
-	DisplayName string               `json:"display_name"`
-	Provider    string               `json:"provider"`
-	CreatedAt   time.Time            `json:"created_at"`
-	Profile     *UserProfileResponse `json:"profile,omitempty"`
+	ID            string               `json:"id"`
+	Email         string               `json:"email"`
+	DisplayName   string               `json:"display_name"`
+	Provider      string               `json:"provider"`
+	EmailVerified bool                 `json:"is_verified"`
+	CreatedAt     time.Time            `json:"created_at"`
+	Profile       *UserProfileResponse `json:"profile,omitempty"`
 }
 
 // ErrorResponse represents an error response

@@ -126,11 +126,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.AuthResponse{
 		Token: token,
 		User: dto.UserResponse{
-			ID:          user.ID.String(),
-			Email:       *user.Email,
-			DisplayName: user.GetDisplayName(),
-			Provider:    string(user.Provider),
-			CreatedAt:   user.CreatedAt,
+			ID:            user.ID.String(),
+			Email:         *user.Email,
+			DisplayName:   user.GetDisplayName(),
+			Provider:      string(user.Provider),
+			EmailVerified: user.EmailVerified,
+			CreatedAt:     user.CreatedAt,
 		},
 	})
 }
@@ -270,14 +271,15 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	}
 
 	// Redirect to frontend with token
-	frontendURL := "http://localhost:8081/callback"
-	redirectURL := fmt.Sprintf("%s?token=%s&user_id=%s&email=%s&display_name=%s&provider=%s",
+	frontendURL := "exp://192.168.1.37:8081/callback"
+	redirectURL := fmt.Sprintf("%s?token=%s&user_id=%s&email=%s&display_name=%s&provider=%s&is_verified=%t",
 		frontendURL,
 		jwtToken,
 		user.ID.String(),
 		userInfo.Email,
 		userInfo.Name,
-		string(user.Provider))
+		string(user.Provider),
+		user.EmailVerified)
 
 	c.Redirect(http.StatusFound, redirectURL)
 }
@@ -445,11 +447,12 @@ func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 	c.JSON(http.StatusCreated, dto.AuthResponse{
 		Token: token,
 		User: dto.UserResponse{
-			ID:          user.ID.String(),
-			Email:       *user.Email,
-			DisplayName: user.GetDisplayName(),
-			Provider:    string(user.Provider),
-			CreatedAt:   user.CreatedAt,
+			ID:            user.ID.String(),
+			Email:         *user.Email,
+			DisplayName:   user.GetDisplayName(),
+			Provider:      string(user.Provider),
+			EmailVerified: user.EmailVerified,
+			CreatedAt:     user.CreatedAt,
 		},
 	})
 }

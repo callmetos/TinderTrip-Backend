@@ -10,17 +10,18 @@ import (
 )
 
 type Config struct {
-	Server    ServerConfig
-	Database  DatabaseConfig
-	Redis     RedisConfig
-	JWT       JWTConfig
-	Email     EmailConfig
-	AWS       AWSConfig
-	Firebase  FirebaseConfig
-	Google    GoogleConfig
-	RateLimit RateLimitConfig
-	CORS      CORSConfig
-	Nextcloud NextcloudConfig
+	Server     ServerConfig
+	Database   DatabaseConfig
+	Redis      RedisConfig
+	JWT        JWTConfig
+	Email      EmailConfig
+	AWS        AWSConfig
+	Firebase   FirebaseConfig
+	Google     GoogleConfig
+	RateLimit  RateLimitConfig
+	CORS       CORSConfig
+	Nextcloud  NextcloudConfig
+	Monitoring MonitoringConfig
 }
 
 type ServerConfig struct {
@@ -94,6 +95,12 @@ type GoogleConfig struct {
 	RedirectURL  string
 }
 
+type MonitoringConfig struct {
+	Enabled     bool
+	MetricsPort string
+	HealthPort  string
+}
+
 var AppConfig *Config
 
 func LoadConfig() {
@@ -165,6 +172,11 @@ func LoadConfig() {
 			Username: getEnv("NEXTCLOUD_USERNAME", ""),
 			Password: getEnv("NEXTCLOUD_PASSWORD", ""),
 		},
+		Monitoring: MonitoringConfig{
+			Enabled:     getEnvAsBool("MONITORING_ENABLED", true),
+			MetricsPort: getEnv("METRICS_PORT", "9090"),
+			HealthPort:  getEnv("HEALTH_PORT", "8080"),
+		},
 	}
 
 	// Validate required configuration
@@ -190,6 +202,15 @@ func getEnvAsInt(key string, defaultValue int) int {
 func getEnvAsSlice(key string, defaultValue []string) []string {
 	if value := os.Getenv(key); value != "" {
 		return strings.Split(value, ",")
+	}
+	return defaultValue
+}
+
+func getEnvAsBool(key string, defaultValue bool) bool {
+	if value := os.Getenv(key); value != "" {
+		if boolValue, err := strconv.ParseBool(value); err == nil {
+			return boolValue
+		}
 	}
 	return defaultValue
 }

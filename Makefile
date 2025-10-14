@@ -92,3 +92,54 @@ dev-setup:
 	cp env.example .env
 	$(GOMOD) download
 	$(GOMOD) tidy
+
+# Monitoring setup
+.PHONY: monitoring-setup
+monitoring-setup:
+	./scripts/setup-monitoring.sh
+
+# Start monitoring stack
+.PHONY: monitoring-start
+monitoring-start:
+	docker-compose -f docker-compose.monitoring.yml up -d
+
+# Stop monitoring stack
+.PHONY: monitoring-stop
+monitoring-stop:
+	docker-compose -f docker-compose.monitoring.yml down
+
+# Production deployment
+.PHONY: deploy-prod
+deploy-prod:
+	./scripts/deploy-production.sh
+
+# Deploy monitoring to production
+.PHONY: deploy-prod-monitoring
+deploy-prod-monitoring:
+	docker-compose -f docker-compose.prod.monitoring.yml up -d
+
+# Stop production services
+.PHONY: stop-prod
+stop-prod:
+	docker-compose -f docker-compose.prod.yml down
+	docker-compose -f docker-compose.prod.monitoring.yml down
+
+# Production logs
+.PHONY: logs-prod
+logs-prod:
+	docker-compose -f docker-compose.prod.yml logs -f
+
+# Production monitoring logs
+.PHONY: logs-prod-monitoring
+logs-prod-monitoring:
+	docker-compose -f docker-compose.prod.monitoring.yml logs -f
+
+# Test monitoring
+.PHONY: monitoring-test
+monitoring-test:
+	./scripts/test-monitoring.sh
+
+# View monitoring logs
+.PHONY: monitoring-logs
+monitoring-logs:
+	docker-compose -f docker-compose.monitoring.yml logs -f

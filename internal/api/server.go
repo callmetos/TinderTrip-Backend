@@ -11,7 +11,9 @@ import (
 	"TinderTrip-Backend/internal/api/handlers"
 	"TinderTrip-Backend/internal/api/middleware"
 	"TinderTrip-Backend/internal/api/routes"
+	"TinderTrip-Backend/internal/service"
 	"TinderTrip-Backend/pkg/config"
+	"TinderTrip-Backend/pkg/database"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -19,9 +21,10 @@ import (
 )
 
 type Server struct {
-	httpServer  *http.Server
-	router      *gin.Engine
-	authHandler *handlers.AuthHandler
+	httpServer        *http.Server
+	router            *gin.Engine
+	authHandler       *handlers.AuthHandler
+	monitoringService *service.MonitoringService
 }
 
 func NewServer() *Server {
@@ -31,6 +34,13 @@ func NewServer() *Server {
 	// Create router
 	router := gin.New()
 
+	// Initialize monitoring service
+	var monitoringService *service.MonitoringService
+	if config.AppConfig.Monitoring.Enabled {
+		monitoringService = service.NewMonitoringService(database.DB)
+		middleware.SetMonitoringService(monitoringService)
+	}
+
 	// Add middleware
 	router.Use(middleware.Logger())
 	router.Use(middleware.AuthContext()) // Extract user ID from JWT for API logging
@@ -38,6 +48,12 @@ func NewServer() *Server {
 	router.Use(middleware.Recovery())
 	router.Use(middleware.CustomCORS()) // CORS enabled for all responses
 	// router.Use(middleware.RateLimit()) // Rate limit disabled for development
+
+	// Add monitoring middleware
+	if config.AppConfig.Monitoring.Enabled {
+		router.Use(middleware.PrometheusMetrics())
+		router.Use(middleware.BusinessMetrics())
+	}
 
 	// Setup routes
 	routes.SetupRoutes(router)
@@ -56,12 +72,20 @@ func NewServer() *Server {
 	authHandler := handlers.NewAuthHandler()
 
 	return &Server{
-		router:      router,
-		authHandler: authHandler,
+		router:            router,
+		authHandler:       authHandler,
+		monitoringService: monitoringService,
 	}
 }
 
 func (s *Server) Start() error {
+	// Start monitoring service
+	if s.monitoringService != nil {
+		if err := s.monitoringService.Start(); err != nil {
+			log.Printf("Failed to start monitoring service: %v", err)
+		}
+	}
+
 	port := config.AppConfig.Server.Port
 	host := "0.0.0.0" // Hardcode to 0.0.0.0 for LAN access
 
@@ -80,6 +104,13 @@ func (s *Server) Start() error {
 func (s *Server) Shutdown() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
+	// Stop monitoring service
+	if s.monitoringService != nil {
+		if err := s.monitoringService.Stop(); err != nil {
+			log.Printf("Error stopping monitoring service: %v", err)
+		}
+	}
 
 	return s.httpServer.Shutdown(ctx)
 }

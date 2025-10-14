@@ -111,11 +111,12 @@ func (s *GoogleOAuthService) CreateOrUpdateUser(ctx context.Context, userInfo *G
 			// User doesn't exist, create new user
 			isNewUser = true
 			user = models.User{
-				Email:       &userInfo.Email,
-				Provider:    models.AuthProviderGoogle,
-				GoogleID:    &userInfo.ID,
-				DisplayName: &userInfo.Name,
-				LastLoginAt: &[]time.Time{time.Now()}[0],
+				Email:         &userInfo.Email,
+				Provider:      models.AuthProviderGoogle,
+				GoogleID:      &userInfo.ID,
+				DisplayName:   &userInfo.Name,
+				EmailVerified: true, // Google OAuth users are automatically verified
+				LastLoginAt:   &[]time.Time{time.Now()}[0],
 			}
 
 			err = database.GetDB().Create(&user).Error
@@ -126,10 +127,11 @@ func (s *GoogleOAuthService) CreateOrUpdateUser(ctx context.Context, userInfo *G
 			return nil, false, fmt.Errorf("failed to check user existence: %w", err)
 		}
 	} else {
-		// User exists, update last login
+		// User exists, update last login and ensure email is verified
 		now := time.Now()
 		user.LastLoginAt = &now
 		user.DisplayName = &userInfo.Name
+		user.EmailVerified = true // Ensure Google OAuth users are always verified
 
 		err = database.GetDB().Save(&user).Error
 		if err != nil {

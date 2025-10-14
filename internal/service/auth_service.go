@@ -78,14 +78,40 @@ func (s *AuthService) Register(email, password, displayName string) (*models.Use
 
 // Login authenticates a user
 func (s *AuthService) Login(email, password string) (*models.User, error) {
-	// Find user by email
+	// Find user by email (any provider)
 	var user models.User
-	err := database.GetDB().Where("email = ? AND provider = ?", email, models.AuthProviderPassword).First(&user).Error
+	err := database.GetDB().Where("email = ?", email).First(&user).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("invalid credentials")
 		}
 		return nil, fmt.Errorf("database error: %w", err)
+	}
+
+	// Check if user is Google OAuth user
+	if user.Provider == models.AuthProviderGoogle {
+		// Google users can login without password verification
+		// Update last login time
+		now := time.Now()
+		user.LastLoginAt = &now
+		if err := database.GetDB().Save(&user).Error; err != nil {
+			return nil, fmt.Errorf("failed to update last login time: %w", err)
+		}
+
+		// Log login action
+		userIDStr := user.ID.String()
+		s.auditLogger.LogLogin(&userIDStr, map[string]interface{}{
+			"email":      email,
+			"login_time": now,
+			"provider":   "google",
+		})
+
+		return &user, nil
+	}
+
+	// For password users, check if email is verified
+	if user.Provider == models.AuthProviderPassword && !user.EmailVerified {
+		return nil, fmt.Errorf("email not verified")
 	}
 
 	// Check if user has password
@@ -114,6 +140,7 @@ func (s *AuthService) Login(email, password string) (*models.User, error) {
 	s.auditLogger.LogLogin(&userIDStr, map[string]interface{}{
 		"email":      email,
 		"login_time": now,
+		"provider":   "password",
 	})
 
 	return &user, nil
