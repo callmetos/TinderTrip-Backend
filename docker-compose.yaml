@@ -12,7 +12,7 @@ services:
       - "9952:${SERVER_PORT}"
       # Monitoring ports
       - "9090:9090"  # Prometheus metrics
-      - "8080:8080"  # Health checks
+      - "9953:9953"  # Health checks
     environment:
       SERVER_PORT: ${SERVER_PORT}
       POSTGRES_USER: ${DB_USER}
@@ -37,4 +37,4 @@ services:
       # Monitoring configuration
       MONITORING_ENABLED: ${MONITORING_ENABLED:-true}
       METRICS_PORT: ${METRICS_PORT:-9090}
-      HEALTH_PORT: ${HEALTH_PORT:-8080}
+      HEALTH_PORT: ${HEALTH_PORT:-9953}
