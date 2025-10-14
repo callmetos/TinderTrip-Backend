@@ -11,7 +11,7 @@ services:
       # Map พอร์ตของ api service ใน container ออกมาที่เครื่องเรา
       - "9952:${SERVER_PORT}"
       # Monitoring ports
-      - "9090:9090"  # Prometheus metrics
+      - "9954:9954"  # Prometheus metrics
       - "9953:9953"  # Health checks
     environment:
       SERVER_PORT: ${SERVER_PORT}
@@ -36,5 +36,5 @@ services:
       MAX_UPLOAD_MB: 10
       # Monitoring configuration
       MONITORING_ENABLED: ${MONITORING_ENABLED:-true}
-      METRICS_PORT: ${METRICS_PORT:-9090}
+      METRICS_PORT: ${METRICS_PORT:-9954}
       HEALTH_PORT: ${HEALTH_PORT:-9953}
