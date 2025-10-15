@@ -271,7 +271,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	}
 
 	// Redirect to frontend with token
-	frontendURL := "exp://192.168.1.37:8081/callback"
+	frontendURL := "http://localhost:8081/callback"
 	redirectURL := fmt.Sprintf("%s?token=%s&user_id=%s&email=%s&display_name=%s&provider=%s&is_verified=%t",
 		frontendURL,
 		jwtToken,
