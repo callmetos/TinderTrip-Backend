@@ -90,23 +90,8 @@ func (s *AuthService) Login(email, password string) (*models.User, error) {
 
 	// Check if user is Google OAuth user
 	if user.Provider == models.AuthProviderGoogle {
-		// Google users can login without password verification
-		// Update last login time
-		now := time.Now()
-		user.LastLoginAt = &now
-		if err := database.GetDB().Save(&user).Error; err != nil {
-			return nil, fmt.Errorf("failed to update last login time: %w", err)
-		}
-
-		// Log login action
-		userIDStr := user.ID.String()
-		s.auditLogger.LogLogin(&userIDStr, map[string]interface{}{
-			"email":      email,
-			"login_time": now,
-			"provider":   "google",
-		})
-
-		return &user, nil
+		// Google users cannot login with password - they must use Google OAuth
+		return nil, fmt.Errorf("this account uses Google login. Please use Google OAuth to sign in")
 	}
 
 	// For password users, check if email is verified
