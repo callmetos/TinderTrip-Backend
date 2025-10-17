@@ -17,7 +17,7 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     networks:
-      - monitoring
+      - coolify
 
   grafana:
     image: grafana/grafana:latest
@@ -35,7 +35,7 @@ services:
       - GF_SERVER_DOMAIN=${GRAFANA_DOMAIN:-localhost}
       - GF_SERVER_ROOT_URL=${GRAFANA_ROOT_URL:-http://localhost:3000}
     networks:
-      - monitoring
+      - coolify
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -52,7 +52,7 @@ services:
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     networks:
-      - monitoring
+      - coolify
 
   redis-exporter:
     image: oliver006/redis_exporter:latest
@@ -62,7 +62,7 @@ services:
     environment:
       - REDIS_ADDR=redis://redis:6379  # ใช้ service name
     networks:
-      - monitoring
+      - coolify
 
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
@@ -72,12 +72,12 @@ services:
     environment:
       - DATA_SOURCE_NAME=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-tindertrip}?sslmode=disable
     networks:
-      - monitoring
+      - coolify
 
 volumes:
   prometheus_data:
   grafana_data:
 
 networks:
-  monitoring:
+  coolify:
     external: true
