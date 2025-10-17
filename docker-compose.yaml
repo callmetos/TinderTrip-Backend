@@ -38,3 +38,15 @@ services:
       MONITORING_ENABLED: ${MONITORING_ENABLED:-true}
       METRICS_PORT: ${METRICS_PORT:-9954}
       HEALTH_PORT: ${HEALTH_PORT:-9953}
+    networks:
+      - coolify
+    restart: unless-stopped
+
+networks:
+  coolify:
+    external: true
+
+volumes:
+  postgres_data:
+  redis_data:
+  grafana_data:
