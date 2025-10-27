@@ -63,3 +63,8 @@ type UserStatsResponse struct {
 	OvernightEvents int64   `json:"overnight_events"`
 	CompletionRate  float64 `json:"completion_rate"`
 }
+
+// SetupStatusResponse represents user setup completion status
+type SetupStatusResponse struct {
+	SetupCompleted bool `json:"setup_completed"`
+}

@@ -81,6 +81,7 @@ func SetupRoutes(router *gin.Engine) {
 			users.GET("/profile", userHandler.GetProfile)
 			users.PUT("/profile", userHandler.UpdateProfile)
 			users.DELETE("/profile", userHandler.DeleteProfile)
+			users.GET("/setup-status", userHandler.GetSetupStatus)
 		}
 
 		// Preference routes

@@ -314,3 +314,42 @@ func (h *UserHandler) DeleteProfile(c *gin.Context) {
 		Message: "Profile deleted successfully",
 	})
 }
+
+// GetSetupStatus checks if user has completed initial setup
+// @Summary Get user setup status
+// @Description Check if current user has completed initial profile setup
+// @Tags users
+// @Security BearerAuth
+// @Produce json
+// @Success 200 {object} dto.SetupStatusResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /users/setup-status [get]
+func (h *UserHandler) GetSetupStatus(c *gin.Context) {
+	// Get user ID from context
+	userID, exists := middleware.GetCurrentUserID(c)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Error:   "Unauthorized",
+			Message: "User not authenticated",
+		})
+		return
+	}
+
+	// Check setup status
+	setupCompleted, err := h.userService.CheckSetupStatus(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Error:   "Failed to check setup status",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": dto.SetupStatusResponse{
+			SetupCompleted: setupCompleted,
+		},
+		"message": "Setup status retrieved successfully",
+	})
+}

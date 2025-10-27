@@ -192,6 +192,34 @@ func (s *UserService) DeleteProfile(userID string) error {
 	return nil
 }
 
+// CheckSetupStatus checks if user has completed initial setup
+func (s *UserService) CheckSetupStatus(userID string) (bool, error) {
+	// Parse user ID
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return false, fmt.Errorf("invalid user ID: %w", err)
+	}
+
+	// Get user profile
+	var profile models.UserProfile
+	err = database.GetDB().Where("user_id = ?", userUUID).First(&profile).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// No profile created yet = setup not completed
+			return false, nil
+		}
+		return false, fmt.Errorf("database error: %w", err)
+	}
+
+	// Check if essential fields are filled
+	// Consider setup completed if user has at least bio OR gender OR languages
+	hasEssentialInfo := (profile.Bio != nil && *profile.Bio != "") ||
+		(profile.Gender != nil) ||
+		(profile.Languages != nil && *profile.Languages != "")
+
+	return hasEssentialInfo, nil
+}
+
 // Helper functions
 func convertTimeToString(t *time.Time) *string {
 	if t == nil {

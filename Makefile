@@ -24,16 +24,44 @@ run:
 	$(GOBUILD) -o $(BINARY_NAME) -v ./cmd/api
 	./$(BINARY_NAME)
 
-# Run tests
+# Run all tests
 .PHONY: test
 test:
-	$(GOTEST) -v ./...
+	$(GOTEST) -v ./tests/...
+
+# Run unit tests only
+.PHONY: test-unit
+test-unit:
+	$(GOTEST) -v ./tests/unit/...
+
+# Run integration tests only
+.PHONY: test-integration
+test-integration:
+	$(GOTEST) -v ./tests/integration/...
 
 # Run tests with coverage
 .PHONY: test-coverage
 test-coverage:
-	$(GOTEST) -v -coverprofile=coverage.out ./...
+	$(GOTEST) -v -coverprofile=coverage.out ./tests/...
 	$(GOCMD) tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage report generated: coverage.html"
+
+# Run tests with coverage report in terminal
+.PHONY: test-coverage-report
+test-coverage-report:
+	$(GOTEST) -v -coverprofile=coverage.out ./tests/...
+	$(GOCMD) tool cover -func=coverage.out
+
+# Run specific test
+.PHONY: test-specific
+test-specific:
+	@read -p "Enter test pattern: " pattern; \
+	$(GOTEST) -v -run $$pattern ./tests/...
+
+# Run benchmarks
+.PHONY: benchmark
+benchmark:
+	$(GOTEST) -bench=. -benchmem ./tests/...
 
 # Clean build files
 .PHONY: clean
