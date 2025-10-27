@@ -5,7 +5,6 @@ import (
 	"log"
 	"time"
 
-	"TinderTrip-Backend/internal/models"
 	"TinderTrip-Backend/pkg/config"
 
 	"gorm.io/driver/postgres"
@@ -44,29 +43,34 @@ func ConnectPostgres() error {
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
-	// Auto-migrate models
-	err = DB.AutoMigrate(
-		&models.User{},
-		&models.UserProfile{},
-		&models.PasswordReset{},
-		&models.Tag{},
-		&models.Event{},
-		&models.EventPhoto{},
-		&models.EventMember{},
-		&models.EventSwipe{},
-		&models.EventCategory{},
-		&models.EventTag{},
-		&models.ChatRoom{},
-		&models.ChatMessage{},
-		&models.UserEventHistory{},
-		&models.AuditLog{},
-		&models.APILog{},           // Add APILog model
-		&models.PrefAvailability{}, // Add preference models
-		&models.PrefBudget{},
-	)
-	if err != nil {
-		return fmt.Errorf("failed to auto-migrate models: %w", err)
-	}
+	// Auto-migrate models - DISABLED
+	// All database tables already exist and are properly configured
+	// AutoMigrate is disabled to prevent "insufficient arguments" errors
+	// If you need to add new tables, uncomment and add only the new models
+	/*
+		err = DB.AutoMigrate(
+			&models.User{},
+			&models.UserProfile{},
+			&models.PasswordReset{},
+			&models.Tag{},
+			&models.Event{},
+			&models.EventPhoto{},
+			&models.EventMember{},
+			&models.EventSwipe{},
+			&models.EventCategory{},
+			&models.EventTag{},
+			&models.ChatRoom{},
+			&models.ChatMessage{},
+			&models.UserEventHistory{},
+			&models.AuditLog{},
+			&models.APILog{},
+			&models.PrefAvailability{},
+			&models.PrefBudget{},
+		)
+		if err != nil {
+			return fmt.Errorf("failed to auto-migrate models: %w", err)
+		}
+	*/
 
 	log.Println("Successfully connected to PostgreSQL database")
 	return nil

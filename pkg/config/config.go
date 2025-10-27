@@ -25,9 +25,10 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port string
-	Host string
-	Mode string
+	Port        string
+	Host        string
+	Mode        string
+	FrontendURL string
 }
 
 type DatabaseConfig struct {
@@ -113,9 +114,11 @@ func LoadConfig() {
 
 	AppConfig = &Config{
 		Server: ServerConfig{
-			Port: getEnv("SERVER_PORT", ""),
-			Host: getEnv("SERVER_HOST", ""),
-			Mode: getEnv("GIN_MODE", ""),
+
+			Port:        getEnv("SERVER_PORT", ""),
+			Host:        getEnv("SERVER_HOST", ""),
+			Mode:        getEnv("GIN_MODE", ""),
+			FrontendURL: getEnv("FRONTEND_URL", "http://localhost:8081"),
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", ""),

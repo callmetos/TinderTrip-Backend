@@ -10,6 +10,7 @@ import (
 	"TinderTrip-Backend/internal/models"
 	"TinderTrip-Backend/internal/service"
 	"TinderTrip-Backend/internal/utils"
+	"TinderTrip-Backend/pkg/config"
 	"TinderTrip-Backend/pkg/database"
 
 	"github.com/gin-gonic/gin"
@@ -192,11 +193,19 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	code := c.Query("code")
 	state := c.Query("state")
 
+	// Helper function to redirect to frontend with error
+	redirectToError := func(errorType, errorMessage string) {
+		frontendURL := config.AppConfig.Server.FrontendURL
+		redirectURL := fmt.Sprintf("%s/callback?error=%s&message=%s",
+			frontendURL,
+			errorType,
+			errorMessage,
+		)
+		c.Redirect(http.StatusFound, redirectURL)
+	}
+
 	if code == "" || state == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Missing parameters",
-			Message: "Authorization code and state are required",
-		})
+		redirectToError("missing_parameters", "Authorization code and state are required")
 		return
 	}
 
@@ -207,50 +216,35 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		// If Redis is not available, skip state validation
 		utils.Logger().WithField("error", err).Warn("Redis not available, skipping state validation")
 	} else if validState != "valid" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid state",
-			Message: "Invalid or expired state parameter",
-		})
+		redirectToError("invalid_state", "Invalid or expired state parameter")
 		return
 	}
 
 	// Exchange code for token
 	token, err := h.googleOAuthService.ExchangeCodeForToken(ctx, code)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Token exchange failed",
-			Message: "Failed to exchange authorization code for token",
-		})
+		redirectToError("token_exchange_failed", "Failed to exchange authorization code")
 		return
 	}
 
 	// Get user info from Google
 	userInfo, err := h.googleOAuthService.GetUserInfo(ctx, token)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "User info failed",
-			Message: "Failed to get user information from Google",
-		})
+		redirectToError("user_info_failed", "Failed to get user information from Google")
 		return
 	}
 
 	// Create or update user
 	user, isNewUser, err := h.googleOAuthService.CreateOrUpdateUser(ctx, userInfo)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "User creation failed",
-			Message: "Failed to create or update user",
-		})
+		redirectToError("user_creation_failed", "Failed to create or update user account")
 		return
 	}
 
 	// Generate JWT token
 	jwtToken, err := utils.GenerateToken(user.ID.String(), userInfo.Email, string(user.Provider))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Token generation failed",
-			Message: "Failed to generate authentication token",
-		})
+		redirectToError("token_generation_failed", "Failed to generate authentication token")
 		return
 	}
 
@@ -270,9 +264,9 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 		}()
 	}
 
-	// Redirect to frontend with token
-	frontendURL := "http://localhost:8081/callback"
-	redirectURL := fmt.Sprintf("%s?token=%s&user_id=%s&email=%s&display_name=%s&provider=%s&is_verified=%t",
+	// Redirect to frontend with token (success)
+	frontendURL := config.AppConfig.Server.FrontendURL
+	redirectURL := fmt.Sprintf("%s/callback?token=%s&user_id=%s&email=%s&display_name=%s&provider=%s&is_verified=%t",
 		frontendURL,
 		jwtToken,
 		user.ID.String(),

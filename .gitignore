@@ -208,3 +208,7 @@ node_modules/
 .yarn/install-state.gz
 .pnp.*
 scripts/seed_tags.sql
+
+# Binary files
+main
+api
