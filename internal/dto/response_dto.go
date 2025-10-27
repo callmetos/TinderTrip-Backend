@@ -40,13 +40,23 @@ type ErrorAPIResponse struct {
 	Errors    interface{} `json:"errors,omitempty"`
 }
 
-// AuthResponseWrapper wraps AuthResponse in APIResponse format
+// AuthResponseWrapper wraps authentication response with token and user at top level
 type AuthResponseWrapper struct {
 	Success   bool         `json:"success" example:"true"`
 	RequestID string       `json:"request_id" example:"550e8400-e29b-41d4-a716-446655440000"`
 	Timestamp string       `json:"timestamp" example:"2024-01-01T00:00:00Z"`
 	Message   string       `json:"message" example:"Login successful"`
-	Data      AuthResponse `json:"data"`
+	Token     string       `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	User      UserResponse `json:"user"`
+}
+
+// TokenResponseWrapper wraps token-only response (for refresh token)
+type TokenResponseWrapper struct {
+	Success   bool   `json:"success" example:"true"`
+	RequestID string `json:"request_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Timestamp string `json:"timestamp" example:"2024-01-01T00:00:00Z"`
+	Message   string `json:"message" example:"Token refreshed successfully"`
+	Token     string `json:"token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
 }
 
 // UserProfileResponseWrapper wraps UserProfileResponse in APIResponse format
@@ -77,13 +87,14 @@ type EventListResponseWrapper struct {
 	Meta      *MetaData       `json:"meta,omitempty"`
 }
 
-// GoogleAuthResponseWrapper wraps GoogleAuthResponse in APIResponse format
+// GoogleAuthResponseWrapper wraps Google OAuth response with auth_url and state at top level
 type GoogleAuthResponseWrapper struct {
-	Success   bool               `json:"success" example:"true"`
-	RequestID string             `json:"request_id" example:"550e8400-e29b-41d4-a716-446655440000"`
-	Timestamp string             `json:"timestamp" example:"2024-01-01T00:00:00Z"`
-	Message   string             `json:"message" example:"OAuth URL generated successfully"`
-	Data      GoogleAuthResponse `json:"data"`
+	Success   bool   `json:"success" example:"true"`
+	RequestID string `json:"request_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Timestamp string `json:"timestamp" example:"2024-01-01T00:00:00Z"`
+	Message   string `json:"message" example:"OAuth URL generated successfully"`
+	AuthURL   string `json:"auth_url" example:"https://accounts.google.com/o/oauth2/auth?access_type=offline&client_id=xxx"`
+	State     string `json:"state" example:"550e8400-e29b-41d4-a716-446655440000"`
 }
 
 // SetupStatusResponseWrapper wraps SetupStatusResponse in APIResponse format
@@ -148,13 +159,14 @@ type ChatMessageListResponseWrapper struct {
 	Data      []ChatMessageResponse `json:"data"`
 }
 
-// HistoryListResponseWrapper wraps event history in APIResponse format
+// HistoryListResponseWrapper wraps event history in APIResponse format with pagination
 type HistoryListResponseWrapper struct {
-	Success   bool                       `json:"success" example:"true"`
-	RequestID string                     `json:"request_id" example:"550e8400-e29b-41d4-a716-446655440000"`
-	Timestamp string                     `json:"timestamp" example:"2024-01-01T00:00:00Z"`
-	Message   string                     `json:"message" example:"History retrieved successfully"`
-	Data      []UserEventHistoryResponse `json:"data"`
+	Success   bool        `json:"success" example:"true"`
+	RequestID string      `json:"request_id" example:"550e8400-e29b-41d4-a716-446655440000"`
+	Timestamp string      `json:"timestamp" example:"2024-01-01T00:00:00Z"`
+	Message   string      `json:"message" example:"History retrieved successfully"`
+	Data      interface{} `json:"data"`
+	Meta      *MetaData   `json:"meta,omitempty"`
 }
 
 // AuditLogListResponseWrapper wraps audit logs in APIResponse format
@@ -174,14 +186,4 @@ type EventSuggestionResponseWrapper struct {
 	Timestamp string                  `json:"timestamp" example:"2024-01-01T00:00:00Z"`
 	Message   string                  `json:"message" example:"Event suggestions retrieved successfully"`
 	Data      EventSuggestionResponse `json:"data"`
-}
-
-// HistoryListResponseWrapperWithMeta wraps history with pagination
-type HistoryListResponseWrapperWithMeta struct {
-	Success   bool                       `json:"success" example:"true"`
-	RequestID string                     `json:"request_id" example:"550e8400-e29b-41d4-a716-446655440000"`
-	Timestamp string                     `json:"timestamp" example:"2024-01-01T00:00:00Z"`
-	Message   string                     `json:"message" example:"History retrieved successfully"`
-	Data      []UserEventHistoryResponse `json:"data"`
-	Meta      *MetaData                  `json:"meta,omitempty"`
 }

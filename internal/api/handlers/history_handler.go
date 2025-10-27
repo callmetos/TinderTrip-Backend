@@ -31,9 +31,9 @@ func NewHistoryHandler() *HistoryHandler {
 // @Param page query int false "Page number"
 // @Param limit query int false "Items per page"
 // @Param completed query bool false "Filter by completion status"
-// @Success 200 {object} dto.HistoryListResponseWrapperWithMeta
-// @Failure 400 {object} dto.ErrorAPIResponse
-// @Failure 400 {object} dto.ErrorAPIResponse
+// @Success 200 {object} utils.APIResponse
+// @Failure 400 {object} utils.APIResponse
+// @Failure 401 {object} utils.APIResponse
 // @Router /history [get]
 func (h *HistoryHandler) GetHistory(c *gin.Context) {
 	// Get query parameters
@@ -75,11 +75,11 @@ func (h *HistoryHandler) GetHistory(c *gin.Context) {
 // @Security BearerAuth
 // @Produce json
 // @Param id path string true "Event ID"
-// @Success 200 {object} dto.SuccessMessageWrapper
-// @Failure 400 {object} dto.ErrorAPIResponse
-// @Failure 400 {object} dto.ErrorAPIResponse
-// @Failure 400 {object} dto.ErrorAPIResponse
-// @Failure 400 {object} dto.ErrorAPIResponse
+// @Success 200 {object} utils.APIResponse
+// @Failure 400 {object} utils.APIResponse
+// @Failure 401 {object} utils.APIResponse
+// @Failure 404 {object} utils.APIResponse
+// @Failure 500 {object} utils.APIResponse
 // @Router /history/{id}/complete [post]
 func (h *HistoryHandler) MarkComplete(c *gin.Context) {
 	eventID := c.Param("id")

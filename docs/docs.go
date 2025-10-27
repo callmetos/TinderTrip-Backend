@@ -71,19 +71,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.AuditLogListResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.AuditLogListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -140,19 +140,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.AuditLogListResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.AuditLogListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -180,13 +180,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/handlers.CheckResponse"
+                            "$ref": "#/definitions/internal_api_handlers.CheckResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -212,7 +212,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.ForgotPasswordRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ForgotPasswordRequest"
                         }
                     }
                 ],
@@ -220,19 +220,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -252,13 +252,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.GoogleAuthResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.GoogleAuthResponseWrapper"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -297,19 +297,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.AuthResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.AuthResponseWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -335,7 +335,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.LoginRequest"
                         }
                     }
                 ],
@@ -343,25 +343,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.AuthResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.AuthResponseWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -383,13 +383,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -411,13 +411,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.AuthResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TokenResponseWrapper"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -443,7 +443,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.RegisterRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.RegisterRequest"
                         }
                     }
                 ],
@@ -451,25 +451,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -495,7 +495,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.ResendVerificationRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ResendVerificationRequest"
                         }
                     }
                 ],
@@ -503,19 +503,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -541,7 +541,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.ResetPasswordRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ResetPasswordRequest"
                         }
                     }
                 ],
@@ -549,19 +549,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -587,7 +587,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.RegisterWithOTPRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.RegisterWithOTPRequest"
                         }
                     }
                 ],
@@ -595,19 +595,19 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.AuthResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.AuthResponseWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -633,7 +633,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.VerifyOTPRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.VerifyOTPRequest"
                         }
                     }
                 ],
@@ -641,19 +641,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -678,19 +678,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ChatRoomListResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ChatRoomListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -736,31 +736,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ChatMessageListResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ChatMessageListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -796,7 +796,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.SendMessageRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SendMessageRequest"
                         }
                     }
                 ],
@@ -804,31 +804,31 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.ChatMessageResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ChatMessageResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -907,19 +907,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EventListResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventListResponseWrapper"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -949,7 +949,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.CreateEventRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.CreateEventRequest"
                         }
                     },
                     {
@@ -1035,13 +1035,13 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/dto.EventResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventResponseWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1080,13 +1080,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EventSuggestionResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventSuggestionResponseWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1120,31 +1120,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EventResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventResponseWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1180,7 +1180,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateEventRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UpdateEventRequest"
                         }
                     }
                 ],
@@ -1188,13 +1188,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EventResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventResponseWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1226,13 +1226,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1266,13 +1266,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1306,13 +1306,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1346,13 +1346,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1404,7 +1404,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1438,13 +1438,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1478,13 +1478,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1539,7 +1539,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1577,7 +1577,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.SwipeEventRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SwipeEventRequest"
                         }
                     }
                 ],
@@ -1585,13 +1585,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -1620,25 +1620,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EventTagListResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventTagListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1674,7 +1674,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AddEventTagRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.AddEventTagRequest"
                         }
                     }
                 ],
@@ -1682,37 +1682,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1753,37 +1753,37 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1803,13 +1803,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.FoodPreferenceCategoriesResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.FoodPreferenceCategoriesResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1854,13 +1854,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.HistoryListResponseWrapperWithMeta"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_utils.APIResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_utils.APIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_utils.APIResponse"
                         }
                     }
                 }
@@ -1894,13 +1900,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_utils.APIResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_utils.APIResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_utils.APIResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_utils.APIResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_utils.APIResponse"
                         }
                     }
                 }
@@ -1940,25 +1964,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -1998,25 +2022,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2056,13 +2080,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EventListResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventListResponseWrapper"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -2091,25 +2115,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.EventResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventResponseWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -2149,19 +2173,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.TagListResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TagListResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2181,13 +2205,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.TravelPreferenceStylesResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TravelPreferenceStylesResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2212,19 +2236,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.FoodPreferenceListResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.FoodPreferenceListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2253,7 +2277,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateFoodPreferenceRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UpdateFoodPreferenceRequest"
                         }
                     }
                 ],
@@ -2261,25 +2285,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2310,7 +2334,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateAllFoodPreferencesRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UpdateAllFoodPreferencesRequest"
                         }
                     }
                 ],
@@ -2318,25 +2342,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2361,19 +2385,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.FoodPreferenceCategoriesResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.FoodPreferenceCategoriesResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2398,19 +2422,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.FoodPreferenceStatsResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.FoodPreferenceStatsResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2444,25 +2468,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2487,19 +2511,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.PrefAvailabilityResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.PrefAvailabilityResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2528,7 +2552,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdatePrefAvailabilityRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UpdatePrefAvailabilityRequest"
                         }
                     }
                 ],
@@ -2536,25 +2560,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.PrefAvailabilityResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.PrefAvailabilityResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2579,19 +2603,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.PrefBudgetResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.PrefBudgetResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2620,7 +2644,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdatePrefBudgetRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UpdatePrefBudgetRequest"
                         }
                     }
                 ],
@@ -2628,25 +2652,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.PrefBudgetResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.PrefBudgetResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2671,19 +2695,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserProfileResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UserProfileResponseWrapper"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -2712,7 +2736,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateProfileRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UpdateProfileRequest"
                         }
                     }
                 ],
@@ -2720,25 +2744,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserProfileResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UserProfileResponseWrapper"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -2761,19 +2785,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessMessageWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessMessageWrapper"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -2798,19 +2822,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SetupStatusResponseWrapper"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SetupStatusResponseWrapper"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorAPIResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
                     }
                 }
@@ -2835,19 +2859,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserTagListResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UserTagListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2876,7 +2900,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AddUserTagRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.AddUserTagRequest"
                         }
                     }
                 ],
@@ -2884,25 +2908,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2936,31 +2960,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -2985,19 +3009,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.TravelPreferenceListResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TravelPreferenceListResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -3026,7 +3050,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.AddTravelPreferenceRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.AddTravelPreferenceRequest"
                         }
                     }
                 ],
@@ -3034,31 +3058,31 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "409": {
                         "description": "Conflict",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -3089,7 +3113,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateAllTravelPreferencesRequest"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UpdateAllTravelPreferencesRequest"
                         }
                     }
                 ],
@@ -3097,25 +3121,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -3140,19 +3164,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.TravelPreferenceStatsResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TravelPreferenceStatsResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -3177,19 +3201,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.TravelPreferenceStylesResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TravelPreferenceStylesResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -3223,25 +3247,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SuccessResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorResponse"
                         }
                     }
                 }
@@ -3249,7 +3273,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.AddEventTagRequest": {
+        "TinderTrip-Backend_internal_dto.AddEventTagRequest": {
             "type": "object",
             "required": [
                 "tag_id"
@@ -3260,7 +3284,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AddTravelPreferenceRequest": {
+        "TinderTrip-Backend_internal_dto.AddTravelPreferenceRequest": {
             "type": "object",
             "required": [
                 "travel_style"
@@ -3289,7 +3313,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AddUserTagRequest": {
+        "TinderTrip-Backend_internal_dto.AddUserTagRequest": {
             "type": "object",
             "required": [
                 "tag_id"
@@ -3300,7 +3324,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AuditLogListResponse": {
+        "TinderTrip-Backend_internal_dto.AuditLogListResponse": {
             "type": "object",
             "properties": {
                 "limit": {
@@ -3309,7 +3333,7 @@ const docTemplate = `{
                 "logs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.AuditLogResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.AuditLogResponse"
                     }
                 },
                 "page": {
@@ -3323,7 +3347,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AuditLogResponse": {
+        "TinderTrip-Backend_internal_dto.AuditLogResponse": {
             "type": "object",
             "properties": {
                 "action": {
@@ -3352,23 +3376,9 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.AuthResponse": {
+        "TinderTrip-Backend_internal_dto.AuthResponseWrapper": {
             "type": "object",
             "properties": {
-                "token": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/dto.UserResponse"
-                }
-            }
-        },
-        "dto.AuthResponseWrapper": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dto.AuthResponse"
-                },
                 "message": {
                     "type": "string",
                     "example": "Login successful"
@@ -3384,10 +3394,17 @@ const docTemplate = `{
                 "timestamp": {
                     "type": "string",
                     "example": "2024-01-01T00:00:00Z"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "user": {
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UserResponse"
                 }
             }
         },
-        "dto.ChatMessageListResponse": {
+        "TinderTrip-Backend_internal_dto.ChatMessageListResponse": {
             "type": "object",
             "properties": {
                 "limit": {
@@ -3396,7 +3413,7 @@ const docTemplate = `{
                 "messages": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ChatMessageResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ChatMessageResponse"
                     }
                 },
                 "page": {
@@ -3407,7 +3424,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ChatMessageResponse": {
+        "TinderTrip-Backend_internal_dto.ChatMessageResponse": {
             "type": "object",
             "properties": {
                 "body": {
@@ -3426,32 +3443,32 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sender": {
-                    "$ref": "#/definitions/dto.UserResponse"
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UserResponse"
                 },
                 "sender_id": {
                     "type": "string"
                 }
             }
         },
-        "dto.ChatRoomListResponse": {
+        "TinderTrip-Backend_internal_dto.ChatRoomListResponse": {
             "type": "object",
             "properties": {
                 "rooms": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.ChatRoomResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ChatRoomResponse"
                     }
                 }
             }
         },
-        "dto.ChatRoomResponse": {
+        "TinderTrip-Backend_internal_dto.ChatRoomResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
                     "type": "string"
                 },
                 "event": {
-                    "$ref": "#/definitions/dto.EventResponse"
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventResponse"
                 },
                 "event_id": {
                     "type": "string"
@@ -3461,7 +3478,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.CreateEventRequest": {
+        "TinderTrip-Backend_internal_dto.CreateEventRequest": {
             "type": "object",
             "required": [
                 "event_type",
@@ -3526,7 +3543,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ErrorAPIResponse": {
+        "TinderTrip-Backend_internal_dto.ErrorAPIResponse": {
             "type": "object",
             "properties": {
                 "code": {
@@ -3552,7 +3569,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ErrorResponse": {
+        "TinderTrip-Backend_internal_dto.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -3563,13 +3580,13 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.EventListResponseWrapper": {
+        "TinderTrip-Backend_internal_dto.EventListResponseWrapper": {
             "type": "object",
             "properties": {
                 "data": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.EventResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventResponse"
                     }
                 },
                 "message": {
@@ -3577,7 +3594,7 @@ const docTemplate = `{
                     "example": "Events retrieved successfully"
                 },
                 "meta": {
-                    "$ref": "#/definitions/dto.MetaData"
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.MetaData"
                 },
                 "request_id": {
                     "type": "string",
@@ -3593,7 +3610,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.EventMemberResponse": {
+        "TinderTrip-Backend_internal_dto.EventMemberResponse": {
             "type": "object",
             "properties": {
                 "confirmed_at": {
@@ -3622,7 +3639,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.EventPhotoResponse": {
+        "TinderTrip-Backend_internal_dto.EventPhotoResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -3642,7 +3659,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.EventResponse": {
+        "TinderTrip-Backend_internal_dto.EventResponse": {
             "type": "object",
             "properties": {
                 "address_text": {
@@ -3660,7 +3677,7 @@ const docTemplate = `{
                 "categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.TagResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TagResponse"
                     }
                 },
                 "cover_image_url": {
@@ -3670,7 +3687,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "creator": {
-                    "$ref": "#/definitions/dto.UserResponse"
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UserResponse"
                 },
                 "creator_id": {
                     "type": "string"
@@ -3705,13 +3722,13 @@ const docTemplate = `{
                 "members": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.EventMemberResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventMemberResponse"
                     }
                 },
                 "photos": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.EventPhotoResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventPhotoResponse"
                     }
                 },
                 "start_at": {
@@ -3723,7 +3740,7 @@ const docTemplate = `{
                 "tags": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.TagResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TagResponse"
                     }
                 },
                 "title": {
@@ -3733,15 +3750,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_swipe": {
-                    "$ref": "#/definitions/dto.EventSwipeResponse"
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventSwipeResponse"
                 }
             }
         },
-        "dto.EventResponseWrapper": {
+        "TinderTrip-Backend_internal_dto.EventResponseWrapper": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.EventResponse"
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventResponse"
                 },
                 "message": {
                     "type": "string",
@@ -3761,11 +3778,11 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.EventSuggestionItem": {
+        "TinderTrip-Backend_internal_dto.EventSuggestionItem": {
             "type": "object",
             "properties": {
                 "event": {
-                    "$ref": "#/definitions/dto.EventResponse"
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventResponse"
                 },
                 "match_score": {
                     "type": "number"
@@ -3773,18 +3790,18 @@ const docTemplate = `{
                 "matched_tags": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.TagResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TagResponse"
                     }
                 }
             }
         },
-        "dto.EventSuggestionResponse": {
+        "TinderTrip-Backend_internal_dto.EventSuggestionResponse": {
             "type": "object",
             "properties": {
                 "events": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.EventSuggestionItem"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventSuggestionItem"
                     }
                 },
                 "limit": {
@@ -3798,11 +3815,11 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.EventSuggestionResponseWrapper": {
+        "TinderTrip-Backend_internal_dto.EventSuggestionResponseWrapper": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.EventSuggestionResponse"
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.EventSuggestionResponse"
                 },
                 "message": {
                     "type": "string",
@@ -3822,7 +3839,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.EventSwipeResponse": {
+        "TinderTrip-Backend_internal_dto.EventSwipeResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -3839,29 +3856,29 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.EventTagListResponse": {
+        "TinderTrip-Backend_internal_dto.EventTagListResponse": {
             "type": "object",
             "properties": {
                 "tags": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.TagResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TagResponse"
                     }
                 }
             }
         },
-        "dto.FoodPreferenceCategoriesResponse": {
+        "TinderTrip-Backend_internal_dto.FoodPreferenceCategoriesResponse": {
             "type": "object",
             "properties": {
                 "categories": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.FoodPreferenceCategoryResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.FoodPreferenceCategoryResponse"
                     }
                 }
             }
         },
-        "dto.FoodPreferenceCategoryResponse": {
+        "TinderTrip-Backend_internal_dto.FoodPreferenceCategoryResponse": {
             "type": "object",
             "properties": {
                 "category": {
@@ -3878,18 +3895,18 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.FoodPreferenceListResponse": {
+        "TinderTrip-Backend_internal_dto.FoodPreferenceListResponse": {
             "type": "object",
             "properties": {
                 "preferences": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.FoodPreferenceResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.FoodPreferenceResponse"
                     }
                 }
             }
         },
-        "dto.FoodPreferenceResponse": {
+        "TinderTrip-Backend_internal_dto.FoodPreferenceResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -3912,7 +3929,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.FoodPreferenceStatsResponse": {
+        "TinderTrip-Backend_internal_dto.FoodPreferenceStatsResponse": {
             "type": "object",
             "properties": {
                 "dislike_count": {
@@ -3929,7 +3946,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ForgotPasswordRequest": {
+        "TinderTrip-Backend_internal_dto.ForgotPasswordRequest": {
             "type": "object",
             "required": [
                 "email"
@@ -3940,22 +3957,12 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.GoogleAuthResponse": {
+        "TinderTrip-Backend_internal_dto.GoogleAuthResponseWrapper": {
             "type": "object",
             "properties": {
                 "auth_url": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.GoogleAuthResponseWrapper": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "$ref": "#/definitions/dto.GoogleAuthResponse"
+                    "type": "string",
+                    "example": "https://accounts.google.com/o/oauth2/auth?access_type=offline\u0026client_id=xxx"
                 },
                 "message": {
                     "type": "string",
@@ -3965,33 +3972,7 @@ const docTemplate = `{
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
-                "success": {
-                    "type": "boolean",
-                    "example": true
-                },
-                "timestamp": {
-                    "type": "string",
-                    "example": "2024-01-01T00:00:00Z"
-                }
-            }
-        },
-        "dto.HistoryListResponseWrapperWithMeta": {
-            "type": "object",
-            "properties": {
-                "data": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.UserEventHistoryResponse"
-                    }
-                },
-                "message": {
-                    "type": "string",
-                    "example": "History retrieved successfully"
-                },
-                "meta": {
-                    "$ref": "#/definitions/dto.MetaData"
-                },
-                "request_id": {
+                "state": {
                     "type": "string",
                     "example": "550e8400-e29b-41d4-a716-446655440000"
                 },
@@ -4005,7 +3986,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.LoginRequest": {
+        "TinderTrip-Backend_internal_dto.LoginRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -4020,7 +4001,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.MetaData": {
+        "TinderTrip-Backend_internal_dto.MetaData": {
             "type": "object",
             "properties": {
                 "limit": {
@@ -4041,7 +4022,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.PrefAvailabilityResponse": {
+        "TinderTrip-Backend_internal_dto.PrefAvailabilityResponse": {
             "type": "object",
             "properties": {
                 "afternoon": {
@@ -4091,7 +4072,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.PrefBudgetResponse": {
+        "TinderTrip-Backend_internal_dto.PrefBudgetResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -4132,7 +4113,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RegisterRequest": {
+        "TinderTrip-Backend_internal_dto.RegisterRequest": {
             "type": "object",
             "required": [
                 "display_name",
@@ -4154,7 +4135,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.RegisterWithOTPRequest": {
+        "TinderTrip-Backend_internal_dto.RegisterWithOTPRequest": {
             "type": "object",
             "required": [
                 "display_name",
@@ -4180,7 +4161,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ResendVerificationRequest": {
+        "TinderTrip-Backend_internal_dto.ResendVerificationRequest": {
             "type": "object",
             "required": [
                 "email"
@@ -4191,7 +4172,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.ResetPasswordRequest": {
+        "TinderTrip-Backend_internal_dto.ResetPasswordRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -4211,7 +4192,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SendMessageRequest": {
+        "TinderTrip-Backend_internal_dto.SendMessageRequest": {
             "type": "object",
             "required": [
                 "body",
@@ -4230,7 +4211,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SetupStatusResponse": {
+        "TinderTrip-Backend_internal_dto.SetupStatusResponse": {
             "type": "object",
             "properties": {
                 "setup_completed": {
@@ -4238,11 +4219,11 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SetupStatusResponseWrapper": {
+        "TinderTrip-Backend_internal_dto.SetupStatusResponseWrapper": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.SetupStatusResponse"
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.SetupStatusResponse"
                 },
                 "message": {
                     "type": "string",
@@ -4262,7 +4243,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SuccessMessageWrapper": {
+        "TinderTrip-Backend_internal_dto.SuccessMessageWrapper": {
             "type": "object",
             "properties": {
                 "message": {
@@ -4283,7 +4264,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SuccessResponse": {
+        "TinderTrip-Backend_internal_dto.SuccessResponse": {
             "type": "object",
             "properties": {
                 "message": {
@@ -4291,7 +4272,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.SwipeEventRequest": {
+        "TinderTrip-Backend_internal_dto.SwipeEventRequest": {
             "type": "object",
             "required": [
                 "direction",
@@ -4310,7 +4291,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.TagListResponse": {
+        "TinderTrip-Backend_internal_dto.TagListResponse": {
             "type": "object",
             "properties": {
                 "limit": {
@@ -4322,7 +4303,7 @@ const docTemplate = `{
                 "tags": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.TagResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TagResponse"
                     }
                 },
                 "total": {
@@ -4330,7 +4311,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.TagResponse": {
+        "TinderTrip-Backend_internal_dto.TagResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -4347,18 +4328,43 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.TravelPreferenceListResponse": {
+        "TinderTrip-Backend_internal_dto.TokenResponseWrapper": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Token refreshed successfully"
+                },
+                "request_id": {
+                    "type": "string",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "timestamp": {
+                    "type": "string",
+                    "example": "2024-01-01T00:00:00Z"
+                },
+                "token": {
+                    "type": "string",
+                    "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                }
+            }
+        },
+        "TinderTrip-Backend_internal_dto.TravelPreferenceListResponse": {
             "type": "object",
             "properties": {
                 "preferences": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.TravelPreferenceResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TravelPreferenceResponse"
                     }
                 }
             }
         },
-        "dto.TravelPreferenceResponse": {
+        "TinderTrip-Backend_internal_dto.TravelPreferenceResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -4378,7 +4384,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.TravelPreferenceStatsResponse": {
+        "TinderTrip-Backend_internal_dto.TravelPreferenceStatsResponse": {
             "type": "object",
             "properties": {
                 "total_preferences": {
@@ -4386,7 +4392,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.TravelPreferenceStyleResponse": {
+        "TinderTrip-Backend_internal_dto.TravelPreferenceStyleResponse": {
             "type": "object",
             "properties": {
                 "display_name": {
@@ -4403,18 +4409,18 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.TravelPreferenceStylesResponse": {
+        "TinderTrip-Backend_internal_dto.TravelPreferenceStylesResponse": {
             "type": "object",
             "properties": {
                 "styles": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.TravelPreferenceStyleResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TravelPreferenceStyleResponse"
                     }
                 }
             }
         },
-        "dto.UpdateAllFoodPreferencesRequest": {
+        "TinderTrip-Backend_internal_dto.UpdateAllFoodPreferencesRequest": {
             "type": "object",
             "required": [
                 "preferences"
@@ -4424,12 +4430,12 @@ const docTemplate = `{
                     "type": "array",
                     "minItems": 1,
                     "items": {
-                        "$ref": "#/definitions/dto.UpdateFoodPreferenceRequest"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UpdateFoodPreferenceRequest"
                     }
                 }
             }
         },
-        "dto.UpdateAllTravelPreferencesRequest": {
+        "TinderTrip-Backend_internal_dto.UpdateAllTravelPreferencesRequest": {
             "type": "object",
             "required": [
                 "travel_styles"
@@ -4444,7 +4450,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateEventRequest": {
+        "TinderTrip-Backend_internal_dto.UpdateEventRequest": {
             "type": "object",
             "properties": {
                 "address_text": {
@@ -4515,7 +4521,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateFoodPreferenceRequest": {
+        "TinderTrip-Backend_internal_dto.UpdateFoodPreferenceRequest": {
             "type": "object",
             "required": [
                 "food_category",
@@ -4541,7 +4547,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdatePrefAvailabilityRequest": {
+        "TinderTrip-Backend_internal_dto.UpdatePrefAvailabilityRequest": {
             "type": "object",
             "properties": {
                 "afternoon": {
@@ -4579,7 +4585,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdatePrefBudgetRequest": {
+        "TinderTrip-Backend_internal_dto.UpdatePrefBudgetRequest": {
             "type": "object",
             "properties": {
                 "currency": {
@@ -4608,7 +4614,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UpdateProfileRequest": {
+        "TinderTrip-Backend_internal_dto.UpdateProfileRequest": {
             "type": "object",
             "properties": {
                 "avatar_url": {
@@ -4640,36 +4646,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserEventHistoryResponse": {
-            "type": "object",
-            "properties": {
-                "completed": {
-                    "type": "boolean"
-                },
-                "completed_at": {
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "event": {
-                    "$ref": "#/definitions/dto.EventResponse"
-                },
-                "event_id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "user": {
-                    "$ref": "#/definitions/dto.UserResponse"
-                },
-                "user_id": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.UserProfileResponse": {
+        "TinderTrip-Backend_internal_dto.UserProfileResponse": {
             "type": "object",
             "properties": {
                 "avatar_url": {
@@ -4713,11 +4690,11 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserProfileResponseWrapper": {
+        "TinderTrip-Backend_internal_dto.UserProfileResponseWrapper": {
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/dto.UserProfileResponse"
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UserProfileResponse"
                 },
                 "message": {
                     "type": "string",
@@ -4737,7 +4714,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.UserResponse": {
+        "TinderTrip-Backend_internal_dto.UserResponse": {
             "type": "object",
             "properties": {
                 "created_at": {
@@ -4756,25 +4733,25 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "profile": {
-                    "$ref": "#/definitions/dto.UserProfileResponse"
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_dto.UserProfileResponse"
                 },
                 "provider": {
                     "type": "string"
                 }
             }
         },
-        "dto.UserTagListResponse": {
+        "TinderTrip-Backend_internal_dto.UserTagListResponse": {
             "type": "object",
             "properties": {
                 "tags": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.TagResponse"
+                        "$ref": "#/definitions/TinderTrip-Backend_internal_dto.TagResponse"
                     }
                 }
             }
         },
-        "dto.VerifyOTPRequest": {
+        "TinderTrip-Backend_internal_dto.VerifyOTPRequest": {
             "type": "object",
             "required": [
                 "email",
@@ -4789,7 +4766,49 @@ const docTemplate = `{
                 }
             }
         },
-        "handlers.CheckResponse": {
+        "TinderTrip-Backend_internal_utils.APIResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "data": {},
+                "errors": {},
+                "message": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/TinderTrip-Backend_internal_utils.Meta"
+                },
+                "request_id": {
+                    "type": "string"
+                },
+                "success": {
+                    "type": "boolean"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "TinderTrip-Backend_internal_utils.Meta": {
+            "type": "object",
+            "properties": {
+                "limit": {
+                    "type": "integer"
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "total_pages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_api_handlers.CheckResponse": {
             "type": "object",
             "properties": {
                 "created_at": {

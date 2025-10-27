@@ -107,8 +107,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	user.LastLoginAt = &now
 	database.GetDB().Save(user)
 
-	utils.SuccessResponse(c, http.StatusOK, "Login successful", dto.AuthResponse{
-		Token: token,
+	// Create custom response with token and user at top level
+	c.JSON(http.StatusOK, dto.AuthResponseWrapper{
+		Success:   true,
+		RequestID: utils.GetRequestID(c),
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+		Message:   "Login successful",
+		Token:     token,
 		User: dto.UserResponse{
 			ID:            user.ID.String(),
 			Email:         *user.Email,
@@ -151,9 +156,14 @@ func (h *AuthHandler) GoogleAuth(c *gin.Context) {
 	// Get Google OAuth URL
 	authURL := h.googleOAuthService.GetAuthURL(state)
 
-	utils.SendSuccessResponse(c, "OAuth URL generated successfully", dto.GoogleAuthResponse{
-		AuthURL: authURL,
-		State:   state,
+	// Create custom response with auth_url and state at top level
+	c.JSON(http.StatusOK, dto.GoogleAuthResponseWrapper{
+		Success:   true,
+		RequestID: utils.GetRequestID(c),
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+		Message:   "OAuth URL generated successfully",
+		AuthURL:   authURL,
+		State:     state,
 	})
 }
 
@@ -386,8 +396,13 @@ func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 		}
 	}()
 
-	utils.SuccessResponse(c, http.StatusCreated, "Registration successful", dto.AuthResponse{
-		Token: token,
+	// Create custom response with token and user at top level
+	c.JSON(http.StatusCreated, dto.AuthResponseWrapper{
+		Success:   true,
+		RequestID: utils.GetRequestID(c),
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+		Message:   "Registration successful",
+		Token:     token,
 		User: dto.UserResponse{
 			ID:            user.ID.String(),
 			Email:         *user.Email,
@@ -454,7 +469,7 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 // @Description Refresh JWT token
 // @Tags auth
 // @Security BearerAuth
-// @Success 200 {object} dto.AuthResponseWrapper
+// @Success 200 {object} dto.TokenResponseWrapper
 // @Failure 401 {object} dto.ErrorAPIResponse
 // @Router /auth/refresh [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
@@ -479,8 +494,13 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccessResponse(c, "Token refreshed successfully", dto.AuthResponse{
-		Token: newToken,
+	// Create custom response with token at top level
+	c.JSON(http.StatusOK, dto.TokenResponseWrapper{
+		Success:   true,
+		RequestID: utils.GetRequestID(c),
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+		Message:   "Token refreshed successfully",
+		Token:     newToken,
 	})
 }
 
