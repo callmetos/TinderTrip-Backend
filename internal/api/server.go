@@ -42,6 +42,7 @@ func NewServer() *Server {
 	}
 
 	// Add middleware
+	router.Use(middleware.RequestID()) // Add unique request ID to each request (must be first)
 	router.Use(middleware.Logger())
 	router.Use(middleware.AuthContext()) // Extract user ID from JWT for API logging
 	router.Use(middleware.APILogger())   // Add API logging to database

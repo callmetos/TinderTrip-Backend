@@ -5,6 +5,7 @@ import (
 
 	"TinderTrip-Backend/internal/api/handlers"
 	"TinderTrip-Backend/internal/api/middleware"
+	"TinderTrip-Backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,9 +17,8 @@ func SetupRoutes(router *gin.Engine) {
 
 	// Health check
 	router.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"status":  "ok",
-			"message": "TinderTrip API is running",
+		utils.SendSuccessResponse(c, "TinderTrip API is running", gin.H{
+			"status": "healthy",
 		})
 	})
 
