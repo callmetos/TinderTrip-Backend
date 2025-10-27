@@ -196,7 +196,7 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	// Helper function to redirect to frontend with error
 	redirectToError := func(errorType, errorMessage string) {
 		frontendURL := config.AppConfig.Server.FrontendURL
-		redirectURL := fmt.Sprintf("%s/callback?error=%s&message=%s",
+		redirectURL := fmt.Sprintf("%s/callbackerror?error=%s&message=%s",
 			frontendURL,
 			errorType,
 			errorMessage,
