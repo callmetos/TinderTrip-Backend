@@ -9,6 +9,7 @@ import (
 	"TinderTrip-Backend/internal/api/middleware"
 	"TinderTrip-Backend/internal/dto"
 	"TinderTrip-Backend/internal/service"
+	"TinderTrip-Backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,32 +32,26 @@ func NewUserHandler() *UserHandler {
 // @Tags users
 // @Security BearerAuth
 // @Produce json
-// @Success 200 {object} dto.UserProfileResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.UserProfileResponseWrapper
+// @Failure 401 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /users/profile [get]
 func (h *UserHandler) GetProfile(c *gin.Context) {
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
 	// Get user profile
 	profile, err := h.userService.GetProfile(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Profile not found",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Profile not found", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, profile)
+	utils.SuccessResponse(c, http.StatusOK, "Profile retrieved successfully", profile)
 }
 
 // UpdateProfile updates user profile
@@ -67,10 +62,10 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body dto.UpdateProfileRequest true "Profile update data"
-// @Success 200 {object} dto.UserProfileResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.UserProfileResponseWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 401 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /users/profile [put]
 // UpdateProfile handles both JSON and multipart form.
 // If multipart and field "file" present -> upload to Nextcloud and update avatar_url.
@@ -78,10 +73,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
@@ -172,13 +164,13 @@ func validateProfileUpdateRequest(req updateProfileJSONReq) error {
 func updateProfileJSON(h *UserHandler, c *gin.Context, userID string) {
 	var reqBody updateProfileJSONReq
 	if err := c.ShouldBindJSON(&reqBody); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid request", Message: err.Error()})
+		utils.ValidationErrorResponse(c, "Invalid request", err.Error())
 		return
 	}
 
 	// Validate request data
 	if err := validateProfileUpdateRequest(reqBody); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Validation failed", Message: err.Error()})
+		utils.ValidationErrorResponse(c, "Validation failed", err.Error())
 		return
 	}
 
@@ -196,10 +188,10 @@ func updateProfileJSON(h *UserHandler, c *gin.Context, userID string) {
 	// Update profile
 	profile, err := h.userService.UpdateProfile(userID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Update failed", Message: err.Error()})
+		utils.InternalServerErrorResponse(c, "Update failed", err)
 		return
 	}
-	c.JSON(http.StatusOK, profile)
+	utils.SuccessResponse(c, http.StatusOK, "Profile updated successfully", profile)
 }
 
 func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
@@ -225,7 +217,7 @@ func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
 
 	// Validate request data
 	if err := validateProfileUpdateRequest(reqBody); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Validation failed", Message: err.Error()})
+		utils.ValidationErrorResponse(c, "Validation failed", err.Error())
 		return
 	}
 
@@ -241,19 +233,19 @@ func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
 	if fileHeader, err := c.FormFile("file"); err == nil && fileHeader != nil {
 		src, err := fileHeader.Open()
 		if err != nil {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "Invalid file", Message: err.Error()})
+			utils.BadRequestResponse(c, "Invalid file: "+err.Error())
 			return
 		}
 		defer src.Close()
 
 		fs, err := service.NewFileService()
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Storage init failed", Message: err.Error()})
+			utils.InternalServerErrorResponse(c, "Storage initialization failed", err)
 			return
 		}
 		_, url, _, _, _, err := fs.UploadImage(c, "avatars", fileHeader.Filename, src)
 		if err != nil {
-			c.JSON(http.StatusUnsupportedMediaType, dto.ErrorResponse{Error: "Upload failed", Message: err.Error()})
+			utils.ErrorResponse(c, http.StatusUnsupportedMediaType, utils.ErrCodeInvalidInput, "Upload failed", err)
 			return
 		}
 		// Store the full Nextcloud URL
@@ -273,10 +265,10 @@ func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
 
 	profile, err := h.userService.UpdateProfile(userID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "Update failed", Message: err.Error()})
+		utils.InternalServerErrorResponse(c, "Update failed", err)
 		return
 	}
-	c.JSON(http.StatusOK, profile)
+	utils.SuccessResponse(c, http.StatusOK, "Profile updated successfully", profile)
 }
 
 // DeleteProfile deletes user profile
@@ -285,34 +277,26 @@ func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
 // @Tags users
 // @Security BearerAuth
 // @Produce json
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 401 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /users/profile [delete]
 func (h *UserHandler) DeleteProfile(c *gin.Context) {
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
 	// Delete profile
 	err := h.userService.DeleteProfile(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Delete failed",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Delete failed", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Profile deleted successfully",
-	})
+	utils.SendSuccessResponse(c, "Profile deleted successfully", nil)
 }
 
 // GetSetupStatus checks if user has completed initial setup
@@ -321,35 +305,26 @@ func (h *UserHandler) DeleteProfile(c *gin.Context) {
 // @Tags users
 // @Security BearerAuth
 // @Produce json
-// @Success 200 {object} dto.SetupStatusResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SetupStatusResponseWrapper
+// @Failure 401 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /users/setup-status [get]
 func (h *UserHandler) GetSetupStatus(c *gin.Context) {
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
 	// Check setup status
 	setupCompleted, err := h.userService.CheckSetupStatus(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to check setup status",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to check setup status", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"data": dto.SetupStatusResponse{
-			SetupCompleted: setupCompleted,
-		},
-		"message": "Setup status retrieved successfully",
+	utils.SendSuccessResponse(c, "Setup status retrieved successfully", dto.SetupStatusResponse{
+		SetupCompleted: setupCompleted,
 	})
 }

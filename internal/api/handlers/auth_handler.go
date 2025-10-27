@@ -47,34 +47,26 @@ func (h *AuthHandler) StopCleanup() {
 // @Accept json
 // @Produce json
 // @Param request body dto.RegisterRequest true "Registration data"
-// @Success 200 {object} dto.AuthResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 409 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 409 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /auth/register [post]
 func (h *AuthHandler) Register(c *gin.Context) {
 	var req dto.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-		})
+		utils.ValidationErrorResponse(c, "Invalid request format", err.Error())
 		return
 	}
 
 	// Send email verification OTP
 	err := h.authService.SendEmailVerificationOTP(req.Email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to send verification OTP",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to send verification OTP", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Verification OTP sent to your email",
-	})
+	utils.SendSuccessResponse(c, "Verification OTP sent to your email", nil)
 }
 
 // Login handles user login
@@ -84,38 +76,29 @@ func (h *AuthHandler) Register(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body dto.LoginRequest true "Login data"
-// @Success 200 {object} dto.AuthResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.AuthResponseWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 401 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /auth/login [post]
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-		})
+		utils.ValidationErrorResponse(c, "Invalid request format", err.Error())
 		return
 	}
 
 	// Authenticate user
 	user, err := h.authService.Login(req.Email, req.Password)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Invalid credentials",
-			Message: "Email or password is incorrect",
-		})
+		utils.ErrorResponse(c, http.StatusUnauthorized, utils.ErrCodeAuthenticationFailed, "Email or password is incorrect", nil)
 		return
 	}
 
 	// Generate JWT token
 	token, err := utils.GenerateToken(user.ID.String(), *user.Email, string(user.Provider))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Token generation failed",
-			Message: "Failed to generate authentication token",
-		})
+		utils.InternalServerErrorResponse(c, "Failed to generate authentication token", err)
 		return
 	}
 
@@ -124,7 +107,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	user.LastLoginAt = &now
 	database.GetDB().Save(user)
 
-	c.JSON(http.StatusOK, dto.AuthResponse{
+	utils.SuccessResponse(c, http.StatusOK, "Login successful", dto.AuthResponse{
 		Token: token,
 		User: dto.UserResponse{
 			ID:            user.ID.String(),
@@ -142,8 +125,8 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // @Description Get Google OAuth authorization URL
 // @Tags auth
 // @Produce json
-// @Success 200 {object} dto.GoogleAuthResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.GoogleAuthResponseWrapper
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /auth/google [get]
 func (h *AuthHandler) GoogleAuth(c *gin.Context) {
 	// Generate state parameter
@@ -161,17 +144,14 @@ func (h *AuthHandler) GoogleAuth(c *gin.Context) {
 
 	// Check if Google OAuth service is properly configured
 	if h.googleOAuthService == nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "OAuth service error",
-			Message: "Google OAuth service not initialized",
-		})
+		utils.InternalServerErrorResponse(c, "Google OAuth service not initialized", nil)
 		return
 	}
 
 	// Get Google OAuth URL
 	authURL := h.googleOAuthService.GetAuthURL(state)
 
-	c.JSON(http.StatusOK, dto.GoogleAuthResponse{
+	utils.SendSuccessResponse(c, "OAuth URL generated successfully", dto.GoogleAuthResponse{
 		AuthURL: authURL,
 		State:   state,
 	})
@@ -185,9 +165,9 @@ func (h *AuthHandler) GoogleAuth(c *gin.Context) {
 // @Produce json
 // @Param code query string true "Authorization code"
 // @Param state query string true "State parameter"
-// @Success 200 {object} dto.AuthResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.AuthResponseWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /auth/google/callback [get]
 func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 	code := c.Query("code")
@@ -285,33 +265,26 @@ func (h *AuthHandler) GoogleCallback(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body dto.ForgotPasswordRequest true "Email address"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /auth/forgot-password [post]
 func (h *AuthHandler) ForgotPassword(c *gin.Context) {
 	var req dto.ForgotPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-		})
+		utils.ValidationErrorResponse(c, "Invalid request format", err.Error())
 		return
 	}
 
 	// Send password reset OTP
 	err := h.authService.SendPasswordResetOTP(req.Email)
 	if err != nil {
-		// Don't reveal if email exists or not
-		c.JSON(http.StatusOK, dto.SuccessResponse{
-			Message: "If the email exists, a password reset OTP has been sent",
-		})
+		// Don't reveal if email exists or not (security best practice)
+		utils.SendSuccessResponse(c, "If the email exists, a password reset OTP has been sent", nil)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "If the email exists, a password reset OTP has been sent",
-	})
+	utils.SendSuccessResponse(c, "If the email exists, a password reset OTP has been sent", nil)
 }
 
 // ResetPassword handles password reset
@@ -321,33 +294,25 @@ func (h *AuthHandler) ForgotPassword(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body dto.ResetPasswordRequest true "Reset password data with OTP"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /auth/reset-password [post]
 func (h *AuthHandler) ResetPassword(c *gin.Context) {
 	var req dto.ResetPasswordRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-		})
+		utils.ValidationErrorResponse(c, "Invalid request format", err.Error())
 		return
 	}
 
 	// Reset password with OTP
 	err := h.authService.ResetPassword(req.Email, req.OTP, req.Password)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Password reset failed",
-			Message: err.Error(),
-		})
+		utils.BadRequestResponse(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Password has been reset successfully",
-	})
+	utils.SendSuccessResponse(c, "Password has been reset successfully", nil)
 }
 
 // VerifyOTP handles OTP verification
@@ -357,33 +322,25 @@ func (h *AuthHandler) ResetPassword(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body dto.VerifyOTPRequest true "OTP verification data"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /auth/verify-otp [post]
 func (h *AuthHandler) VerifyOTP(c *gin.Context) {
 	var req dto.VerifyOTPRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-		})
+		utils.ValidationErrorResponse(c, "Invalid request format", err.Error())
 		return
 	}
 
 	// Verify OTP
 	err := h.authService.VerifyOTP(req.Email, req.OTP)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "OTP verification failed",
-			Message: err.Error(),
-		})
+		utils.BadRequestResponse(c, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "OTP verified successfully",
-	})
+	utils.SendSuccessResponse(c, "OTP verified successfully", nil)
 }
 
 // VerifyEmail handles email verification with OTP
@@ -393,37 +350,28 @@ func (h *AuthHandler) VerifyOTP(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body dto.RegisterWithOTPRequest true "Email verification data"
-// @Success 201 {object} dto.AuthResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 201 {object} dto.AuthResponseWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /auth/verify-email [post]
 func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 	var req dto.RegisterWithOTPRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-		})
+		utils.ValidationErrorResponse(c, "Invalid request format", err.Error())
 		return
 	}
 
 	// Verify OTP and create user
 	user, err := h.authService.VerifyEmailOTP(req.Email, req.OTP, req.Password, req.DisplayName)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Email verification failed",
-			Message: err.Error(),
-		})
+		utils.BadRequestResponse(c, err.Error())
 		return
 	}
 
 	// Generate JWT token
 	token, err := utils.GenerateToken(user.ID.String(), *user.Email, string(user.Provider))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Token generation failed",
-			Message: "Failed to generate authentication token",
-		})
+		utils.InternalServerErrorResponse(c, "Failed to generate authentication token", err)
 		return
 	}
 
@@ -438,7 +386,7 @@ func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 		}
 	}()
 
-	c.JSON(http.StatusCreated, dto.AuthResponse{
+	utils.SuccessResponse(c, http.StatusCreated, "Registration successful", dto.AuthResponse{
 		Token: token,
 		User: dto.UserResponse{
 			ID:            user.ID.String(),
@@ -458,9 +406,9 @@ func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param request body dto.ResendVerificationRequest true "Email address"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /auth/resend-verification [post]
 func (h *AuthHandler) ResendVerification(c *gin.Context) {
 	var req dto.ResendVerificationRequest
@@ -476,23 +424,15 @@ func (h *AuthHandler) ResendVerification(c *gin.Context) {
 	err := h.authService.ResendEmailVerificationOTP(req.Email)
 	if err != nil {
 		if err.Error() == "user already exists" {
-			c.JSON(http.StatusConflict, dto.ErrorResponse{
-				Error:   "User already exists",
-				Message: "An account with this email already exists",
-			})
+			utils.ErrorResponse(c, http.StatusConflict, utils.ErrCodeResourceExists, "An account with this email already exists", nil)
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to resend verification",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to resend verification", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Verification OTP resent to your email. Please check your inbox.",
-	})
+	utils.SendSuccessResponse(c, "Verification OTP resent to your email. Please check your inbox.", nil)
 }
 
 // Logout handles user logout
@@ -500,15 +440,13 @@ func (h *AuthHandler) ResendVerification(c *gin.Context) {
 // @Description Logout user and invalidate token
 // @Tags auth
 // @Security BearerAuth
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 401 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 401 {object} dto.ErrorAPIResponse
 // @Router /auth/logout [post]
 func (h *AuthHandler) Logout(c *gin.Context) {
 	// In a real implementation, you might want to blacklist the token
 	// For now, we'll just return success
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Logged out successfully",
-	})
+	utils.SendSuccessResponse(c, "Logged out successfully", nil)
 }
 
 // RefreshToken handles token refresh
@@ -516,41 +454,32 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 // @Description Refresh JWT token
 // @Tags auth
 // @Security BearerAuth
-// @Success 200 {object} dto.AuthResponse
-// @Failure 401 {object} dto.ErrorResponse
+// @Success 200 {object} dto.AuthResponseWrapper
+// @Failure 401 {object} dto.ErrorAPIResponse
 // @Router /auth/refresh [post]
 func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	// Get current token from header
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Authorization header required",
-			Message: "Please provide a valid token",
-		})
+		utils.UnauthorizedResponse(c, "Please provide a valid token")
 		return
 	}
 
 	// Extract token
 	token, err := utils.ExtractTokenFromHeader(authHeader)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Invalid token",
-			Message: err.Error(),
-		})
+		utils.ErrorResponse(c, http.StatusUnauthorized, utils.ErrCodeInvalidToken, err.Error(), nil)
 		return
 	}
 
 	// Refresh token
 	newToken, err := utils.RefreshToken(token)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Token refresh failed",
-			Message: err.Error(),
-		})
+		utils.ErrorResponse(c, http.StatusUnauthorized, utils.ErrCodeExpiredToken, "Token refresh failed", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.AuthResponse{
+	utils.SendSuccessResponse(c, "Token refreshed successfully", dto.AuthResponse{
 		Token: newToken,
 	})
 }
@@ -571,7 +500,7 @@ type CheckResponse struct {
 // @Produce json
 // @Security ApiKeyAuth
 // @Success 200 {object} CheckResponse
-// @Failure 401 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /auth/check [get]
 func (h *AuthHandler) Check(c *gin.Context) {
 	// Get user ID from context (set by AuthMiddleware)
@@ -588,10 +517,7 @@ func (h *AuthHandler) Check(c *gin.Context) {
 	var user models.User
 	err := database.GetDB().Where("id = ? AND deleted_at IS NULL", userID).First(&user).Error
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "User not found",
-			Message: "User account not found or has been deleted",
-		})
+		utils.UnauthorizedResponse(c, "User account not found or has been deleted")
 		return
 	}
 
@@ -605,7 +531,7 @@ func (h *AuthHandler) Check(c *gin.Context) {
 		username = *user.DisplayName
 	}
 
-	c.JSON(http.StatusOK, CheckResponse{
+	utils.SendSuccessResponse(c, "Token is valid", CheckResponse{
 		Status:    "valid",
 		Email:     email,
 		Username:  username,

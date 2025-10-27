@@ -1,12 +1,11 @@
 package handlers
 
 import (
-	"net/http"
 	"strconv"
 
 	"TinderTrip-Backend/internal/api/middleware"
-	"TinderTrip-Backend/internal/dto"
 	"TinderTrip-Backend/internal/service"
+	"TinderTrip-Backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,9 +31,9 @@ func NewHistoryHandler() *HistoryHandler {
 // @Param page query int false "Page number"
 // @Param limit query int false "Items per page"
 // @Param completed query bool false "Filter by completion status"
-// @Success 200 {object} dto.HistoryListResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.HistoryListResponseWrapperWithMeta
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /history [get]
 func (h *HistoryHandler) GetHistory(c *gin.Context) {
 	// Get query parameters
@@ -45,10 +44,7 @@ func (h *HistoryHandler) GetHistory(c *gin.Context) {
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
@@ -65,19 +61,11 @@ func (h *HistoryHandler) GetHistory(c *gin.Context) {
 	// Get history
 	history, total, err := h.historyService.GetHistory(userID, page, limit, completedFilter)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to get history",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to get history", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.HistoryListResponse{
-		History: history,
-		Total:   total,
-		Page:    page,
-		Limit:   limit,
-	})
+	utils.PaginatedResponse(c, "History retrieved successfully", history, int64(total), page, limit)
 }
 
 // MarkComplete marks an event as completed
@@ -87,29 +75,23 @@ func (h *HistoryHandler) GetHistory(c *gin.Context) {
 // @Security BearerAuth
 // @Produce json
 // @Param id path string true "Event ID"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /history/{id}/complete [post]
 func (h *HistoryHandler) MarkComplete(c *gin.Context) {
 	eventID := c.Param("id")
 	if eventID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid event ID",
-			Message: "Event ID is required",
-		})
+		utils.BadRequestResponse(c, "Event ID is required")
 		return
 	}
 
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
@@ -117,28 +99,17 @@ func (h *HistoryHandler) MarkComplete(c *gin.Context) {
 	err := h.historyService.MarkComplete(eventID, userID)
 	if err != nil {
 		if err.Error() == "event not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Event not found",
-				Message: err.Error(),
-			})
+			utils.NotFoundResponse(c, "Event not found")
 			return
 		}
 		if err.Error() == "history not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "History not found",
-				Message: "You haven't participated in this event",
-			})
+			utils.NotFoundResponse(c, "You haven't participated in this event")
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to mark as complete",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to mark as complete", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Event marked as completed",
-	})
+	utils.SendSuccessResponse(c, "Event marked as completed", nil)
 }

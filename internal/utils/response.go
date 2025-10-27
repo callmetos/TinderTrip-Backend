@@ -2,83 +2,150 @@ package utils
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
-// Response represents a standard API response
-type Response struct {
-	Success bool        `json:"success"`
-	Message string      `json:"message,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
-	Error   string      `json:"error,omitempty"`
+// Error codes for machine-readable errors
+const (
+	ErrCodeValidation              = "VALIDATION_ERROR"
+	ErrCodeUnauthorized            = "UNAUTHORIZED"
+	ErrCodeForbidden               = "FORBIDDEN"
+	ErrCodeNotFound                = "NOT_FOUND"
+	ErrCodeConflict                = "CONFLICT"
+	ErrCodeTooManyRequests         = "RATE_LIMIT_EXCEEDED"
+	ErrCodeBadRequest              = "BAD_REQUEST"
+	ErrCodeInternalServer          = "INTERNAL_SERVER_ERROR"
+	ErrCodeServiceUnavailable      = "SERVICE_UNAVAILABLE"
+	ErrCodeAuthenticationFailed    = "AUTHENTICATION_FAILED"
+	ErrCodeInvalidToken            = "INVALID_TOKEN"
+	ErrCodeExpiredToken            = "EXPIRED_TOKEN"
+	ErrCodeInsufficientPermissions = "INSUFFICIENT_PERMISSIONS"
+	ErrCodeResourceExists          = "RESOURCE_ALREADY_EXISTS"
+	ErrCodeInvalidInput            = "INVALID_INPUT"
+	ErrCodeDatabaseError           = "DATABASE_ERROR"
+	ErrCodeExternalService         = "EXTERNAL_SERVICE_ERROR"
+)
+
+// Request ID key for context
+const RequestIDKey = "request_id"
+
+// APIResponse represents a production-grade API response
+type APIResponse struct {
+	Success   bool        `json:"success"`
+	RequestID string      `json:"request_id"`
+	Timestamp string      `json:"timestamp"`
+	Code      string      `json:"code,omitempty"`
+	Message   string      `json:"message"`
+	Data      interface{} `json:"data,omitempty"`
+	Errors    interface{} `json:"errors,omitempty"`
+	Meta      *Meta       `json:"meta,omitempty"`
+}
+
+// Meta represents pagination and additional metadata
+type Meta struct {
+	Page       *int   `json:"page,omitempty"`
+	Limit      *int   `json:"limit,omitempty"`
+	Total      *int64 `json:"total,omitempty"`
+	TotalPages *int   `json:"total_pages,omitempty"`
+}
+
+// ValidationError represents a field-level validation error
+type ValidationError struct {
+	Field   string `json:"field"`
+	Message string `json:"message"`
+}
+
+// GetRequestID gets or creates a request ID
+func GetRequestID(c *gin.Context) string {
+	if requestID, exists := c.Get(RequestIDKey); exists {
+		if id, ok := requestID.(string); ok {
+			return id
+		}
+	}
+	// Fallback: create new UUID
+	return uuid.New().String()
+}
+
+// buildResponse creates a base API response
+func buildResponse(c *gin.Context, success bool, code, message string) APIResponse {
+	return APIResponse{
+		Success:   success,
+		RequestID: GetRequestID(c),
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+		Code:      code,
+		Message:   message,
+	}
 }
 
 // SuccessResponse sends a success response
 func SuccessResponse(c *gin.Context, statusCode int, message string, data interface{}) {
-	c.JSON(statusCode, Response{
-		Success: true,
-		Message: message,
-		Data:    data,
-	})
+	response := buildResponse(c, true, "", message)
+	response.Data = data
+	c.JSON(statusCode, response)
+}
+
+// SuccessWithMetaResponse sends a success response with metadata
+func SuccessWithMetaResponse(c *gin.Context, statusCode int, message string, data interface{}, meta *Meta) {
+	response := buildResponse(c, true, "", message)
+	response.Data = data
+	response.Meta = meta
+	c.JSON(statusCode, response)
 }
 
 // ErrorResponse sends an error response
-func ErrorResponse(c *gin.Context, statusCode int, message string, err error) {
-	response := Response{
-		Success: false,
-		Message: message,
-	}
+func ErrorResponse(c *gin.Context, statusCode int, code, message string, err error) {
+	response := buildResponse(c, false, code, message)
 
-	if err != nil {
-		response.Error = err.Error()
+	// In production, don't expose internal error details
+	if err != nil && statusCode == http.StatusInternalServerError {
+		Logger().WithField("request_id", response.RequestID).
+			WithField("error", err.Error()).
+			Error("Internal server error")
+		// Don't send internal error details to client in production
+	} else if err != nil {
+		response.Errors = err.Error()
 	}
 
 	c.JSON(statusCode, response)
 }
 
 // ValidationErrorResponse sends a validation error response
-func ValidationErrorResponse(c *gin.Context, message string, errors map[string]string) {
-	c.JSON(http.StatusBadRequest, Response{
-		Success: false,
-		Message: message,
-		Data:    errors,
-	})
+func ValidationErrorResponse(c *gin.Context, message string, errors interface{}) {
+	response := buildResponse(c, false, ErrCodeValidation, message)
+	response.Errors = errors
+	c.JSON(http.StatusBadRequest, response)
 }
 
 // NotFoundResponse sends a not found response
 func NotFoundResponse(c *gin.Context, message string) {
-	c.JSON(http.StatusNotFound, Response{
-		Success: false,
-		Message: message,
-	})
+	response := buildResponse(c, false, ErrCodeNotFound, message)
+	c.JSON(http.StatusNotFound, response)
 }
 
 // UnauthorizedResponse sends an unauthorized response
 func UnauthorizedResponse(c *gin.Context, message string) {
-	c.JSON(http.StatusUnauthorized, Response{
-		Success: false,
-		Message: message,
-	})
+	response := buildResponse(c, false, ErrCodeUnauthorized, message)
+	c.JSON(http.StatusUnauthorized, response)
 }
 
 // ForbiddenResponse sends a forbidden response
 func ForbiddenResponse(c *gin.Context, message string) {
-	c.JSON(http.StatusForbidden, Response{
-		Success: false,
-		Message: message,
-	})
+	response := buildResponse(c, false, ErrCodeForbidden, message)
+	c.JSON(http.StatusForbidden, response)
 }
 
 // InternalServerErrorResponse sends an internal server error response
 func InternalServerErrorResponse(c *gin.Context, message string, err error) {
-	response := Response{
-		Success: false,
-		Message: message,
-	}
+	response := buildResponse(c, false, ErrCodeInternalServer, message)
 
+	// Log the actual error but don't expose to client
 	if err != nil {
-		response.Error = err.Error()
+		Logger().WithField("request_id", response.RequestID).
+			WithField("error", err.Error()).
+			Error("Internal server error")
 	}
 
 	c.JSON(http.StatusInternalServerError, response)
@@ -86,115 +153,110 @@ func InternalServerErrorResponse(c *gin.Context, message string, err error) {
 
 // BadRequestResponse sends a bad request response
 func BadRequestResponse(c *gin.Context, message string) {
-	c.JSON(http.StatusBadRequest, Response{
-		Success: false,
-		Message: message,
-	})
+	response := buildResponse(c, false, ErrCodeBadRequest, message)
+	c.JSON(http.StatusBadRequest, response)
 }
 
 // ConflictResponse sends a conflict response
 func ConflictResponse(c *gin.Context, message string) {
-	c.JSON(http.StatusConflict, Response{
-		Success: false,
-		Message: message,
-	})
+	response := buildResponse(c, false, ErrCodeConflict, message)
+	c.JSON(http.StatusConflict, response)
 }
 
 // TooManyRequestsResponse sends a too many requests response
 func TooManyRequestsResponse(c *gin.Context, message string) {
-	c.JSON(http.StatusTooManyRequests, Response{
-		Success: false,
-		Message: message,
-	})
+	response := buildResponse(c, false, ErrCodeTooManyRequests, message)
+	c.JSON(http.StatusTooManyRequests, response)
 }
 
-// PaginationResponse represents a paginated response
-type PaginationResponse struct {
-	Success    bool        `json:"success"`
-	Message    string      `json:"message,omitempty"`
-	Data       interface{} `json:"data"`
-	Total      int64       `json:"total"`
-	Page       int         `json:"page"`
-	Limit      int         `json:"limit"`
-	TotalPages int         `json:"total_pages"`
+// ServiceUnavailableResponse sends a service unavailable response
+func ServiceUnavailableResponse(c *gin.Context, message string) {
+	response := buildResponse(c, false, ErrCodeServiceUnavailable, message)
+	c.JSON(http.StatusServiceUnavailable, response)
 }
 
-// SendPaginatedResponse sends a paginated response
-func SendPaginatedResponse(c *gin.Context, data interface{}, total int64, page, limit int) {
+// PaginatedResponse sends a paginated success response
+func PaginatedResponse(c *gin.Context, message string, data interface{}, total int64, page, limit int) {
 	totalPages := int((total + int64(limit) - 1) / int64(limit))
 
-	c.JSON(http.StatusOK, PaginationResponse{
-		Success:    true,
-		Message:    "Data retrieved successfully",
-		Data:       data,
-		Total:      total,
-		Page:       page,
-		Limit:      limit,
-		TotalPages: totalPages,
-	})
+	meta := &Meta{
+		Page:       &page,
+		Limit:      &limit,
+		Total:      &total,
+		TotalPages: &totalPages,
+	}
+
+	SuccessWithMetaResponse(c, http.StatusOK, message, data, meta)
 }
 
-// SendSuccessResponse sends a success response
+// Legacy wrapper functions for backward compatibility
 func SendSuccessResponse(c *gin.Context, message string, data interface{}) {
 	SuccessResponse(c, http.StatusOK, message, data)
 }
 
-// SendErrorResponse sends an error response
 func SendErrorResponse(c *gin.Context, statusCode int, message string, err error) {
-	ErrorResponse(c, statusCode, message, err)
+	code := ErrCodeInternalServer
+	switch statusCode {
+	case http.StatusBadRequest:
+		code = ErrCodeBadRequest
+	case http.StatusUnauthorized:
+		code = ErrCodeUnauthorized
+	case http.StatusForbidden:
+		code = ErrCodeForbidden
+	case http.StatusNotFound:
+		code = ErrCodeNotFound
+	case http.StatusConflict:
+		code = ErrCodeConflict
+	case http.StatusTooManyRequests:
+		code = ErrCodeTooManyRequests
+	}
+	ErrorResponse(c, statusCode, code, message, err)
 }
 
-// SendValidationErrorResponse sends a validation error response
-func SendValidationErrorResponse(c *gin.Context, message string, errors map[string]string) {
+func SendValidationErrorResponse(c *gin.Context, message string, errors interface{}) {
 	ValidationErrorResponse(c, message, errors)
 }
 
-// SendNotFoundResponse sends a not found response
 func SendNotFoundResponse(c *gin.Context, message string) {
 	NotFoundResponse(c, message)
 }
 
-// SendUnauthorizedResponse sends an unauthorized response
 func SendUnauthorizedResponse(c *gin.Context, message string) {
 	UnauthorizedResponse(c, message)
 }
 
-// SendForbiddenResponse sends a forbidden response
 func SendForbiddenResponse(c *gin.Context, message string) {
 	ForbiddenResponse(c, message)
 }
 
-// SendInternalServerErrorResponse sends an internal server error response
 func SendInternalServerErrorResponse(c *gin.Context, message string, err error) {
 	InternalServerErrorResponse(c, message, err)
 }
 
-// SendBadRequestResponse sends a bad request response
 func SendBadRequestResponse(c *gin.Context, message string) {
 	BadRequestResponse(c, message)
 }
 
-// SendConflictResponse sends a conflict response
 func SendConflictResponse(c *gin.Context, message string) {
 	ConflictResponse(c, message)
 }
 
-// SendTooManyRequestsResponse sends a too many requests response
 func SendTooManyRequestsResponse(c *gin.Context, message string) {
 	TooManyRequestsResponse(c, message)
 }
 
-// SendCreatedResponse sends a created response
 func SendCreatedResponse(c *gin.Context, message string, data interface{}) {
 	SuccessResponse(c, http.StatusCreated, message, data)
 }
 
-// SendAcceptedResponse sends an accepted response
 func SendAcceptedResponse(c *gin.Context, message string, data interface{}) {
 	SuccessResponse(c, http.StatusAccepted, message, data)
 }
 
-// SendNoContentResponse sends a no content response
 func SendNoContentResponse(c *gin.Context) {
 	c.Status(http.StatusNoContent)
+}
+
+func SendPaginatedResponse(c *gin.Context, data interface{}, total int64, page, limit int) {
+	PaginatedResponse(c, "Data retrieved successfully", data, total, page, limit)
 }

@@ -25,6 +25,7 @@ import (
 
 // @host api.tindertrip.phitik.com
 // @BasePath /api/v1
+// @schemes https http
 
 // @securityDefinitions.apikey BearerAuth
 // @in header

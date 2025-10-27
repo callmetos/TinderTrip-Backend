@@ -37,9 +37,9 @@ func NewEventHandler() *EventHandler {
 // @Param limit query int false "Items per page"
 // @Param event_type query string false "Event type filter"
 // @Param status query string false "Event status filter"
-// @Success 200 {object} dto.EventListResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.EventListResponseWrapper
+// @Failure 401 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /events [get]
 func (h *EventHandler) GetEvents(c *gin.Context) {
 	// Get query parameters
@@ -54,19 +54,11 @@ func (h *EventHandler) GetEvents(c *gin.Context) {
 	// Get events
 	events, total, err := h.eventService.GetEvents(userID, page, limit, eventType, status)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to get events",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to get events", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.EventListResponse{
-		Events: events,
-		Total:  total,
-		Page:   page,
-		Limit:  limit,
-	})
+	utils.PaginatedResponse(c, "Events retrieved successfully", events, int64(total), page, limit)
 }
 
 // GetPublicEvents gets public events (no authentication required)
@@ -77,8 +69,8 @@ func (h *EventHandler) GetEvents(c *gin.Context) {
 // @Param page query int false "Page number"
 // @Param limit query int false "Items per page"
 // @Param event_type query string false "Event type filter"
-// @Success 200 {object} dto.EventListResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.EventListResponseWrapper
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /public/events [get]
 func (h *EventHandler) GetPublicEvents(c *gin.Context) {
 	// Get query parameters
@@ -89,19 +81,11 @@ func (h *EventHandler) GetPublicEvents(c *gin.Context) {
 	// Get public events
 	events, total, err := h.eventService.GetPublicEvents(page, limit, eventType)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to get events",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to get events", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.EventListResponse{
-		Events: events,
-		Total:  total,
-		Page:   page,
-		Limit:  limit,
-	})
+	utils.PaginatedResponse(c, "Events retrieved successfully", events, int64(total), page, limit)
 }
 
 // GetEvent gets a specific event
@@ -111,19 +95,16 @@ func (h *EventHandler) GetPublicEvents(c *gin.Context) {
 // @Security BearerAuth
 // @Produce json
 // @Param id path string true "Event ID"
-// @Success 200 {object} dto.EventResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.EventResponseWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 401 {object} dto.ErrorAPIResponse
+// @Failure 404 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /events/{id} [get]
 func (h *EventHandler) GetEvent(c *gin.Context) {
 	eventID := c.Param("id")
 	if eventID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid event ID",
-			Message: "Event ID is required",
-		})
+		utils.BadRequestResponse(c, "Event ID is required")
 		return
 	}
 
@@ -134,20 +115,14 @@ func (h *EventHandler) GetEvent(c *gin.Context) {
 	event, err := h.eventService.GetEvent(eventID, userID)
 	if err != nil {
 		if err.Error() == "event not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Event not found",
-				Message: "The requested event does not exist",
-			})
+			utils.NotFoundResponse(c, "The requested event does not exist")
 		} else {
-			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-				Error:   "Failed to get event",
-				Message: err.Error(),
-			})
+			utils.InternalServerErrorResponse(c, "Failed to get event", err)
 		}
 		return
 	}
 
-	c.JSON(http.StatusOK, event)
+	utils.SuccessResponse(c, http.StatusOK, "Event retrieved successfully", event)
 }
 
 // GetPublicEvent gets a specific public event
@@ -156,18 +131,15 @@ func (h *EventHandler) GetEvent(c *gin.Context) {
 // @Tags events
 // @Produce json
 // @Param id path string true "Event ID"
-// @Success 200 {object} dto.EventResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.EventResponseWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 404 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /public/events/{id} [get]
 func (h *EventHandler) GetPublicEvent(c *gin.Context) {
 	eventID := c.Param("id")
 	if eventID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid event ID",
-			Message: "Event ID is required",
-		})
+		utils.BadRequestResponse(c, "Event ID is required")
 		return
 	}
 
@@ -175,20 +147,14 @@ func (h *EventHandler) GetPublicEvent(c *gin.Context) {
 	event, err := h.eventService.GetPublicEvent(eventID)
 	if err != nil {
 		if err.Error() == "event not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Event not found",
-				Message: "The requested event does not exist or is not public",
-			})
+			utils.NotFoundResponse(c, "The requested event does not exist or is not public")
 		} else {
-			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-				Error:   "Failed to get event",
-				Message: err.Error(),
-			})
+			utils.InternalServerErrorResponse(c, "Failed to get event", err)
 		}
 		return
 	}
 
-	c.JSON(http.StatusOK, event)
+	utils.SuccessResponse(c, http.StatusOK, "Event retrieved successfully", event)
 }
 
 // CreateEvent creates a new event
@@ -212,19 +178,16 @@ func (h *EventHandler) GetPublicEvent(c *gin.Context) {
 // @Param tag_ids formData string false "Tag IDs comma separated (multipart)"
 // @Param file formData file false "Cover image file (multipart)"
 // @Param files[] formData file false "Event photos (multipart)"
-// @Success 201 {object} dto.EventResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 201 {object} dto.EventResponseWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events [post]
 func (h *EventHandler) CreateEvent(c *gin.Context) {
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
@@ -240,10 +203,7 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 		var err error
 		req, coverImageURL, photoURLs, err = h.parseCreateEventMultipart(c)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-				Error:   "Invalid request",
-				Message: err.Error(),
-			})
+			utils.BadRequestResponse(c, "Invalid request: "+err.Error())
 			return
 		}
 
@@ -254,10 +214,7 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 	} else {
 		// Handle JSON request
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-				Error:   "Invalid request",
-				Message: err.Error(),
-			})
+			utils.ValidationErrorResponse(c, "Invalid request", err.Error())
 			return
 		}
 	}
@@ -265,10 +222,7 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 	// Create event
 	event, err := h.eventService.CreateEvent(userID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to create event",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to create event", err)
 		return
 	}
 
@@ -280,7 +234,7 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusCreated, event)
+	utils.SuccessResponse(c, http.StatusCreated, "Event created successfully", event)
 }
 
 // UpdateEvent updates an event
@@ -292,39 +246,30 @@ func (h *EventHandler) CreateEvent(c *gin.Context) {
 // @Produce json
 // @Param id path string true "Event ID"
 // @Param request body dto.UpdateEventRequest true "Event update data"
-// @Success 200 {object} dto.EventResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 403 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.EventResponseWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events/{id} [put]
 func (h *EventHandler) UpdateEvent(c *gin.Context) {
 	eventID := c.Param("id")
 	if eventID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid event ID",
-			Message: "Event ID is required",
-		})
+		utils.BadRequestResponse(c, "Event ID is required")
 		return
 	}
 
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
 	var req dto.UpdateEventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-		})
+		utils.ValidationErrorResponse(c, "Invalid request", err.Error())
 		return
 	}
 
@@ -332,28 +277,19 @@ func (h *EventHandler) UpdateEvent(c *gin.Context) {
 	event, err := h.eventService.UpdateEvent(eventID, userID, req)
 	if err != nil {
 		if err.Error() == "event not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Event not found",
-				Message: err.Error(),
-			})
+			utils.NotFoundResponse(c, "Event not found")
 			return
 		}
 		if err.Error() == "unauthorized" {
-			c.JSON(http.StatusForbidden, dto.ErrorResponse{
-				Error:   "Unauthorized",
-				Message: "You don't have permission to update this event",
-			})
+			utils.ForbiddenResponse(c, "You don't have permission to update this event")
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to update event",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to update event", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, event)
+	utils.SuccessResponse(c, http.StatusOK, "Event updated successfully", event)
 }
 
 // DeleteEvent deletes an event
@@ -363,30 +299,24 @@ func (h *EventHandler) UpdateEvent(c *gin.Context) {
 // @Security BearerAuth
 // @Produce json
 // @Param id path string true "Event ID"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 403 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events/{id} [delete]
 func (h *EventHandler) DeleteEvent(c *gin.Context) {
 	eventID := c.Param("id")
 	if eventID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid event ID",
-			Message: "Event ID is required",
-		})
+		utils.BadRequestResponse(c, "Event ID is required")
 		return
 	}
 
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
@@ -394,30 +324,19 @@ func (h *EventHandler) DeleteEvent(c *gin.Context) {
 	err := h.eventService.DeleteEvent(eventID, userID)
 	if err != nil {
 		if err.Error() == "event not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Event not found",
-				Message: err.Error(),
-			})
+			utils.NotFoundResponse(c, "Event not found")
 			return
 		}
 		if err.Error() == "unauthorized" {
-			c.JSON(http.StatusForbidden, dto.ErrorResponse{
-				Error:   "Unauthorized",
-				Message: "You don't have permission to delete this event",
-			})
+			utils.ForbiddenResponse(c, "You don't have permission to delete this event")
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to delete event",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to delete event", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Event deleted successfully",
-	})
+	utils.SendSuccessResponse(c, "Event deleted successfully", nil)
 }
 
 // JoinEvent joins an event
@@ -427,29 +346,23 @@ func (h *EventHandler) DeleteEvent(c *gin.Context) {
 // @Security BearerAuth
 // @Produce json
 // @Param id path string true "Event ID"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events/{id}/join [post]
 func (h *EventHandler) JoinEvent(c *gin.Context) {
 	eventID := c.Param("id")
 	if eventID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid event ID",
-			Message: "Event ID is required",
-		})
+		utils.BadRequestResponse(c, "Event ID is required")
 		return
 	}
 
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
@@ -457,27 +370,16 @@ func (h *EventHandler) JoinEvent(c *gin.Context) {
 	err := h.eventService.JoinEvent(eventID, userID)
 	if err != nil {
 		if err.Error() == "event not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Event not found",
-				Message: "The requested event does not exist",
-			})
+			utils.NotFoundResponse(c, "The requested event does not exist")
 		} else if err.Error() == "user is already a member" {
-			c.JSON(http.StatusConflict, dto.ErrorResponse{
-				Error:   "Already a member",
-				Message: "You are already a member of this event",
-			})
+			utils.ConflictResponse(c, "You are already a member of this event")
 		} else {
-			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-				Error:   "Failed to join event",
-				Message: err.Error(),
-			})
+			utils.InternalServerErrorResponse(c, "Failed to join event", err)
 		}
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Successfully joined the event",
-	})
+	utils.SendSuccessResponse(c, "Successfully joined the event", nil)
 }
 
 // LeaveEvent leaves an event
@@ -487,29 +389,23 @@ func (h *EventHandler) JoinEvent(c *gin.Context) {
 // @Security BearerAuth
 // @Produce json
 // @Param id path string true "Event ID"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events/{id}/leave [post]
 func (h *EventHandler) LeaveEvent(c *gin.Context) {
 	eventID := c.Param("id")
 	if eventID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid event ID",
-			Message: "Event ID is required",
-		})
+		utils.BadRequestResponse(c, "Event ID is required")
 		return
 	}
 
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
@@ -517,27 +413,16 @@ func (h *EventHandler) LeaveEvent(c *gin.Context) {
 	err := h.eventService.LeaveEvent(eventID, userID)
 	if err != nil {
 		if err.Error() == "event not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Event not found",
-				Message: "The requested event does not exist",
-			})
+			utils.NotFoundResponse(c, "The requested event does not exist")
 		} else if err.Error() == "user is not a member" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Not a member",
-				Message: "You are not a member of this event",
-			})
+			utils.NotFoundResponse(c, "You are not a member of this event")
 		} else {
-			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-				Error:   "Failed to leave event",
-				Message: err.Error(),
-			})
+			utils.InternalServerErrorResponse(c, "Failed to leave event", err)
 		}
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Successfully left the event",
-	})
+	utils.SendSuccessResponse(c, "Successfully left the event", nil)
 }
 
 // ConfirmEvent confirms participation in an event
@@ -547,30 +432,24 @@ func (h *EventHandler) LeaveEvent(c *gin.Context) {
 // @Security BearerAuth
 // @Produce json
 // @Param id path string true "Event ID"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
-// @Failure 409 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events/{id}/confirm [post]
 func (h *EventHandler) ConfirmEvent(c *gin.Context) {
 	eventID := c.Param("id")
 	if eventID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid event ID",
-			Message: "Event ID is required",
-		})
+		utils.BadRequestResponse(c, "Event ID is required")
 		return
 	}
 
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
@@ -578,37 +457,23 @@ func (h *EventHandler) ConfirmEvent(c *gin.Context) {
 	err := h.eventService.ConfirmEventParticipation(eventID, userID)
 	if err != nil {
 		if err.Error() == "event not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Event not found",
-				Message: err.Error(),
-			})
+			utils.NotFoundResponse(c, "Event not found")
 			return
 		}
 		if err.Error() == "event is full" {
-			c.JSON(http.StatusConflict, dto.ErrorResponse{
-				Error:   "Event is full",
-				Message: "Cannot confirm participation. Event has reached its capacity.",
-			})
+			utils.ConflictResponse(c, "Cannot confirm participation. Event has reached its capacity.")
 			return
 		}
 		if err.Error() == "member not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Member not found",
-				Message: "You are not a member of this event",
-			})
+			utils.NotFoundResponse(c, "You are not a member of this event")
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to confirm event participation",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to confirm event participation", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Successfully confirmed participation in the event",
-	})
+	utils.SendSuccessResponse(c, "Successfully confirmed participation in the event", nil)
 }
 
 // CancelEvent cancels participation in an event
@@ -618,29 +483,23 @@ func (h *EventHandler) ConfirmEvent(c *gin.Context) {
 // @Security BearerAuth
 // @Produce json
 // @Param id path string true "Event ID"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events/{id}/cancel [post]
 func (h *EventHandler) CancelEvent(c *gin.Context) {
 	eventID := c.Param("id")
 	if eventID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid event ID",
-			Message: "Event ID is required",
-		})
+		utils.BadRequestResponse(c, "Event ID is required")
 		return
 	}
 
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
@@ -648,30 +507,19 @@ func (h *EventHandler) CancelEvent(c *gin.Context) {
 	err := h.eventService.CancelEventParticipation(eventID, userID)
 	if err != nil {
 		if err.Error() == "event not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Event not found",
-				Message: err.Error(),
-			})
+			utils.NotFoundResponse(c, "Event not found")
 			return
 		}
 		if err.Error() == "member not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Member not found",
-				Message: "You are not a member of this event",
-			})
+			utils.NotFoundResponse(c, "You are not a member of this event")
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to cancel event participation",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to cancel event participation", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Successfully cancelled participation in the event",
-	})
+	utils.SendSuccessResponse(c, "Successfully cancelled participation in the event", nil)
 }
 
 // CompleteEvent completes an event (creator only)
@@ -681,30 +529,24 @@ func (h *EventHandler) CancelEvent(c *gin.Context) {
 // @Security BearerAuth
 // @Produce json
 // @Param id path string true "Event ID"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 403 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events/{id}/complete [post]
 func (h *EventHandler) CompleteEvent(c *gin.Context) {
 	eventID := c.Param("id")
 	if eventID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid event ID",
-			Message: "Event ID is required",
-		})
+		utils.BadRequestResponse(c, "Event ID is required")
 		return
 	}
 
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
@@ -712,30 +554,19 @@ func (h *EventHandler) CompleteEvent(c *gin.Context) {
 	err := h.eventService.CompleteEvent(eventID, userID)
 	if err != nil {
 		if err.Error() == "event not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Event not found",
-				Message: err.Error(),
-			})
+			utils.NotFoundResponse(c, "Event not found")
 			return
 		}
 		if err.Error() == "not authorized" {
-			c.JSON(http.StatusForbidden, dto.ErrorResponse{
-				Error:   "Not authorized",
-				Message: "Only the event creator can complete the event",
-			})
+			utils.ForbiddenResponse(c, "Only the event creator can complete the event")
 			return
 		}
 
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to complete event",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to complete event", err)
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Successfully completed the event",
-	})
+	utils.SendSuccessResponse(c, "Successfully completed the event", nil)
 }
 
 // SwipeEvent swipes on an event
@@ -747,38 +578,29 @@ func (h *EventHandler) CompleteEvent(c *gin.Context) {
 // @Produce json
 // @Param id path string true "Event ID"
 // @Param request body dto.SwipeEventRequest true "Swipe data"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 404 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.SuccessMessageWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events/{id}/swipe [post]
 func (h *EventHandler) SwipeEvent(c *gin.Context) {
 	eventID := c.Param("id")
 	if eventID == "" {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid event ID",
-			Message: "Event ID is required",
-		})
+		utils.BadRequestResponse(c, "Event ID is required")
 		return
 	}
 
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
 	var req dto.SwipeEventRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Error:   "Invalid request",
-			Message: err.Error(),
-		})
+		utils.ValidationErrorResponse(c, "Invalid request", err.Error())
 		return
 	}
 
@@ -786,22 +608,14 @@ func (h *EventHandler) SwipeEvent(c *gin.Context) {
 	err := h.eventService.SwipeEvent(eventID, userID, req.Direction)
 	if err != nil {
 		if err.Error() == "event not found" {
-			c.JSON(http.StatusNotFound, dto.ErrorResponse{
-				Error:   "Event not found",
-				Message: "The requested event does not exist",
-			})
+			utils.NotFoundResponse(c, "The requested event does not exist")
 		} else {
-			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-				Error:   "Failed to swipe event",
-				Message: err.Error(),
-			})
+			utils.InternalServerErrorResponse(c, "Failed to swipe event", err)
 		}
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.SuccessResponse{
-		Message: "Swipe recorded successfully",
-	})
+	utils.SendSuccessResponse(c, "Swipe recorded successfully", nil)
 }
 
 // GetEventSuggestions gets event suggestions based on user interests
@@ -812,18 +626,15 @@ func (h *EventHandler) SwipeEvent(c *gin.Context) {
 // @Produce json
 // @Param page query int false "Page number"
 // @Param limit query int false "Items per page"
-// @Success 200 {object} dto.EventSuggestionResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} dto.EventSuggestionResponseWrapper
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events/suggestions [get]
 func (h *EventHandler) GetEventSuggestions(c *gin.Context) {
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Error:   "Unauthorized",
-			Message: "User not authenticated",
-		})
+		utils.UnauthorizedResponse(c, "User not authenticated")
 		return
 	}
 
@@ -834,15 +645,12 @@ func (h *EventHandler) GetEventSuggestions(c *gin.Context) {
 	// Get event suggestions
 	suggestions, total, err := h.eventService.GetEventSuggestions(userID, page, limit)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to get event suggestions",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to get event suggestions", err)
 		return
 	}
 
 	// Send response
-	c.JSON(http.StatusOK, dto.EventSuggestionResponse{
+	utils.SuccessResponse(c, http.StatusOK, "Event suggestions retrieved successfully", dto.EventSuggestionResponse{
 		Events: suggestions,
 		Total:  total,
 		Page:   page,
@@ -859,10 +667,10 @@ func (h *EventHandler) GetEventSuggestions(c *gin.Context) {
 // @Param id path string true "Event ID"
 // @Param file formData file true "Cover image file"
 // @Success 200 {object} map[string]string
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 403 {object} dto.ErrorResponse
-// @Failure 415 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events/{id}/cover [put]
 func (h *EventHandler) UpdateCover(c *gin.Context) {
 	userID, _ := middleware.GetCurrentUserID(c)
@@ -870,33 +678,33 @@ func (h *EventHandler) UpdateCover(c *gin.Context) {
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "file required"})
+		utils.BadRequestResponse(c, "File required")
 		return
 	}
 	src, err := file.Open()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid file"})
+		utils.BadRequestResponse(c, "Invalid file")
 		return
 	}
 	defer src.Close()
 
 	fs, err := service.NewFileService()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "storage init failed"})
+		utils.InternalServerErrorResponse(c, "Storage initialization failed", err)
 		return
 	}
 
 	_, url, _, _, _, err := fs.UploadImage(c, "event_covers", file.Filename, src)
 	if err != nil {
-		c.JSON(http.StatusUnsupportedMediaType, dto.ErrorResponse{Error: err.Error()})
+		utils.ErrorResponse(c, http.StatusUnsupportedMediaType, utils.ErrCodeInvalidInput, "Upload failed", err)
 		return
 	}
 
 	if err := h.eventService.UpdateCoverImageURL(userID, eventID, &url); err != nil {
-		c.JSON(http.StatusForbidden, dto.ErrorResponse{Error: err.Error()})
+		utils.ForbiddenResponse(c, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"cover_image_url": url})
+	utils.SendSuccessResponse(c, "Cover image updated successfully", gin.H{"cover_image_url": url})
 }
 
 // AddPhotos appends photos to event gallery (multipart: files[])
@@ -908,10 +716,10 @@ func (h *EventHandler) UpdateCover(c *gin.Context) {
 // @Param id path string true "Event ID"
 // @Param files[] formData file true "Gallery images (multiple)"
 // @Success 201 {object} map[string][]string
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 403 {object} dto.ErrorResponse
-// @Failure 415 {object} dto.ErrorResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 400 {object} dto.ErrorAPIResponse
 // @Router /events/{id}/photos [post]
 func (h *EventHandler) AddPhotos(c *gin.Context) {
 	userID, _ := middleware.GetCurrentUserID(c)
@@ -919,13 +727,13 @@ func (h *EventHandler) AddPhotos(c *gin.Context) {
 
 	form, err := c.MultipartForm()
 	if err != nil || form.File["files[]"] == nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "files[] required"})
+		utils.BadRequestResponse(c, "files[] required")
 		return
 	}
 
 	fs, err := service.NewFileService()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Error: "storage init failed"})
+		utils.InternalServerErrorResponse(c, "Storage initialization failed", err)
 		return
 	}
 
@@ -933,23 +741,23 @@ func (h *EventHandler) AddPhotos(c *gin.Context) {
 	for _, f := range form.File["files[]"] {
 		src, err := f.Open()
 		if err != nil {
-			c.JSON(http.StatusBadRequest, dto.ErrorResponse{Error: "invalid file"})
+			utils.BadRequestResponse(c, "Invalid file")
 			return
 		}
 		_, url, _, _, _, err := fs.UploadImage(c, "event_photos", f.Filename, src)
 		src.Close()
 		if err != nil {
-			c.JSON(http.StatusUnsupportedMediaType, dto.ErrorResponse{Error: err.Error()})
+			utils.ErrorResponse(c, http.StatusUnsupportedMediaType, utils.ErrCodeInvalidInput, "Upload failed", err)
 			return
 		}
 		urls = append(urls, url)
 	}
 
 	if err := h.eventService.AppendEventPhotos(userID, eventID, urls); err != nil {
-		c.JSON(http.StatusForbidden, dto.ErrorResponse{Error: err.Error()})
+		utils.ForbiddenResponse(c, err.Error())
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{"urls": urls})
+	utils.SuccessResponse(c, http.StatusCreated, "Photos added successfully", gin.H{"urls": urls})
 }
 
 // parseCreateEventMultipart parses multipart form data for event creation
