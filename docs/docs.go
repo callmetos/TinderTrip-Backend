@@ -180,7 +180,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/internal_api_handlers.CheckResponse"
+                            "$ref": "#/definitions/handlers.CheckResponse"
                         }
                     },
                     "400": {
@@ -508,6 +508,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/TinderTrip-Backend_internal_dto.ErrorAPIResponse"
                         }
@@ -4808,7 +4814,7 @@ const docTemplate = `{
                 }
             }
         },
-        "internal_api_handlers.CheckResponse": {
+        "handlers.CheckResponse": {
             "type": "object",
             "properties": {
                 "created_at": {

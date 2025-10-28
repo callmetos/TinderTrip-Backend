@@ -62,6 +62,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	// Send email verification OTP
 	err := h.authService.SendEmailVerificationOTP(req.Email)
 	if err != nil {
+		// Check if error is due to user already exists
+		if err.Error() == "user already exists" {
+			utils.ConflictResponse(c, "An account with this email already exists")
+			return
+		}
 		utils.InternalServerErrorResponse(c, "Failed to send verification OTP", err)
 		return
 	}
@@ -423,6 +428,7 @@ func (h *AuthHandler) VerifyEmail(c *gin.Context) {
 // @Param request body dto.ResendVerificationRequest true "Email address"
 // @Success 200 {object} dto.SuccessMessageWrapper
 // @Failure 400 {object} dto.ErrorAPIResponse
+// @Failure 409 {object} dto.ErrorAPIResponse
 // @Failure 500 {object} dto.ErrorAPIResponse
 // @Router /auth/resend-verification [post]
 func (h *AuthHandler) ResendVerification(c *gin.Context) {
