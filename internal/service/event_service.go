@@ -98,6 +98,65 @@ func (s *EventService) GetPublicEvents(page, limit int, eventType string) ([]dto
 	return responses, total, nil
 }
 
+// GetJoinedEvents gets events that the user has joined (as a member)
+func (s *EventService) GetJoinedEvents(userID string, page, limit int, memberStatus string) ([]dto.EventResponse, int64, error) {
+	// Parse user UUID
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, 0, fmt.Errorf("invalid user ID: %w", err)
+	}
+
+	// Build query to get event IDs where user is a member
+	memberQuery := database.GetDB().Model(&models.EventMember{}).
+		Select("event_id").
+		Where("user_id = ?", userUUID)
+
+	// Apply member status filter if provided
+	if memberStatus != "" {
+		memberQuery = memberQuery.Where("status = ?", memberStatus)
+	}
+
+	// Get event IDs
+	var eventIDs []uuid.UUID
+	err = memberQuery.Pluck("event_id", &eventIDs).Error
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get joined event IDs: %w", err)
+	}
+
+	// If no events found, return empty list
+	if len(eventIDs) == 0 {
+		return []dto.EventResponse{}, 0, nil
+	}
+
+	// Build main query for events
+	query := database.GetDB().Model(&models.Event{}).
+		Where("id IN (?) AND deleted_at IS NULL", eventIDs)
+
+	// Get total count
+	var total int64
+	err = query.Count(&total).Error
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to count joined events: %w", err)
+	}
+
+	// Get events with pagination
+	var events []models.Event
+	offset := (page - 1) * limit
+	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
+		Offset(offset).Limit(limit).Order("created_at DESC").Find(&events).Error
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get joined events: %w", err)
+	}
+
+	// Convert to response DTOs
+	responses := make([]dto.EventResponse, len(events))
+	for i, event := range events {
+		responses[i] = s.convertEventToResponse(event, userID)
+	}
+
+	return responses, total, nil
+}
+
 // GetEvent gets a specific event
 func (s *EventService) GetEvent(eventID, userID string) (*dto.EventResponse, error) {
 	// Parse event ID

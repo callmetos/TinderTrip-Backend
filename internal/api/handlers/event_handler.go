@@ -61,6 +61,42 @@ func (h *EventHandler) GetEvents(c *gin.Context) {
 	utils.PaginatedResponse(c, "Events retrieved successfully", events, int64(total), page, limit)
 }
 
+// GetJoinedEvents gets events that the user has joined
+// @Summary Get joined events
+// @Description Get events that the authenticated user has joined as a member
+// @Tags events
+// @Security BearerAuth
+// @Produce json
+// @Param page query int false "Page number"
+// @Param limit query int false "Items per page"
+// @Param status query string false "Member status filter (pending, confirmed, declined)"
+// @Success 200 {object} dto.EventListResponseWrapper
+// @Failure 401 {object} dto.ErrorAPIResponse
+// @Failure 500 {object} dto.ErrorAPIResponse
+// @Router /events/joined [get]
+func (h *EventHandler) GetJoinedEvents(c *gin.Context) {
+	// Get user ID from context
+	userID, exists := middleware.GetCurrentUserID(c)
+	if !exists {
+		utils.UnauthorizedResponse(c, "User not authenticated")
+		return
+	}
+
+	// Get query parameters
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	memberStatus := c.Query("status")
+
+	// Get joined events
+	events, total, err := h.eventService.GetJoinedEvents(userID, page, limit, memberStatus)
+	if err != nil {
+		utils.InternalServerErrorResponse(c, "Failed to get joined events", err)
+		return
+	}
+
+	utils.PaginatedResponse(c, "Joined events retrieved successfully", events, int64(total), page, limit)
+}
+
 // GetPublicEvents gets public events (no authentication required)
 // @Summary Get public events
 // @Description Get public events without authentication

@@ -99,6 +99,8 @@ func SetupRoutes(router *gin.Engine) {
 		events := protected.Group("/events")
 		{
 			events.GET("", eventHandler.GetEvents)
+			events.GET("/joined", eventHandler.GetJoinedEvents)
+			events.GET("/suggestions", eventHandler.GetEventSuggestions)
 			events.POST("", eventHandler.CreateEvent)
 			events.GET("/:id", eventHandler.GetEvent)
 			events.PUT("/:id", eventHandler.UpdateEvent)
@@ -111,7 +113,6 @@ func SetupRoutes(router *gin.Engine) {
 			events.POST("/:id/swipe", eventHandler.SwipeEvent)
 			events.PUT("/:id/cover", eventHandler.UpdateCover)
 			events.POST("/:id/photos", eventHandler.AddPhotos)
-			events.GET("/suggestions", eventHandler.GetEventSuggestions)
 		}
 
 		// Chat routes
