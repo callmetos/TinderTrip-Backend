@@ -90,3 +90,8 @@ func ClosePostgres() error {
 func GetDB() *gorm.DB {
 	return DB
 }
+
+// SetTestDB sets a test database instance (for testing purposes only)
+func SetTestDB(testDB *gorm.DB) {
+	DB = testDB
+}
