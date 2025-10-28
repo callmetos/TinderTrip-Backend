@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
@@ -74,14 +75,25 @@ func setupTestRouter(db *gorm.DB) *gin.Engine {
 
 // loadTestConfig loads test configuration
 func loadTestConfig(t *testing.T) {
-	// Try to load configuration from environment
-	// If config is not available (e.g., in CI without .env), skip the test
-	defer func() {
-		if r := recover(); r != nil {
-			t.Skip("Skipping integration test: Configuration not available (missing .env file or environment variables)")
-		}
-	}()
+	// Check if required environment variables are set
+	// If not available (e.g., in CI without .env), skip the test
+	requiredEnvVars := []string{
+		"DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME",
+		"JWT_SECRET", "SERVER_PORT", "SERVER_HOST",
+	}
 
+	missingVars := []string{}
+	for _, envVar := range requiredEnvVars {
+		if os.Getenv(envVar) == "" {
+			missingVars = append(missingVars, envVar)
+		}
+	}
+
+	if len(missingVars) > 0 {
+		t.Skipf("Skipping integration test: Missing required environment variables: %v", missingVars)
+	}
+
+	// Load configuration
 	config.LoadConfig()
 }
 
