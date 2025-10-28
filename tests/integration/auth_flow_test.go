@@ -26,10 +26,14 @@ import (
 func setupTestDB(t *testing.T) *gorm.DB {
 	// Connect to existing database
 	err := database.ConnectPostgres()
-	require.NoError(t, err, "Failed to connect to test database")
+	if err != nil {
+		t.Skipf("Skipping integration test: Failed to connect to database: %v", err)
+	}
 
 	db := database.GetDB()
-	require.NotNil(t, db, "Database connection should not be nil")
+	if db == nil {
+		t.Skip("Skipping integration test: Database connection is nil")
+	}
 
 	return db
 }
@@ -70,7 +74,14 @@ func setupTestRouter(db *gorm.DB) *gin.Engine {
 
 // loadTestConfig loads test configuration
 func loadTestConfig(t *testing.T) {
-	// Load configuration from environment
+	// Try to load configuration from environment
+	// If config is not available (e.g., in CI without .env), skip the test
+	defer func() {
+		if r := recover(); r != nil {
+			t.Skip("Skipping integration test: Configuration not available (missing .env file or environment variables)")
+		}
+	}()
+
 	config.LoadConfig()
 }
 

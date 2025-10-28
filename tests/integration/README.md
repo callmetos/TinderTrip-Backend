@@ -84,8 +84,23 @@ Integration tests use the **real database** specified in your `.env` file:
 - `DB_USER`
 - `DB_PASSWORD`
 - `DB_NAME`
+- `JWT_SECRET`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
 
 Make sure your database is accessible before running tests.
+
+### CI/CD Behavior
+
+**In CI/CD environments (GitHub Actions, etc.):**
+- If `.env` file is not found or database is not accessible, tests will be **automatically skipped**
+- This prevents CI/CD pipeline failures due to missing integration test infrastructure
+- Unit tests will still run normally
+
+**To run integration tests in CI/CD:**
+1. Set up environment variables as secrets
+2. Configure test database in CI environment
+3. Tests will run automatically when configuration is available
 
 ## Data Cleanup
 
