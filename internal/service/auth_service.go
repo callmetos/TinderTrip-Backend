@@ -166,13 +166,10 @@ func (s *AuthService) SendPasswordResetOTP(email string) error {
 	}
 
 	// Send OTP email
-	fmt.Printf("DEBUG: Attempting to send OTP to %s: %s\n", email, otp)
 	err = s.emailService.SendPasswordResetOTP(email, otp)
 	if err != nil {
-		fmt.Printf("DEBUG: OTP email sending failed: %v\n", err)
 		return fmt.Errorf("failed to send OTP email: %w", err)
 	}
-	fmt.Printf("DEBUG: OTP email sent successfully to %s\n", email)
 	return nil
 }
 
@@ -382,13 +379,10 @@ func (s *AuthService) SendEmailVerificationOTP(email string) error {
 	}
 
 	// Send OTP email
-	fmt.Printf("DEBUG: Attempting to send verification OTP to %s: %s\n", email, otp)
 	err = s.emailService.SendVerificationOTP(email, otp)
 	if err != nil {
-		fmt.Printf("DEBUG: Verification OTP email sending failed: %v\n", err)
 		return fmt.Errorf("failed to send verification OTP email: %w", err)
 	}
-	fmt.Printf("DEBUG: Verification OTP email sent successfully to %s\n", email)
 	return nil
 }
 
@@ -485,12 +479,9 @@ func (s *AuthService) ResendEmailVerificationOTP(email string) error {
 	}
 
 	// Send OTP email
-	fmt.Printf("DEBUG: Attempting to resend verification OTP to %s: %s\n", email, otp)
 	err = s.emailService.SendVerificationOTP(email, otp)
 	if err != nil {
-		fmt.Printf("DEBUG: Verification OTP email sending failed: %v\n", err)
 		return fmt.Errorf("failed to send verification OTP email: %w", err)
 	}
-	fmt.Printf("DEBUG: Verification OTP email resent successfully to %s\n", email)
 	return nil
 }

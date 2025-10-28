@@ -2236,19 +2236,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.TagListResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/utils.APIResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/utils.APIResponse"
                         }
                     }
                 }
@@ -4351,26 +4345,6 @@ const docTemplate = `{
                 },
                 "event_id": {
                     "type": "string"
-                }
-            }
-        },
-        "dto.TagListResponse": {
-            "type": "object",
-            "properties": {
-                "limit": {
-                    "type": "integer"
-                },
-                "page": {
-                    "type": "integer"
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.TagResponse"
-                    }
-                },
-                "total": {
-                    "type": "integer"
                 }
             }
         },

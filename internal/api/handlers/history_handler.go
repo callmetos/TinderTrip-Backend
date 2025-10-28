@@ -41,6 +41,9 @@ func (h *HistoryHandler) GetHistory(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	completed := c.Query("completed")
 
+	// Validate pagination
+	page, limit = utils.ValidatePagination(page, limit)
+
 	// Get user ID from context
 	userID, exists := middleware.GetCurrentUserID(c)
 	if !exists {

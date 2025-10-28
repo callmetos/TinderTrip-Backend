@@ -96,6 +96,7 @@ func SetupRoutes(router *gin.Engine) {
 
 		// Event routes
 		eventHandler := handlers.NewEventHandler()
+		tagHandler := handlers.NewTagHandler()
 		events := protected.Group("/events")
 		{
 			events.GET("", eventHandler.GetEvents)
@@ -113,6 +114,10 @@ func SetupRoutes(router *gin.Engine) {
 			events.POST("/:id/swipe", eventHandler.SwipeEvent)
 			events.PUT("/:id/cover", eventHandler.UpdateCover)
 			events.POST("/:id/photos", eventHandler.AddPhotos)
+			// Event tag routes
+			events.GET("/:id/tags", tagHandler.GetEventTags)
+			events.POST("/:id/tags", tagHandler.AddEventTag)
+			events.DELETE("/:id/tags/:tag_id", tagHandler.RemoveEventTag)
 		}
 
 		// Chat routes
@@ -132,19 +137,13 @@ func SetupRoutes(router *gin.Engine) {
 			history.POST("/:id/complete", historyHandler.MarkComplete)
 		}
 
-		// Tag routes
-		tagHandler := handlers.NewTagHandler()
-		tags := protected.Group("/tags")
-		{
-			tags.GET("", tagHandler.GetTags)
-		}
-
-		// User tag routes
+		// User tag routes (protected)
+		tagHandler2 := handlers.NewTagHandler()
 		userTags := protected.Group("/users")
 		{
-			userTags.GET("/tags", tagHandler.GetUserTags)
-			userTags.POST("/tags", tagHandler.AddUserTag)
-			userTags.DELETE("/tags/:tag_id", tagHandler.RemoveUserTag)
+			userTags.GET("/tags", tagHandler2.GetUserTags)
+			userTags.POST("/tags", tagHandler2.AddUserTag)
+			userTags.DELETE("/tags/:tag_id", tagHandler2.RemoveUserTag)
 		}
 
 		// Food preference routes
@@ -171,14 +170,6 @@ func SetupRoutes(router *gin.Engine) {
 			travelPreferences.DELETE("/travel-preferences/:style", travelPreferenceHandler.DeleteTravelPreference)
 		}
 
-		// Event tag routes
-		eventTags := protected.Group("/events")
-		{
-			eventTags.GET("/:id/tags", tagHandler.GetEventTags)
-			eventTags.POST("/:id/tags", tagHandler.AddEventTag)
-			eventTags.DELETE("/:id/tags/:tag_id", tagHandler.RemoveEventTag)
-		}
-
 		// Audit routes
 		auditHandler := handlers.NewAuditHandler()
 		audit := protected.Group("/audit")
@@ -198,6 +189,10 @@ func SetupRoutes(router *gin.Engine) {
 			events.GET("", eventHandler.GetPublicEvents)
 			events.GET("/:id", eventHandler.GetPublicEvent)
 		}
+
+		// Public tags route
+		tagHandlerPublic := handlers.NewTagHandler()
+		public.GET("/tags", tagHandlerPublic.GetTags)
 
 		// Public food preference routes
 		foodPreferenceHandler := handlers.NewFoodPreferenceHandler()

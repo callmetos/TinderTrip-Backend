@@ -7,6 +7,7 @@ import (
 	"TinderTrip-Backend/internal/api/middleware"
 	"TinderTrip-Backend/internal/dto"
 	"TinderTrip-Backend/internal/service"
+	"TinderTrip-Backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,9 +32,8 @@ func NewTagHandler() *TagHandler {
 // @Param kind query string false "Filter by tag kind (interest, category, activity, location, food, transport, accommodation)"
 // @Param page query int false "Page number"
 // @Param limit query int false "Items per page"
-// @Success 200 {object} dto.TagListResponse
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
+// @Success 200 {object} utils.APIResponse
+// @Failure 500 {object} utils.APIResponse
 // @Router /tags [get]
 func (h *TagHandler) GetTags(c *gin.Context) {
 	// Get query parameters
@@ -41,23 +41,18 @@ func (h *TagHandler) GetTags(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
 	kind := c.Query("kind")
 
+	// Validate pagination
+	page, limit = utils.ValidatePagination(page, limit)
+
 	// Get tags
 	tags, total, err := h.tagService.GetTags(page, limit, kind)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Error:   "Failed to get tags",
-			Message: err.Error(),
-		})
+		utils.InternalServerErrorResponse(c, "Failed to get tags", err)
 		return
 	}
 
-	// Send response
-	c.JSON(http.StatusOK, dto.TagListResponse{
-		Tags:  tags,
-		Total: total,
-		Page:  page,
-		Limit: limit,
-	})
+	// Send response with pagination
+	utils.PaginatedResponse(c, "Tags retrieved successfully", tags, int64(total), page, limit)
 }
 
 // GetUserTags gets user's tags

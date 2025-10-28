@@ -48,6 +48,9 @@ func (h *EventHandler) GetEvents(c *gin.Context) {
 	eventType := c.Query("event_type")
 	status := c.Query("status")
 
+	// Validate pagination
+	page, limit = utils.ValidatePagination(page, limit)
+
 	// Get user ID from context
 	userID, _ := middleware.GetCurrentUserID(c)
 
@@ -87,6 +90,9 @@ func (h *EventHandler) GetJoinedEvents(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	memberStatus := c.Query("status")
 
+	// Validate pagination
+	page, limit = utils.ValidatePagination(page, limit)
+
 	// Get joined events
 	events, total, err := h.eventService.GetJoinedEvents(userID, page, limit, memberStatus)
 	if err != nil {
@@ -113,6 +119,9 @@ func (h *EventHandler) GetPublicEvents(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	eventType := c.Query("event_type")
+
+	// Validate pagination
+	page, limit = utils.ValidatePagination(page, limit)
 
 	// Get public events
 	events, total, err := h.eventService.GetPublicEvents(page, limit, eventType)
@@ -677,6 +686,9 @@ func (h *EventHandler) GetEventSuggestions(c *gin.Context) {
 	// Get query parameters
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+
+	// Validate pagination
+	page, limit = utils.ValidatePagination(page, limit)
 
 	// Get event suggestions
 	suggestions, total, err := h.eventService.GetEventSuggestions(userID, page, limit)
