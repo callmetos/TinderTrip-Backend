@@ -3,7 +3,9 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"TinderTrip-Backend/internal/api/middleware"
@@ -86,13 +88,15 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 }
 
 type updateProfileJSONReq struct {
-	Bio           *string `json:"bio,omitempty"`
-	Languages     *string `json:"languages,omitempty"`
-	Gender        *string `json:"gender,omitempty"`
-	JobTitle      *string `json:"job_title,omitempty"`
-	Smoking       *string `json:"smoking,omitempty"`
-	InterestsNote *string `json:"interests_note,omitempty"`
-	HomeLocation  *string `json:"home_location,omitempty"`
+	Bio           *string    `json:"bio,omitempty"`
+	Languages     *string    `json:"languages,omitempty"`
+	DateOfBirth   *time.Time `json:"date_of_birth,omitempty"`
+	Age           *int       `json:"age,omitempty"`
+	Gender        *string    `json:"gender,omitempty"`
+	JobTitle      *string    `json:"job_title,omitempty"`
+	Smoking       *string    `json:"smoking,omitempty"`
+	InterestsNote *string    `json:"interests_note,omitempty"`
+	HomeLocation  *string    `json:"home_location,omitempty"`
 }
 
 // validateProfileUpdateRequest validates the profile update request
@@ -113,9 +117,9 @@ func validateProfileUpdateRequest(req updateProfileJSONReq) error {
 		}
 	}
 
-	// Validate gender
+	// Validate gender (align with models: male, female, nonbinary, prefer_not_say)
 	if req.Gender != nil && *req.Gender != "" {
-		validGenders := []string{"male", "female", "other", "prefer_not_to_say"}
+		validGenders := []string{"male", "female", "nonbinary", "prefer_not_say"}
 		valid := false
 		for _, g := range validGenders {
 			if *req.Gender == g {
@@ -124,7 +128,14 @@ func validateProfileUpdateRequest(req updateProfileJSONReq) error {
 			}
 		}
 		if !valid {
-			return fmt.Errorf("gender must be one of: male, female, other, prefer_not_to_say")
+			return fmt.Errorf("gender must be one of: male, female, nonbinary, prefer_not_say")
+		}
+	}
+
+	// Validate age (if provided)
+	if req.Age != nil {
+		if *req.Age < 0 || *req.Age > 120 {
+			return fmt.Errorf("age must be between 0 and 120")
 		}
 	}
 
@@ -133,9 +144,9 @@ func validateProfileUpdateRequest(req updateProfileJSONReq) error {
 		return fmt.Errorf("job title must be 100 characters or less")
 	}
 
-	// Validate smoking preference
+	// Validate smoking preference (align with models: no, yes, occasionally)
 	if req.Smoking != nil && *req.Smoking != "" {
-		validSmoking := []string{"yes", "no", "occasionally", "prefer_not_to_say"}
+		validSmoking := []string{"no", "yes", "occasionally"}
 		valid := false
 		for _, s := range validSmoking {
 			if *req.Smoking == s {
@@ -144,7 +155,7 @@ func validateProfileUpdateRequest(req updateProfileJSONReq) error {
 			}
 		}
 		if !valid {
-			return fmt.Errorf("smoking preference must be one of: yes, no, occasionally, prefer_not_to_say")
+			return fmt.Errorf("smoking must be one of: no, yes, occasionally")
 		}
 	}
 
@@ -177,6 +188,8 @@ func updateProfileJSON(h *UserHandler, c *gin.Context, userID string) {
 	req := dto.UpdateProfileRequest{
 		Bio:           reqBody.Bio,
 		Languages:     reqBody.Languages,
+		DateOfBirth:   reqBody.DateOfBirth,
+		Age:           reqBody.Age,
 		Gender:        reqBody.Gender,
 		JobTitle:      reqBody.JobTitle,
 		Smoking:       reqBody.Smoking,
@@ -198,6 +211,8 @@ func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
 	// Text fields
 	bio := c.PostForm("bio")
 	languages := c.PostForm("languages")
+	dobStr := c.PostForm("date_of_birth")
+	ageStr := c.PostForm("age")
 	gender := c.PostForm("gender")
 	jobTitle := c.PostForm("job_title")
 	smoking := c.PostForm("smoking")
@@ -208,11 +223,35 @@ func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
 	reqBody := updateProfileJSONReq{
 		Bio:           &bio,
 		Languages:     &languages,
+		DateOfBirth:   nil,
+		Age:           nil,
 		Gender:        &gender,
 		JobTitle:      &jobTitle,
 		Smoking:       &smoking,
 		InterestsNote: &interestsNote,
 		HomeLocation:  &homeLocation,
+	}
+
+	// Parse optional date_of_birth
+	if dobStr != "" {
+		if t, err := time.Parse(time.RFC3339, dobStr); err == nil {
+			dob := t
+			reqBody.DateOfBirth = &dob
+		} else {
+			utils.ValidationErrorResponse(c, "Invalid request", "date_of_birth must be RFC3339 format")
+			return
+		}
+	}
+
+	// Parse optional age
+	if ageStr != "" {
+		if n, err := strconv.Atoi(ageStr); err == nil {
+			age := n
+			reqBody.Age = &age
+		} else {
+			utils.ValidationErrorResponse(c, "Invalid request", "age must be an integer")
+			return
+		}
 	}
 
 	// Validate request data
@@ -255,6 +294,8 @@ func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
 	req := dto.UpdateProfileRequest{
 		Bio:           toPtr(bio),
 		Languages:     toPtr(languages),
+		DateOfBirth:   reqBody.DateOfBirth,
+		Age:           reqBody.Age,
 		Gender:        toPtr(gender),
 		JobTitle:      toPtr(jobTitle),
 		Smoking:       toPtr(smoking),

@@ -9,6 +9,7 @@ type UserProfileResponse struct {
 	Bio           *string    `json:"bio,omitempty"`
 	Languages     *string    `json:"languages,omitempty"`
 	DateOfBirth   *time.Time `json:"date_of_birth,omitempty"`
+	Age           *int       `json:"age,omitempty"`
 	Gender        string     `json:"gender,omitempty"`
 	JobTitle      *string    `json:"job_title,omitempty"`
 	Smoking       string     `json:"smoking,omitempty"`
@@ -24,6 +25,7 @@ type UpdateUserProfileRequest struct {
 	Bio           *string    `json:"bio,omitempty"`
 	Languages     *string    `json:"languages,omitempty"`
 	DateOfBirth   *time.Time `json:"date_of_birth,omitempty"`
+	Age           *int       `json:"age,omitempty"`
 	Gender        *string    `json:"gender,omitempty"`
 	JobTitle      *string    `json:"job_title,omitempty"`
 	Smoking       *string    `json:"smoking,omitempty"`

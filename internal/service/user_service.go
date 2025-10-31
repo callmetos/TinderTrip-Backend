@@ -54,6 +54,7 @@ func (s *UserService) GetProfile(userID string) (*dto.UserProfileResponse, error
 		Bio:           profile.Bio,
 		Languages:     profile.Languages,
 		DateOfBirth:   profile.DateOfBirth,
+		Age:           profile.GetAge(),
 		Gender:        gender,
 		JobTitle:      profile.JobTitle,
 		Smoking:       smoking,
@@ -154,6 +155,7 @@ func (s *UserService) UpdateProfile(userID string, req dto.UpdateProfileRequest)
 		Bio:           profile.Bio,
 		Languages:     profile.Languages,
 		DateOfBirth:   profile.DateOfBirth,
+		Age:           req.Age, // Use age from request instead of calculating
 		Gender:        gender,
 		JobTitle:      profile.JobTitle,
 		Smoking:       smoking,
