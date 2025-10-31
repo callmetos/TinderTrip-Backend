@@ -440,6 +440,7 @@ func (s *EventService) JoinEvent(eventID, userID string) error {
 
 // LeaveEvent leaves an event
 // If creator leaves, the event will be soft deleted (same as DELETE)
+// If participant leaves, the member record will be deleted (not just status changed)
 // Returns: (error, isCreator) - if isCreator=true, event was deleted
 func (s *EventService) LeaveEvent(eventID, userID string) (error, bool) {
 	// Parse IDs
@@ -483,12 +484,8 @@ func (s *EventService) LeaveEvent(eventID, userID string) (error, bool) {
 		return fmt.Errorf("database error: %w", err), false
 	}
 
-	// Update member status
-	now := time.Now()
-	err = database.GetDB().Model(&member).Updates(map[string]interface{}{
-		"status":  models.MemberStatusLeft,
-		"left_at": now,
-	}).Error
+	// Delete member record instead of updating status
+	err = database.GetDB().Delete(&member).Error
 	if err != nil {
 		return fmt.Errorf("failed to leave event: %w", err), false
 	}
