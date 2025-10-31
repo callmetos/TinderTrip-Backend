@@ -77,7 +77,7 @@ func TestEventService_Basic(t *testing.T) {
 	})
 
 	t.Run("Leave event with invalid ID", func(t *testing.T) {
-		err := eventService.LeaveEvent("invalid-id", "user-id")
+		err, _ := eventService.LeaveEvent("invalid-id", "user-id")
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "invalid event ID")
 	})
