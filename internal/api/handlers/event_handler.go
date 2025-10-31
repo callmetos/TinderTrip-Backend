@@ -455,7 +455,8 @@ func (h *EventHandler) LeaveEvent(c *gin.Context) {
 	}
 
 	// Leave event
-	err := h.eventService.LeaveEvent(eventID, userID)
+	// If creator leaves, event will be soft deleted (same as DELETE)
+	err, isCreator := h.eventService.LeaveEvent(eventID, userID)
 	if err != nil {
 		if err.Error() == "event not found" {
 			utils.NotFoundResponse(c, "The requested event does not exist")
@@ -467,7 +468,12 @@ func (h *EventHandler) LeaveEvent(c *gin.Context) {
 		return
 	}
 
-	utils.SendSuccessResponse(c, "Successfully left the event", nil)
+	// Return appropriate message based on whether creator left
+	if isCreator {
+		utils.SendSuccessResponse(c, "Event deleted successfully (creator left)", nil)
+	} else {
+		utils.SendSuccessResponse(c, "Successfully left the event", nil)
+	}
 }
 
 // ConfirmEvent confirms participation in an event

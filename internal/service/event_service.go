@@ -439,15 +439,17 @@ func (s *EventService) JoinEvent(eventID, userID string) error {
 }
 
 // LeaveEvent leaves an event
-func (s *EventService) LeaveEvent(eventID, userID string) error {
+// If creator leaves, the event will be soft deleted (same as DELETE)
+// Returns: (error, isCreator) - if isCreator=true, event was deleted
+func (s *EventService) LeaveEvent(eventID, userID string) (error, bool) {
 	// Parse IDs
 	eventUUID, err := uuid.Parse(eventID)
 	if err != nil {
-		return fmt.Errorf("invalid event ID: %w", err)
+		return fmt.Errorf("invalid event ID: %w", err), false
 	}
 	userUUID, err := uuid.Parse(userID)
 	if err != nil {
-		return fmt.Errorf("invalid user ID: %w", err)
+		return fmt.Errorf("invalid user ID: %w", err), false
 	}
 
 	// Check if event exists
@@ -455,19 +457,30 @@ func (s *EventService) LeaveEvent(eventID, userID string) error {
 	err = database.GetDB().Where("id = ? AND deleted_at IS NULL", eventUUID).First(&event).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return fmt.Errorf("event not found")
+			return fmt.Errorf("event not found"), false
 		}
-		return fmt.Errorf("database error: %w", err)
+		return fmt.Errorf("database error: %w", err), false
 	}
 
+	// If user is creator, soft delete the event (same as DELETE)
+	if event.CreatorID == userUUID {
+		now := time.Now()
+		err = database.GetDB().Model(&event).Update("deleted_at", now).Error
+		if err != nil {
+			return fmt.Errorf("failed to delete event: %w", err), false
+		}
+		return nil, true // Event was deleted (creator left)
+	}
+
+	// If not creator, leave as normal member
 	// Check if user is a member
 	var member models.EventMember
 	err = database.GetDB().Where("event_id = ? AND user_id = ?", eventUUID, userUUID).First(&member).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return fmt.Errorf("user is not a member")
+			return fmt.Errorf("user is not a member"), false
 		}
-		return fmt.Errorf("database error: %w", err)
+		return fmt.Errorf("database error: %w", err), false
 	}
 
 	// Update member status
@@ -477,10 +490,10 @@ func (s *EventService) LeaveEvent(eventID, userID string) error {
 		"left_at": now,
 	}).Error
 	if err != nil {
-		return fmt.Errorf("failed to leave event: %w", err)
+		return fmt.Errorf("failed to leave event: %w", err), false
 	}
 
-	return nil
+	return nil, false // Normal member left
 }
 
 // SwipeEvent swipes on an event
