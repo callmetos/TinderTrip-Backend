@@ -174,13 +174,13 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 	// Check if request has file upload (multipart form data)
 	_, fileHeader, _ := c.Request.FormFile("file")
 	hasFile := c.Request.MultipartForm != nil || fileHeader != nil
-	
+
 	if hasFile || strings.Contains(contentType, "multipart/form-data") {
 		// Handle multipart form data (for image/file uploads)
 		req.RoomID = roomID
 		req.Body = c.PostForm("body")
 		req.MessageType = c.PostForm("message_type")
-		
+
 		if req.MessageType == "" {
 			utils.BadRequestResponse(c, "message_type is required")
 			return
@@ -239,7 +239,7 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 					req.RoomID = roomID
 					req.Body = c.PostForm("body")
 					req.MessageType = c.PostForm("message_type")
-					
+
 					if req.MessageType == "" {
 						utils.BadRequestResponse(c, "message_type is required")
 						return
@@ -256,7 +256,7 @@ func (h *ChatHandler) SendMessage(c *gin.Context) {
 			req.RoomID = roomID
 			req.Body = c.PostForm("body")
 			req.MessageType = c.PostForm("message_type")
-			
+
 			if req.MessageType == "" {
 				utils.BadRequestResponse(c, "message_type is required")
 				return
