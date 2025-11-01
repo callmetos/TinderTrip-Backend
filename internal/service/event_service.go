@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"TinderTrip-Backend/internal/dto"
@@ -112,7 +113,12 @@ func (s *EventService) GetJoinedEvents(userID string, page, limit int, memberSta
 		Where("user_id = ?", userUUID)
 
 	// Apply member status filter if provided
+	// Note: "left" status is no longer used - participants who leave are deleted from the database
 	if memberStatus != "" {
+		if memberStatus == "left" {
+			// Return empty result since left members are deleted, not marked with status "left"
+			return []dto.EventResponse{}, 0, nil
+		}
 		memberQuery = memberQuery.Where("status = ?", memberStatus)
 	}
 
@@ -435,6 +441,15 @@ func (s *EventService) JoinEvent(eventID, userID string) error {
 	// Log event join
 	s.auditLogger.LogEventJoin(&userID, eventID)
 
+	// Send notification (in background - don't block on error)
+	go func() {
+		notificationService := NewNotificationService()
+		if err := notificationService.SendUserJoinedEventNotification(eventID, userID); err != nil {
+			// Log error but don't fail the join operation
+			log.Printf("Failed to send join notification: %v", err)
+		}
+	}()
+
 	return nil
 }
 
@@ -489,6 +504,18 @@ func (s *EventService) LeaveEvent(eventID, userID string) (error, bool) {
 	if err != nil {
 		return fmt.Errorf("failed to leave event: %w", err), false
 	}
+
+	// Log event leave
+	s.auditLogger.LogEventLeave(&userID, eventID)
+
+	// Send notification (in background - don't block on error)
+	go func() {
+		notificationService := NewNotificationService()
+		if err := notificationService.SendUserLeftEventNotification(eventID, userID); err != nil {
+			// Log error but don't fail the leave operation
+			log.Printf("Failed to send leave notification: %v", err)
+		}
+	}()
 
 	return nil, false // Normal member left
 }
