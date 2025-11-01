@@ -18,14 +18,24 @@ type ChatMessageResponse struct {
 	Sender      *UserResponse `json:"sender,omitempty"`
 	Body        *string       `json:"body,omitempty"`
 	MessageType string        `json:"message_type"`
+	ImageURL    *string       `json:"image_url,omitempty"`
+	FileURL     *string       `json:"file_url,omitempty"`
 	CreatedAt   time.Time     `json:"created_at"`
 }
 
-// SendMessageRequest represents a send message request
+// SendMessageRequest represents a send message request (JSON)
 type SendMessageRequest struct {
 	RoomID      string `json:"room_id" binding:"required"`
-	Body        string `json:"body" binding:"required"`
+	Body        string `json:"body"`
 	MessageType string `json:"message_type" binding:"required"`
+}
+
+// SendMessageMultipartRequest represents a send message request (multipart form data)
+type SendMessageMultipartRequest struct {
+	RoomID      string `form:"room_id" binding:"required"`
+	Body        string `form:"body"`
+	MessageType string `form:"message_type" binding:"required"`
+	File        string `form:"file"` // Will be handled as multipart.FileHeader
 }
 
 // GetMessagesRequest represents a get messages request

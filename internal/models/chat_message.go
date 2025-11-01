@@ -27,6 +27,8 @@ type ChatMessage struct {
 	SenderID    uuid.UUID `json:"sender_id" gorm:"type:uuid;not null;constraint:OnDelete:CASCADE"`
 	Body        *string   `json:"body" gorm:"type:text"`
 	MessageType *string   `json:"message_type" gorm:"type:text"`
+	ImageURL    *string   `json:"image_url,omitempty" gorm:"type:text"`
+	FileURL     *string   `json:"file_url,omitempty" gorm:"type:text"`
 	CreatedAt   time.Time `json:"created_at" gorm:"type:timestamptz;not null;default:now()"`
 
 	// Relationships

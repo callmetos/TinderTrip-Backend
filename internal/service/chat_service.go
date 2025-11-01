@@ -98,6 +98,11 @@ func (s *ChatService) GetMessages(roomID, userID string, page, limit int) ([]dto
 
 // SendMessage sends a message in a chat room
 func (s *ChatService) SendMessage(roomID, userID string, req dto.SendMessageRequest) (*dto.ChatMessageResponse, error) {
+	return s.SendMessageWithMedia(roomID, userID, req, nil, nil)
+}
+
+// SendMessageWithMedia sends a message with image or file in a chat room
+func (s *ChatService) SendMessageWithMedia(roomID, userID string, req dto.SendMessageRequest, imageURL, fileURL *string) (*dto.ChatMessageResponse, error) {
 	// Parse IDs
 	roomUUID, err := uuid.Parse(roomID)
 	if err != nil {
@@ -120,12 +125,26 @@ func (s *ChatService) SendMessage(roomID, userID string, req dto.SendMessageRequ
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 
+	// Validate message type and media
+	if req.MessageType == "image" && imageURL == nil {
+		return nil, fmt.Errorf("image URL is required for image message type")
+	}
+	if req.MessageType == "file" && fileURL == nil {
+		return nil, fmt.Errorf("file URL is required for file message type")
+	}
+
 	// Create message
+	var body *string
+	if req.Body != "" {
+		body = &req.Body
+	}
 	message := &models.ChatMessage{
 		RoomID:      roomUUID,
 		SenderID:    userUUID,
-		Body:        &req.Body,
+		Body:        body,
 		MessageType: &req.MessageType,
+		ImageURL:    imageURL,
+		FileURL:     fileURL,
 	}
 
 	err = database.GetDB().Create(message).Error
@@ -265,12 +284,18 @@ func (s *ChatService) convertChatRoomToResponse(room models.ChatRoom) dto.ChatRo
 
 // Helper function to convert chat message to response DTO
 func (s *ChatService) convertChatMessageToResponse(message models.ChatMessage) dto.ChatMessageResponse {
+	messageType := ""
+	if message.MessageType != nil {
+		messageType = *message.MessageType
+	}
 	response := dto.ChatMessageResponse{
 		ID:          message.ID.String(),
 		RoomID:      message.RoomID.String(),
 		SenderID:    message.SenderID.String(),
 		Body:        message.Body,
-		MessageType: *message.MessageType,
+		MessageType: messageType,
+		ImageURL:    message.ImageURL,
+		FileURL:     message.FileURL,
 		CreatedAt:   message.CreatedAt,
 	}
 
