@@ -79,7 +79,7 @@ func setupUserServiceTest(t *testing.T) (*gorm.DB, *service.UserService) {
 }
 
 func TestUserService_GetProfile(t *testing.T) {
-	_, userService := setupUserServiceTest(t)
+	db, userService := setupUserServiceTest(t)
 
 	tests := []struct {
 		name    string
@@ -90,19 +90,24 @@ func TestUserService_GetProfile(t *testing.T) {
 		{
 			name: "Profile exists",
 			setup: func() string {
-				email := "user@example.com"
+				// Use unique email with timestamp to avoid UNIQUE constraint issues
+				email := fmt.Sprintf("user-%d@example.com", time.Now().UnixNano())
 				user := &models.User{
 					Email:    &email,
 					Provider: models.AuthProviderPassword,
 				}
-				database.DB.Create(user)
+				if err := db.Create(user).Error; err != nil {
+					t.Fatalf("Failed to create user: %v", err)
+				}
 
 				bio := "Test bio"
 				profile := &models.UserProfile{
 					UserID: user.ID,
 					Bio:    &bio,
 				}
-				database.DB.Create(profile)
+				if err := db.Create(profile).Error; err != nil {
+					t.Fatalf("Failed to create profile: %v", err)
+				}
 
 				return user.ID.String()
 			},
@@ -111,12 +116,15 @@ func TestUserService_GetProfile(t *testing.T) {
 		{
 			name: "Profile not found",
 			setup: func() string {
-				email := "noProfile@example.com"
+				// Use unique email with timestamp to avoid UNIQUE constraint issues
+				email := fmt.Sprintf("noprofile-%d@example.com", time.Now().UnixNano())
 				user := &models.User{
 					Email:    &email,
 					Provider: models.AuthProviderPassword,
 				}
-				database.DB.Create(user)
+				if err := db.Create(user).Error; err != nil {
+					t.Fatalf("Failed to create user: %v", err)
+				}
 
 				return user.ID.String()
 			},
@@ -299,7 +307,7 @@ func TestUserService_UpdateProfile(t *testing.T) {
 }
 
 func TestUserService_DeleteProfile(t *testing.T) {
-	_, userService := setupUserServiceTest(t)
+	db, userService := setupUserServiceTest(t)
 
 	tests := []struct {
 		name    string
@@ -309,19 +317,24 @@ func TestUserService_DeleteProfile(t *testing.T) {
 		{
 			name: "Delete existing profile",
 			setup: func() string {
-				email := "delete@example.com"
+				// Use unique email with timestamp to avoid UNIQUE constraint issues
+				email := fmt.Sprintf("delete-%d@example.com", time.Now().UnixNano())
 				user := &models.User{
 					Email:    &email,
 					Provider: models.AuthProviderPassword,
 				}
-				database.DB.Create(user)
+				if err := db.Create(user).Error; err != nil {
+					t.Fatalf("Failed to create user: %v", err)
+				}
 
 				bio := "To be deleted"
 				profile := &models.UserProfile{
 					UserID: user.ID,
 					Bio:    &bio,
 				}
-				database.DB.Create(profile)
+				if err := db.Create(profile).Error; err != nil {
+					t.Fatalf("Failed to create profile: %v", err)
+				}
 
 				return user.ID.String()
 			},
@@ -359,17 +372,20 @@ func TestUserService_DeleteProfile(t *testing.T) {
 }
 
 func TestUserService_ProfileWithFullData(t *testing.T) {
-	_, userService := setupUserServiceTest(t)
+	db, userService := setupUserServiceTest(t)
 
 	// Create user with complete profile
-	email := "complete@example.com"
+	// Use unique email with timestamp to avoid UNIQUE constraint issues
+	email := fmt.Sprintf("complete-%d@example.com", time.Now().UnixNano())
 	displayName := "Complete User"
 	user := &models.User{
 		Email:       &email,
 		Provider:    models.AuthProviderPassword,
 		DisplayName: &displayName,
 	}
-	database.DB.Create(user)
+	if err := db.Create(user).Error; err != nil {
+		t.Fatalf("Failed to create user: %v", err)
+	}
 
 	bio := "Complete bio"
 	languages := "English, Thai, Japanese"
@@ -393,7 +409,9 @@ func TestUserService_ProfileWithFullData(t *testing.T) {
 		AvatarURL:     &avatarURL,
 		HomeLocation:  &homeLocation,
 	}
-	database.DB.Create(profile)
+	if err := db.Create(profile).Error; err != nil {
+		t.Fatalf("Failed to create profile: %v", err)
+	}
 
 	// Retrieve and verify
 	result, err := userService.GetProfile(user.ID.String())
