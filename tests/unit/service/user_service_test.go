@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -33,7 +34,11 @@ func setupUserServiceTest(t *testing.T) (*gorm.DB, *service.UserService) {
 			id TEXT PRIMARY KEY,
 			email TEXT UNIQUE,
 			provider TEXT NOT NULL,
+			password_hash TEXT,
+			email_verified BOOLEAN NOT NULL DEFAULT 0,
+			google_id TEXT,
 			display_name TEXT,
+			last_login_at DATETIME,
 			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			deleted_at DATETIME
@@ -149,7 +154,7 @@ func TestUserService_GetProfile(t *testing.T) {
 }
 
 func TestUserService_UpdateProfile(t *testing.T) {
-	_, userService := setupUserServiceTest(t)
+	db, userService := setupUserServiceTest(t)
 
 	tests := []struct {
 		name    string
@@ -160,19 +165,24 @@ func TestUserService_UpdateProfile(t *testing.T) {
 		{
 			name: "Update existing profile",
 			setup: func() (string, dto.UpdateProfileRequest) {
-				email := "update@example.com"
+				// Use unique email with timestamp to avoid UNIQUE constraint issues
+				email := fmt.Sprintf("update-%d@example.com", time.Now().UnixNano())
 				user := &models.User{
 					Email:    &email,
 					Provider: models.AuthProviderPassword,
 				}
-				database.DB.Create(user)
+				if err := db.Create(user).Error; err != nil {
+					t.Fatalf("Failed to create user: %v", err)
+				}
 
 				bio := "Old bio"
 				profile := &models.UserProfile{
 					UserID: user.ID,
 					Bio:    &bio,
 				}
-				database.DB.Create(profile)
+				if err := db.Create(profile).Error; err != nil {
+					t.Fatalf("Failed to create profile: %v", err)
+				}
 
 				newBio := "New bio"
 				return user.ID.String(), dto.UpdateProfileRequest{
@@ -188,12 +198,15 @@ func TestUserService_UpdateProfile(t *testing.T) {
 		{
 			name: "Create new profile",
 			setup: func() (string, dto.UpdateProfileRequest) {
-				email := "new@example.com"
+				// Use unique email with timestamp to avoid UNIQUE constraint issues
+				email := fmt.Sprintf("new-%d@example.com", time.Now().UnixNano())
 				user := &models.User{
 					Email:    &email,
 					Provider: models.AuthProviderPassword,
 				}
-				database.DB.Create(user)
+				if err := db.Create(user).Error; err != nil {
+					t.Fatalf("Failed to create user: %v", err)
+				}
 
 				bio := "New profile bio"
 				languages := "English, Thai"
@@ -213,12 +226,15 @@ func TestUserService_UpdateProfile(t *testing.T) {
 		{
 			name: "Update with all fields",
 			setup: func() (string, dto.UpdateProfileRequest) {
-				email := "allfields@example.com"
+				// Use unique email with timestamp to avoid UNIQUE constraint issues
+				email := fmt.Sprintf("allfields-%d@example.com", time.Now().UnixNano())
 				user := &models.User{
 					Email:    &email,
 					Provider: models.AuthProviderPassword,
 				}
-				database.DB.Create(user)
+				if err := db.Create(user).Error; err != nil {
+					t.Fatalf("Failed to create user: %v", err)
+				}
 
 				bio := "Full bio"
 				languages := "English"
@@ -400,15 +416,18 @@ func TestUserService_ProfileWithFullData(t *testing.T) {
 }
 
 func TestUserService_UpdateProfile_PartialUpdate(t *testing.T) {
-	_, userService := setupUserServiceTest(t)
+	db, userService := setupUserServiceTest(t)
 
 	// Create user with profile
-	email := "partial@example.com"
+	// Use unique email with timestamp to avoid UNIQUE constraint issues
+	email := fmt.Sprintf("partial-%d@example.com", time.Now().UnixNano())
 	user := &models.User{
 		Email:    &email,
 		Provider: models.AuthProviderPassword,
 	}
-	database.DB.Create(user)
+	if err := db.Create(user).Error; err != nil {
+		t.Fatalf("Failed to create user: %v", err)
+	}
 
 	bio := "Original bio"
 	languages := "English"
@@ -417,7 +436,9 @@ func TestUserService_UpdateProfile_PartialUpdate(t *testing.T) {
 		Bio:       &bio,
 		Languages: &languages,
 	}
-	database.DB.Create(profile)
+	if err := db.Create(profile).Error; err != nil {
+		t.Fatalf("Failed to create profile: %v", err)
+	}
 
 	// Update only bio
 	newBio := "Updated bio"
