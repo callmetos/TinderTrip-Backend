@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"TinderTrip-Backend/internal/api/middleware"
 	"TinderTrip-Backend/internal/dto"
@@ -112,9 +115,20 @@ func (h *ImageHandler) ServeAvatar(c *gin.Context) {
 		return
 	}
 
-	// Set appropriate headers
+	// Generate ETag from image data for better caching
+	etag := generateETag(imageData)
+	c.Header("ETag", etag)
+	
+	// Check if client has cached version
+	if match := c.GetHeader("If-None-Match"); match == etag {
+		c.Status(http.StatusNotModified)
+		return
+	}
+
+	// Set appropriate headers for browser caching
 	c.Header("Content-Type", contentType)
-	c.Header("Cache-Control", "public, max-age=3600") // Cache for 1 hour
+	c.Header("Cache-Control", "public, max-age=86400") // Cache for 24 hours
+	c.Header("Expires", time.Now().Add(24*time.Hour).UTC().Format(http.TimeFormat))
 	c.Data(http.StatusOK, contentType, imageData)
 }
 
@@ -205,8 +219,25 @@ func (h *ImageHandler) ServeEventImage(c *gin.Context) {
 		return
 	}
 
-	// Set appropriate headers
+	// Generate ETag from image data for better caching
+	etag := generateETag(imageData)
+	c.Header("ETag", etag)
+	
+	// Check if client has cached version
+	if match := c.GetHeader("If-None-Match"); match == etag {
+		c.Status(http.StatusNotModified)
+		return
+	}
+
+	// Set appropriate headers for browser caching
 	c.Header("Content-Type", contentType)
-	c.Header("Cache-Control", "public, max-age=3600") // Cache for 1 hour
+	c.Header("Cache-Control", "public, max-age=86400") // Cache for 24 hours
+	c.Header("Expires", time.Now().Add(24*time.Hour).UTC().Format(http.TimeFormat))
 	c.Data(http.StatusOK, contentType, imageData)
+}
+
+// generateETag generates an ETag from image data
+func generateETag(imageData []byte) string {
+	hash := sha256.Sum256(imageData)
+	return fmt.Sprintf(`"%x"`, hash[:16]) // Use first 16 bytes for shorter ETag
 }

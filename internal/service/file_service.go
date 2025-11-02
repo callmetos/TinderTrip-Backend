@@ -14,14 +14,16 @@ import (
 	"time"
 
 	"TinderTrip-Backend/internal/service/storage"
+	"TinderTrip-Backend/internal/utils"
 
 	"github.com/google/uuid"
 )
 
 type FileService struct {
-	uploader storage.Uploader
-	maxBytes int64
-	allow    map[string]bool
+	uploader       storage.Uploader
+	maxBytes       int64
+	allow          map[string]bool
+	imageProcessor *ImageProcessor
 }
 
 func NewFileService() (*FileService, error) {
@@ -56,7 +58,12 @@ func NewFileService() (*FileService, error) {
 		return nil, fmt.Errorf("no allowed image types configured")
 	}
 
-	return &FileService{uploader: up, maxBytes: maxMB * 1024 * 1024, allow: allow}, nil
+	return &FileService{
+		uploader:       up,
+		maxBytes:       maxMB * 1024 * 1024,
+		allow:          allow,
+		imageProcessor: NewImageProcessor(),
+	}, nil
 }
 
 func detectContentType(head []byte) string {
@@ -130,13 +137,28 @@ func (s *FileService) UploadImage(ctx context.Context, folder, filename string, 
 		return "", "", 0, "", "", fmt.Errorf("file too small: minimum 100 bytes required")
 	}
 
-	sum := sha256.Sum256(buf.Bytes())
+	// Process image if it's an image type that should be optimized
+	processedData := buf.Bytes()
+	processedContentType := ct
+	if s.imageProcessor.ShouldProcess(processedData, ct) {
+		processed, newContentType, err := s.imageProcessor.ProcessImage(processedData, ct)
+		if err != nil {
+			// If processing fails, use original image
+			utils.Logger().WithField("error", err).Warn("Failed to process image, using original")
+		} else {
+			processedData = processed
+			processedContentType = newContentType
+			written = int64(len(processedData))
+		}
+	}
+
+	sum := sha256.Sum256(processedData)
 	checksum = fmt.Sprintf("sha256:%x", sum[:])
 
 	day := time.Now().Format("2006/01/02")
 	ext := strings.ToLower(filepath.Ext(filename))
 	if ext == "" {
-		ext = extFromCT(ct)
+		ext = extFromCT(processedContentType)
 	}
 	if ext == "" {
 		ext = ".bin"
@@ -146,9 +168,9 @@ func (s *FileService) UploadImage(ctx context.Context, folder, filename string, 
 	key = fmt.Sprintf("tindertrip/%s/%s/%s%s", strings.Trim(folder, "/"), day, id, ext)
 	key = strings.ReplaceAll(key, "//", "/")
 
-	url, err = s.uploader.Upload(ctx, key, bytes.NewReader(buf.Bytes()), ct)
+	url, err = s.uploader.Upload(ctx, key, bytes.NewReader(processedData), processedContentType)
 	if err != nil {
 		return "", "", 0, "", "", fmt.Errorf("failed to upload file to storage: %w", err)
 	}
-	return key, url, written, checksum, ct, nil
+	return key, url, written, checksum, processedContentType, nil
 }
