@@ -161,12 +161,12 @@ func (h *FoodPreferenceHandler) UpdateAllFoodPreferences(c *gin.Context) {
 
 // GetFoodPreferenceCategories gets available food preference categories
 // @Summary Get food preference categories
-// @Description Get all available food preference categories
+// @Description Get all available food preference categories from database (master data)
 // @Tags food-preferences
 // @Produce json
 // @Success 200 {object} dto.FoodPreferenceCategoriesResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /food-preferences/categories [get]
+// @Router /public/food-preferences/categories [get]
 func (h *FoodPreferenceHandler) GetFoodPreferenceCategories(c *gin.Context) {
 	// Get categories
 	categories := h.foodPreferenceService.GetFoodPreferenceCategories()

@@ -170,12 +170,12 @@ func (h *TravelPreferenceHandler) UpdateAllTravelPreferences(c *gin.Context) {
 
 // GetTravelPreferenceStyles gets available travel preference styles
 // @Summary Get travel preference styles
-// @Description Get all available travel preference styles
+// @Description Get all available travel preference styles from database (master data)
 // @Tags travel-preferences
 // @Produce json
 // @Success 200 {object} dto.TravelPreferenceStylesResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /travel-preferences/styles [get]
+// @Router /public/travel-preferences/styles [get]
 func (h *TravelPreferenceHandler) GetTravelPreferenceStyles(c *gin.Context) {
 	// Get styles
 	styles := h.travelPreferenceService.GetTravelPreferenceStyles()

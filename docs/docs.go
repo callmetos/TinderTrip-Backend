@@ -777,9 +777,10 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Send a message to a specific chat room",
+                "description": "Send a message to a specific chat room (supports JSON and multipart/form-data for images/files)",
                 "consumes": [
-                    "application/json"
+                    "application/json",
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -797,13 +798,38 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Message data",
+                        "description": "Message data (JSON)",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/dto.SendMessageRequest"
                         }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Room ID (multipart)",
+                        "name": "room_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Message body (multipart)",
+                        "name": "body",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Message type: text, image, or file (multipart)",
+                        "name": "message_type",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Image or file to upload (multipart)",
+                        "name": "file",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -875,7 +901,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Get events with pagination and filters",
+                "description": "Get events with pagination and filters. Default: sorted by match score (relevance). Use sort=created for chronological sorting. Events include match_score when sorted by relevance.",
                 "produces": [
                     "application/json"
                 ],
@@ -906,6 +932,12 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Event status filter",
                         "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sort order: 'relevance' (default, by match score) or 'created' (chronological, newest first)",
+                        "name": "sort",
                         "in": "query"
                     }
                 ],
@@ -1852,32 +1884,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/food-preferences/categories": {
-            "get": {
-                "description": "Get all available food preference categories",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "food-preferences"
-                ],
-                "summary": "Get food preference categories",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.FoodPreferenceCategoriesResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/history": {
             "get": {
                 "security": [
@@ -2202,6 +2208,58 @@ const docTemplate = `{
                 }
             }
         },
+        "/public/food-preferences/categories": {
+            "get": {
+                "description": "Get all available food preference categories from database (master data)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "food-preferences"
+                ],
+                "summary": "Get food preference categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.FoodPreferenceCategoriesResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/public/travel-preferences/styles": {
+            "get": {
+                "description": "Get all available travel preference styles from database (master data)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "travel-preferences"
+                ],
+                "summary": "Get travel preference styles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.TravelPreferenceStylesResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/tags": {
             "get": {
                 "description": "Get all tags with optional filtering by kind",
@@ -2243,32 +2301,6 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/utils.APIResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/travel-preferences/styles": {
-            "get": {
-                "description": "Get all available travel preference styles",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "travel-preferences"
-                ],
-                "summary": "Get travel preference styles",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dto.TravelPreferenceStylesResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     }
                 }
@@ -3348,25 +3380,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "travel_style": {
-                    "type": "string",
-                    "enum": [
-                        "cafe_dessert",
-                        "bubble_tea",
-                        "bakery_cake",
-                        "bingsu_ice_cream",
-                        "coffee",
-                        "matcha",
-                        "pancakes",
-                        "social_activity",
-                        "karaoke",
-                        "gaming",
-                        "movie",
-                        "board_game",
-                        "outdoor_activity",
-                        "party_celebration",
-                        "swimming",
-                        "skateboarding"
-                    ]
+                    "description": "Validation against database is done in service layer",
+                    "type": "string"
                 }
             }
         },
@@ -3490,7 +3505,13 @@ const docTemplate = `{
                 "created_at": {
                     "type": "string"
                 },
+                "file_url": {
+                    "type": "string"
+                },
                 "id": {
+                    "type": "string"
+                },
+                "image_url": {
                     "type": "string"
                 },
                 "message_type": {
@@ -3771,6 +3792,9 @@ const docTemplate = `{
                     "type": "number"
                 },
                 "lng": {
+                    "type": "number"
+                },
+                "match_score": {
                     "type": "number"
                 },
                 "member_count": {
@@ -4252,7 +4276,6 @@ const docTemplate = `{
         "dto.SendMessageRequest": {
             "type": "object",
             "required": [
-                "body",
                 "message_type",
                 "room_id"
             ],
@@ -4566,16 +4589,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "food_category": {
-                    "type": "string",
-                    "enum": [
-                        "thai_food",
-                        "japanese_food",
-                        "chinese_food",
-                        "international_food",
-                        "halal_food",
-                        "buffet",
-                        "bbq_grill"
-                    ]
+                    "description": "Validation against database is done in service layer",
+                    "type": "string"
                 },
                 "preference_level": {
                     "type": "integer",
@@ -4654,6 +4669,9 @@ const docTemplate = `{
         "dto.UpdateProfileRequest": {
             "type": "object",
             "properties": {
+                "age": {
+                    "type": "integer"
+                },
                 "avatar_url": {
                     "type": "string"
                 },
@@ -4661,6 +4679,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "date_of_birth": {
+                    "type": "string"
+                },
+                "display_name": {
                     "type": "string"
                 },
                 "gender": {
@@ -4686,6 +4707,9 @@ const docTemplate = `{
         "dto.UserProfileResponse": {
             "type": "object",
             "properties": {
+                "age": {
+                    "type": "integer"
+                },
                 "avatar_url": {
                     "type": "string"
                 },
@@ -4696,6 +4720,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "date_of_birth": {
+                    "type": "string"
+                },
+                "display_name": {
                     "type": "string"
                 },
                 "gender": {

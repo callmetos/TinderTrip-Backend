@@ -29,7 +29,7 @@ func NewEventHandler() *EventHandler {
 
 // GetEvents gets events with pagination and filters
 // @Summary Get events
-// @Description Get events with pagination and filters. Default: sorted by match score (relevance). Use sort=created for chronological sorting.
+// @Description Get events with pagination and filters. Default: sorted by match score (relevance). Use sort=created for chronological sorting. Events include match_score when sorted by relevance.
 // @Tags events
 // @Security BearerAuth
 // @Produce json
