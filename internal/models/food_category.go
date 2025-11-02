@@ -23,4 +23,3 @@ type FoodCategoryMaster struct {
 func (FoodCategoryMaster) TableName() string {
 	return "food_categories"
 }
-

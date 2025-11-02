@@ -612,21 +612,21 @@ func (s *TagService) calculateTravelPreferenceScore(travelPrefs []models.TravelP
 
 	// Map travel styles to potential tag names/activities
 	travelStyleMap := map[string][]string{
-		"outdoor_activity": {"fitness", "camping", "hiking", "outdoor", "sports"},
-		"social_activity":  {"social", "meetup", "gathering", "party"},
-		"karaoke":          {"karaoke", "singing", "music"},
-		"gaming":           {"gaming", "games", "esports"},
-		"movie":            {"movie", "cinema", "film"},
-		"board_game":       {"board game", "games", "tabletop"},
-		"swimming":         {"swimming", "pool", "water"},
-		"skateboarding":    {"skateboarding", "skate", "extreme"},
-		"cafe_dessert":     {"cafe", "dessert", "coffee", "bakery"},
-		"bubble_tea":       {"bubble tea", "tea", "drinks"},
-		"bakery_cake":      {"bakery", "cake", "pastry"},
-		"bingsu_ice_cream": {"bingsu", "ice cream", "dessert"},
-		"coffee":           {"coffee", "cafe"},
-		"matcha":           {"matcha", "tea"},
-		"pancakes":         {"pancakes", "breakfast", "brunch"},
+		"outdoor_activity":  {"fitness", "camping", "hiking", "outdoor", "sports"},
+		"social_activity":   {"social", "meetup", "gathering", "party"},
+		"karaoke":           {"karaoke", "singing", "music"},
+		"gaming":            {"gaming", "games", "esports"},
+		"movie":             {"movie", "cinema", "film"},
+		"board_game":        {"board game", "games", "tabletop"},
+		"swimming":          {"swimming", "pool", "water"},
+		"skateboarding":     {"skateboarding", "skate", "extreme"},
+		"cafe_dessert":      {"cafe", "dessert", "coffee", "bakery"},
+		"bubble_tea":        {"bubble tea", "tea", "drinks"},
+		"bakery_cake":       {"bakery", "cake", "pastry"},
+		"bingsu_ice_cream":  {"bingsu", "ice cream", "dessert"},
+		"coffee":            {"coffee", "cafe"},
+		"matcha":            {"matcha", "tea"},
+		"pancakes":          {"pancakes", "breakfast", "brunch"},
 		"party_celebration": {"party", "celebration", "event"},
 	}
 
@@ -791,7 +791,6 @@ func (s *TagService) calculateEventTypeScore(userUUID uuid.UUID, event models.Ev
 	// Default: neutral score
 	return 50.0
 }
-
 
 // convertEventToResponse converts event model to response DTO
 func (s *TagService) convertEventToResponse(event models.Event, userID string) dto.EventResponse {

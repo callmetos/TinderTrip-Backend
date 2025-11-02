@@ -23,4 +23,3 @@ type TravelStyleMaster struct {
 func (TravelStyleMaster) TableName() string {
 	return "travel_styles"
 }
-
