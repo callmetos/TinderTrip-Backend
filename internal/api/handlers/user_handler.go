@@ -88,6 +88,7 @@ func (h *UserHandler) UpdateProfile(c *gin.Context) {
 }
 
 type updateProfileJSONReq struct {
+	DisplayName   *string    `json:"display_name,omitempty"`
 	Bio           *string    `json:"bio,omitempty"`
 	Languages     *string    `json:"languages,omitempty"`
 	DateOfBirth   *time.Time `json:"date_of_birth,omitempty"`
@@ -101,6 +102,11 @@ type updateProfileJSONReq struct {
 
 // validateProfileUpdateRequest validates the profile update request
 func validateProfileUpdateRequest(req updateProfileJSONReq) error {
+	// Validate display name length
+	if req.DisplayName != nil && utf8.RuneCountInString(*req.DisplayName) > 100 {
+		return fmt.Errorf("display name must be 100 characters or less")
+	}
+
 	// Validate bio length
 	if req.Bio != nil && utf8.RuneCountInString(*req.Bio) > 500 {
 		return fmt.Errorf("bio must be 500 characters or less")
@@ -186,6 +192,7 @@ func updateProfileJSON(h *UserHandler, c *gin.Context, userID string) {
 	}
 
 	req := dto.UpdateProfileRequest{
+		DisplayName:   reqBody.DisplayName,
 		Bio:           reqBody.Bio,
 		Languages:     reqBody.Languages,
 		DateOfBirth:   reqBody.DateOfBirth,
@@ -209,6 +216,7 @@ func updateProfileJSON(h *UserHandler, c *gin.Context, userID string) {
 
 func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
 	// Text fields
+	displayName := c.PostForm("display_name")
 	bio := c.PostForm("bio")
 	languages := c.PostForm("languages")
 	dobStr := c.PostForm("date_of_birth")
@@ -221,6 +229,7 @@ func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
 
 	// Create request struct for validation
 	reqBody := updateProfileJSONReq{
+		DisplayName:   &displayName,
 		Bio:           &bio,
 		Languages:     &languages,
 		DateOfBirth:   nil,
@@ -292,6 +301,7 @@ func updateProfileMultipart(h *UserHandler, c *gin.Context, userID string) {
 	}
 
 	req := dto.UpdateProfileRequest{
+		DisplayName:   toPtr(displayName),
 		Bio:           toPtr(bio),
 		Languages:     toPtr(languages),
 		DateOfBirth:   reqBody.DateOfBirth,

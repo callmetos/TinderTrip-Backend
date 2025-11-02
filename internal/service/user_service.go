@@ -39,6 +39,13 @@ func (s *UserService) GetProfile(userID string) (*dto.UserProfileResponse, error
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 
+	// Get user to get display_name
+	var user models.User
+	err = database.GetDB().Where("id = ?", userUUID).First(&user).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
 	// Convert to response DTO
 	var gender, smoking string
 	if profile.Gender != nil {
@@ -51,6 +58,7 @@ func (s *UserService) GetProfile(userID string) (*dto.UserProfileResponse, error
 	response := &dto.UserProfileResponse{
 		ID:            profile.ID.String(),
 		UserID:        profile.UserID.String(),
+		DisplayName:   user.DisplayName,
 		Bio:           profile.Bio,
 		Languages:     profile.Languages,
 		DateOfBirth:   profile.DateOfBirth,
@@ -97,9 +105,15 @@ func (s *UserService) UpdateProfile(userID string, req dto.UpdateProfileRequest)
 		}
 	}
 
-	// Update fields
-	// Note: DisplayName is not part of UpdateProfileRequest, it should be updated separately
+	// Update display_name in users table if provided
+	if req.DisplayName != nil {
+		err = database.GetDB().Model(&models.User{}).Where("id = ?", userUUID).Update("display_name", *req.DisplayName).Error
+		if err != nil {
+			return nil, fmt.Errorf("failed to update display_name: %w", err)
+		}
+	}
 
+	// Update profile fields
 	if req.Bio != nil {
 		profile.Bio = req.Bio
 	}
@@ -140,6 +154,13 @@ func (s *UserService) UpdateProfile(userID string, req dto.UpdateProfileRequest)
 		return nil, fmt.Errorf("failed to save profile: %w", err)
 	}
 
+	// Get user to get display_name (after update)
+	var user models.User
+	err = database.GetDB().Where("id = ?", userUUID).First(&user).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
 	// Convert to response DTO
 	var gender, smoking string
 	if profile.Gender != nil {
@@ -152,6 +173,7 @@ func (s *UserService) UpdateProfile(userID string, req dto.UpdateProfileRequest)
 	response := &dto.UserProfileResponse{
 		ID:            profile.ID.String(),
 		UserID:        profile.UserID.String(),
+		DisplayName:   user.DisplayName,
 		Bio:           profile.Bio,
 		Languages:     profile.Languages,
 		DateOfBirth:   profile.DateOfBirth,

@@ -58,8 +58,8 @@ func (s *TravelPreferenceService) AddTravelPreference(userID string, req dto.Add
 		return fmt.Errorf("invalid user ID")
 	}
 
-	// Validate travel style
-	if !models.IsValidTravelStyle(req.TravelStyle) {
+	// Validate travel style (check against database)
+	if !s.isValidTravelStyle(req.TravelStyle) {
 		return fmt.Errorf("invalid travel style")
 	}
 
@@ -112,8 +112,8 @@ func (s *TravelPreferenceService) UpdateAllTravelPreferences(userID string, req 
 
 	// Add new preferences
 	for _, travelStyle := range req.TravelStyles {
-		// Validate travel style
-		if !models.IsValidTravelStyle(travelStyle) {
+		// Validate travel style (check against database)
+		if !s.isValidTravelStyle(travelStyle) {
 			tx.Rollback()
 			return fmt.Errorf("invalid travel style: %s", travelStyle)
 		}
@@ -139,8 +139,47 @@ func (s *TravelPreferenceService) UpdateAllTravelPreferences(userID string, req 
 	return nil
 }
 
-// GetTravelPreferenceStyles gets available travel preference styles
+// GetTravelPreferenceStyles gets available travel preference styles from database
 func (s *TravelPreferenceService) GetTravelPreferenceStyles() []dto.TravelPreferenceStyleResponse {
+	// Get travel styles from master table
+	var masterStyles []models.TravelStyleMaster
+	err := database.GetDB().
+		Where("is_active = ?", true).
+		Order("sort_order ASC").
+		Find(&masterStyles).Error
+
+	if err != nil || len(masterStyles) == 0 {
+		// Fallback to hardcoded styles if database is empty
+		return s.getHardcodedTravelStyles()
+	}
+
+	// Convert master data to response DTOs
+	responses := make([]dto.TravelPreferenceStyleResponse, len(masterStyles))
+	for i, style := range masterStyles {
+		displayName := style.DisplayName
+		if displayName == "" {
+			displayName = models.GetTravelStyleName(style.Code) // Fallback
+		}
+
+		icon := ""
+		if style.Icon != nil && *style.Icon != "" {
+			icon = *style.Icon
+		} else {
+			icon = models.GetTravelStyleIcon(style.Code) // Fallback
+		}
+
+		responses[i] = dto.TravelPreferenceStyleResponse{
+			Style:       style.Code,
+			DisplayName: displayName,
+			Icon:        icon,
+		}
+	}
+
+	return responses
+}
+
+// getHardcodedTravelStyles returns hardcoded travel styles as fallback
+func (s *TravelPreferenceService) getHardcodedTravelStyles() []dto.TravelPreferenceStyleResponse {
 	styles := []string{
 		"cafe_dessert",
 		"bubble_tea",
@@ -193,34 +232,17 @@ func (s *TravelPreferenceService) GetTravelPreferenceStylesWithUserPreferences(u
 		preferenceMap[pref.TravelStyle] = true
 	}
 
-	// Get all styles
-	styles := []string{
-		"cafe_dessert",
-		"bubble_tea",
-		"bakery_cake",
-		"bingsu_ice_cream",
-		"coffee",
-		"matcha",
-		"pancakes",
-		"social_activity",
-		"karaoke",
-		"gaming",
-		"movie",
-		"board_game",
-		"outdoor_activity",
-		"party_celebration",
-		"swimming",
-		"skateboarding",
-	}
+	// Get all styles from database
+	masterStyles := s.GetTravelPreferenceStyles()
 
-	responses := make([]dto.TravelPreferenceStyleResponse, len(styles))
-	for i, style := range styles {
-		isSelected := preferenceMap[style] // true if selected, false if not
+	responses := make([]dto.TravelPreferenceStyleResponse, len(masterStyles))
+	for i, style := range masterStyles {
+		isSelected := preferenceMap[style.Style] // true if selected, false if not
 
 		responses[i] = dto.TravelPreferenceStyleResponse{
-			Style:       style,
-			DisplayName: models.GetTravelStyleName(style),
-			Icon:        models.GetTravelStyleIcon(style),
+			Style:       style.Style,
+			DisplayName: style.DisplayName,
+			Icon:        style.Icon,
 			IsSelected:  isSelected,
 		}
 	}
@@ -266,4 +288,20 @@ func (s *TravelPreferenceService) DeleteTravelPreference(userID, travelStyle str
 	}
 
 	return nil
+}
+
+// isValidTravelStyle checks if travel style exists in database
+func (s *TravelPreferenceService) isValidTravelStyle(style string) bool {
+	// Check against database first
+	var masterStyle models.TravelStyleMaster
+	err := database.GetDB().
+		Where("code = ? AND is_active = ?", style, true).
+		First(&masterStyle).Error
+
+	if err == nil {
+		return true // Found in database
+	}
+
+	// Fallback to hardcoded validation
+	return models.IsValidTravelStyle(style)
 }

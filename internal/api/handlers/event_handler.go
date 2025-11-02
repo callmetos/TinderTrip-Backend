@@ -29,7 +29,7 @@ func NewEventHandler() *EventHandler {
 
 // GetEvents gets events with pagination and filters
 // @Summary Get events
-// @Description Get events with pagination and filters
+// @Description Get events with pagination and filters. Default: sorted by match score (relevance). Use sort=created for chronological sorting.
 // @Tags events
 // @Security BearerAuth
 // @Produce json
@@ -37,6 +37,7 @@ func NewEventHandler() *EventHandler {
 // @Param limit query int false "Items per page"
 // @Param event_type query string false "Event type filter"
 // @Param status query string false "Event status filter"
+// @Param sort query string false "Sort order: 'relevance' (default, by match score) or 'created' (chronological, newest first)"
 // @Success 200 {object} dto.EventListResponseWrapper
 // @Failure 401 {object} dto.ErrorAPIResponse
 // @Failure 500 {object} dto.ErrorAPIResponse
@@ -47,6 +48,7 @@ func (h *EventHandler) GetEvents(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
 	eventType := c.Query("event_type")
 	status := c.Query("status")
+	sort := c.DefaultQuery("sort", "relevance") // Default: sort by relevance (match score)
 
 	// Validate pagination
 	page, limit = utils.ValidatePagination(page, limit)
@@ -54,14 +56,36 @@ func (h *EventHandler) GetEvents(c *gin.Context) {
 	// Get user ID from context
 	userID, _ := middleware.GetCurrentUserID(c)
 
-	// Get events
-	events, total, err := h.eventService.GetEvents(userID, page, limit, eventType, status)
-	if err != nil {
-		utils.InternalServerErrorResponse(c, "Failed to get events", err)
+	// Default: Use suggestion algorithm (sorted by match score)
+	// If sort=created or user not logged in, use chronological sorting
+	if sort == "created" || userID == "" {
+		// Get events sorted by created_at (chronological)
+		events, total, err := h.eventService.GetEvents(userID, page, limit, eventType, status)
+		if err != nil {
+			utils.InternalServerErrorResponse(c, "Failed to get events", err)
+			return
+		}
+
+		utils.PaginatedResponse(c, "Events retrieved successfully (sorted by created date)", events, int64(total), page, limit)
 		return
 	}
 
-	utils.PaginatedResponse(c, "Events retrieved successfully", events, int64(total), page, limit)
+	// Use suggestion algorithm (sorted by match score) - DEFAULT BEHAVIOR
+	suggestions, total, err := h.eventService.GetEventSuggestions(userID, page, limit)
+	if err != nil {
+		utils.InternalServerErrorResponse(c, "Failed to get event suggestions", err)
+		return
+	}
+
+	// Convert suggestions to regular events with match scores
+	events := make([]dto.EventResponse, len(suggestions))
+	for i, suggestion := range suggestions {
+		event := suggestion.Event
+		event.MatchScore = &suggestion.MatchScore
+		events[i] = event
+	}
+
+	utils.PaginatedResponse(c, "Events retrieved successfully (sorted by relevance)", events, total, page, limit)
 }
 
 // GetJoinedEvents gets events that the user has joined

@@ -59,6 +59,11 @@ func (s *FoodPreferenceService) UpdateFoodPreference(userID string, req dto.Upda
 		return fmt.Errorf("invalid user ID")
 	}
 
+	// Validate food category (check against database)
+	if !s.isValidFoodCategory(req.FoodCategory) {
+		return fmt.Errorf("invalid food category")
+	}
+
 	// Validate preference level
 	if !models.IsValidPreferenceLevel(req.PreferenceLevel) {
 		return fmt.Errorf("invalid preference level")
@@ -107,6 +112,12 @@ func (s *FoodPreferenceService) UpdateAllFoodPreferences(userID string, req dto.
 
 	// Update each preference
 	for _, prefReq := range req.Preferences {
+		// Validate food category (check against database)
+		if !s.isValidFoodCategory(prefReq.FoodCategory) {
+			tx.Rollback()
+			return fmt.Errorf("invalid food category: %s", prefReq.FoodCategory)
+		}
+
 		// Validate preference level
 		if !models.IsValidPreferenceLevel(prefReq.PreferenceLevel) {
 			tx.Rollback()
@@ -146,8 +157,47 @@ func (s *FoodPreferenceService) UpdateAllFoodPreferences(userID string, req dto.
 	return nil
 }
 
-// GetFoodPreferenceCategories gets available food preference categories
+// GetFoodPreferenceCategories gets available food preference categories from database
 func (s *FoodPreferenceService) GetFoodPreferenceCategories() []dto.FoodPreferenceCategoryResponse {
+	// Get food categories from master table
+	var masterCategories []models.FoodCategoryMaster
+	err := database.GetDB().
+		Where("is_active = ?", true).
+		Order("sort_order ASC").
+		Find(&masterCategories).Error
+
+	if err != nil || len(masterCategories) == 0 {
+		// Fallback to hardcoded categories if database is empty
+		return s.getHardcodedFoodCategories()
+	}
+
+	// Convert master data to response DTOs
+	responses := make([]dto.FoodPreferenceCategoryResponse, len(masterCategories))
+	for i, category := range masterCategories {
+		displayName := category.DisplayName
+		if displayName == "" {
+			displayName = models.GetFoodCategoryName(category.Code) // Fallback
+		}
+
+		icon := ""
+		if category.Icon != nil && *category.Icon != "" {
+			icon = *category.Icon
+		} else {
+			icon = models.GetFoodCategoryIcon(category.Code) // Fallback
+		}
+
+		responses[i] = dto.FoodPreferenceCategoryResponse{
+			Category:    category.Code,
+			DisplayName: displayName,
+			Icon:        icon,
+		}
+	}
+
+	return responses
+}
+
+// getHardcodedFoodCategories returns hardcoded food categories as fallback
+func (s *FoodPreferenceService) getHardcodedFoodCategories() []dto.FoodPreferenceCategoryResponse {
 	categories := []string{
 		"thai_food",
 		"japanese_food",
@@ -191,28 +241,20 @@ func (s *FoodPreferenceService) GetFoodPreferenceCategoriesWithUserPreferences(u
 		preferenceMap[pref.FoodCategory] = pref.PreferenceLevel
 	}
 
-	// Get all categories
-	categories := []string{
-		"thai_food",
-		"japanese_food",
-		"chinese_food",
-		"international_food",
-		"halal_food",
-		"buffet",
-		"bbq_grill",
-	}
+	// Get all categories from database
+	masterCategories := s.GetFoodPreferenceCategories()
 
-	responses := make([]dto.FoodPreferenceCategoryResponse, len(categories))
-	for i, category := range categories {
+	responses := make([]dto.FoodPreferenceCategoryResponse, len(masterCategories))
+	for i, category := range masterCategories {
 		preferenceLevel := 2 // default to neutral
-		if level, exists := preferenceMap[category]; exists {
+		if level, exists := preferenceMap[category.Category]; exists {
 			preferenceLevel = level
 		}
 
 		responses[i] = dto.FoodPreferenceCategoryResponse{
-			Category:        category,
-			DisplayName:     models.GetFoodCategoryName(category),
-			Icon:            models.GetFoodCategoryIcon(category),
+			Category:        category.Category,
+			DisplayName:     category.DisplayName,
+			Icon:            category.Icon,
 			PreferenceLevel: preferenceLevel,
 		}
 	}
@@ -272,4 +314,35 @@ func (s *FoodPreferenceService) DeleteFoodPreference(userID, foodCategory string
 	}
 
 	return nil
+}
+
+// isValidFoodCategory checks if food category exists in database
+func (s *FoodPreferenceService) isValidFoodCategory(category string) bool {
+	// Check against database first
+	var masterCategory models.FoodCategoryMaster
+	err := database.GetDB().
+		Where("code = ? AND is_active = ?", category, true).
+		First(&masterCategory).Error
+
+	if err == nil {
+		return true // Found in database
+	}
+
+	// Fallback to hardcoded validation (check against constants)
+	validCategories := []string{
+		"thai_food",
+		"japanese_food",
+		"chinese_food",
+		"international_food",
+		"halal_food",
+		"buffet",
+		"bbq_grill",
+	}
+	for _, validCategory := range validCategories {
+		if category == validCategory {
+			return true
+		}
+	}
+
+	return false
 }

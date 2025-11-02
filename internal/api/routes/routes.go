@@ -22,6 +22,10 @@ func SetupRoutes(router *gin.Engine) {
 		})
 	})
 
+	// Public tags route (without /public prefix)
+	tagHandlerPublic := handlers.NewTagHandler()
+	v1.GET("/tags", tagHandlerPublic.GetTags)
+
 	// OTP monitoring for development
 	otpHandler := handlers.NewOTPHandler()
 

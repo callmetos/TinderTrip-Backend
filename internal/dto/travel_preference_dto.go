@@ -18,7 +18,7 @@ type TravelPreferenceListResponse struct {
 
 // AddTravelPreferenceRequest represents an add travel preference request
 type AddTravelPreferenceRequest struct {
-	TravelStyle string `json:"travel_style" binding:"required,oneof=cafe_dessert bubble_tea bakery_cake bingsu_ice_cream coffee matcha pancakes social_activity karaoke gaming movie board_game outdoor_activity party_celebration swimming skateboarding"`
+	TravelStyle string `json:"travel_style" binding:"required"` // Validation against database is done in service layer
 }
 
 // UpdateAllTravelPreferencesRequest represents an update all travel preferences request

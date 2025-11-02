@@ -224,23 +224,41 @@ func (s *PreferenceService) UpdateBudget(userID string, req dto.UpdatePrefBudget
 	}
 
 	// Update fields
+	// For Meal budget
 	if req.MealMin != nil {
 		budget.MealMin = req.MealMin
 	}
 	if req.MealMax != nil {
 		budget.MealMax = req.MealMax
+		// If max is set but min is not provided in request, set min to 0
+		if req.MealMin == nil {
+			minValue := 0
+			budget.MealMin = &minValue
+		}
 	}
+	// For Daytrip budget
 	if req.DaytripMin != nil {
 		budget.DaytripMin = req.DaytripMin
 	}
 	if req.DaytripMax != nil {
 		budget.DaytripMax = req.DaytripMax
+		// If max is set but min is not provided in request, set min to 0
+		if req.DaytripMin == nil {
+			minValue := 0
+			budget.DaytripMin = &minValue
+		}
 	}
+	// For Overnight budget
 	if req.OvernightMin != nil {
 		budget.OvernightMin = req.OvernightMin
 	}
 	if req.OvernightMax != nil {
 		budget.OvernightMax = req.OvernightMax
+		// If max is set but min is not provided in request, set min to 0
+		if req.OvernightMin == nil {
+			minValue := 0
+			budget.OvernightMin = &minValue
+		}
 	}
 	if req.Unlimited != nil {
 		budget.Unlimited = *req.Unlimited

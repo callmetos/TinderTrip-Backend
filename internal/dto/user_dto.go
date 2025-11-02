@@ -6,6 +6,7 @@ import "time"
 type UserProfileResponse struct {
 	ID            string     `json:"id"`
 	UserID        string     `json:"user_id"`
+	DisplayName   *string    `json:"display_name,omitempty"`
 	Bio           *string    `json:"bio,omitempty"`
 	Languages     *string    `json:"languages,omitempty"`
 	DateOfBirth   *time.Time `json:"date_of_birth,omitempty"`
@@ -22,6 +23,7 @@ type UserProfileResponse struct {
 
 // UpdateUserProfileRequest represents an update user profile request
 type UpdateUserProfileRequest struct {
+	DisplayName   *string    `json:"display_name,omitempty"`
 	Bio           *string    `json:"bio,omitempty"`
 	Languages     *string    `json:"languages,omitempty"`
 	DateOfBirth   *time.Time `json:"date_of_birth,omitempty"`

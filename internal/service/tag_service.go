@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"TinderTrip-Backend/internal/dto"
 	"TinderTrip-Backend/internal/models"
@@ -320,7 +321,7 @@ func (s *TagService) RemoveEventTag(eventID, tagID, userID string) error {
 	return nil
 }
 
-// GetEventSuggestions gets event suggestions based on user interests
+// GetEventSuggestions gets event suggestions based on user preferences (travel, food, budget, event type)
 func (s *TagService) GetEventSuggestions(userID string, page, limit int) ([]dto.EventSuggestionItem, int64, error) {
 	// Parse user ID
 	userUUID, err := uuid.Parse(userID)
@@ -328,25 +329,29 @@ func (s *TagService) GetEventSuggestions(userID string, page, limit int) ([]dto.
 		return nil, 0, fmt.Errorf("invalid user ID")
 	}
 
-	// Get user tags
-	var userTags []models.UserTag
-	err = database.GetDB().Preload("Tag").Where("user_id = ?", userUUID).Find(&userTags).Error
+	// Get travel preferences
+	var travelPrefs []models.TravelPreference
+	err = database.GetDB().Where("user_id = ? AND deleted_at IS NULL", userUUID).Find(&travelPrefs).Error
 	if err != nil {
-		return nil, 0, fmt.Errorf("failed to get user tags: %w", err)
+		return nil, 0, fmt.Errorf("failed to get travel preferences: %w", err)
 	}
 
-	// If user has no tags, return empty result
-	if len(userTags) == 0 {
-		return []dto.EventSuggestionItem{}, 0, nil
+	// Get food preferences
+	var foodPrefs []models.FoodPreference
+	err = database.GetDB().Where("user_id = ? AND deleted_at IS NULL", userUUID).Find(&foodPrefs).Error
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get food preferences: %w", err)
 	}
 
-	// Get user tag IDs
-	userTagIDs := make([]uuid.UUID, len(userTags))
-	for i, userTag := range userTags {
-		userTagIDs[i] = userTag.TagID
+	// Get user budget preference
+	var userBudget models.PrefBudget
+	err = database.GetDB().Where("user_id = ?", userUUID).First(&userBudget).Error
+	if err != nil && err != gorm.ErrRecordNotFound {
+		return nil, 0, fmt.Errorf("failed to get user budget: %w", err)
 	}
+	hasBudget := err == nil
 
-	// Get events with tags that match user interests
+	// Get all published events (will be sorted by match score later)
 	var events []models.Event
 	err = database.GetDB().
 		Preload("Creator").
@@ -354,11 +359,8 @@ func (s *TagService) GetEventSuggestions(userID string, page, limit int) ([]dto.
 		Preload("Categories.Tag").
 		Preload("Tags.Tag").
 		Preload("Members").
-		Joins("JOIN event_tags ON events.id = event_tags.event_id").
-		Where("events.deleted_at IS NULL AND events.status = ? AND event_tags.tag_id IN ?",
-			models.EventStatusPublished, userTagIDs).
-		Group("events.id").
-		Order("events.created_at DESC").
+		Where("deleted_at IS NULL AND status = ?", models.EventStatusPublished).
+		Order("created_at DESC").
 		Find(&events).Error
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get events: %w", err)
@@ -367,15 +369,47 @@ func (s *TagService) GetEventSuggestions(userID string, page, limit int) ([]dto.
 	// Calculate match scores
 	suggestions := make([]dto.EventSuggestionItem, len(events))
 	for i, event := range events {
-		// Calculate match score
-		matchScore, matchedTags := s.calculateMatchScore(userTags, event.Tags)
+		// Calculate travel preference score
+		travelScore := s.calculateTravelPreferenceScore(travelPrefs, event)
+
+		// Calculate food preference score
+		foodScore := s.calculateFoodPreferenceScore(foodPrefs, event)
+
+		// Calculate event type (trip duration) score
+		eventTypeScore := s.calculateEventTypeScore(userUUID, event)
+
+		// Calculate budget match score
+		var budgetScore float64
+		if hasBudget {
+			budgetScore = s.calculateBudgetMatchScore(userBudget, event)
+		} else {
+			// No budget preference = neutral score (50)
+			budgetScore = 50.0
+		}
+
+		// Combined score: 30% travel + 30% food + 30% budget + 10% event type
+		// Weights can be adjusted based on importance
+		combinedScore := (travelScore * 0.3) + (foodScore * 0.3) + (budgetScore * 0.3) + (eventTypeScore * 0.1)
 
 		// Convert event to response
 		eventResponse := s.convertEventToResponse(event, userID)
 
+		// Get matched tags for display (from event tags)
+		matchedTags := make([]dto.TagResponse, len(event.Tags))
+		for j, eventTag := range event.Tags {
+			if eventTag.Tag != nil {
+				matchedTags[j] = dto.TagResponse{
+					ID:        eventTag.Tag.ID.String(),
+					Name:      eventTag.Tag.Name,
+					Kind:      eventTag.Tag.Kind,
+					CreatedAt: eventTag.Tag.CreatedAt,
+				}
+			}
+		}
+
 		suggestions[i] = dto.EventSuggestionItem{
 			Event:       eventResponse,
-			MatchScore:  matchScore,
+			MatchScore:  math.Round(combinedScore*100) / 100,
 			MatchedTags: matchedTags,
 		}
 	}
@@ -404,8 +438,8 @@ func (s *TagService) GetEventSuggestions(userID string, page, limit int) ([]dto.
 	return suggestions[offset:end], total, nil
 }
 
-// calculateMatchScore calculates match score between user tags and event tags
-func (s *TagService) calculateMatchScore(userTags []models.UserTag, eventTags []models.EventTag) (float64, []dto.TagResponse) {
+// calculateTagMatchScore calculates match score between user tags and event tags
+func (s *TagService) calculateTagMatchScore(userTags []models.UserTag, eventTags []models.EventTag) (float64, []dto.TagResponse) {
 	// Tag kind weights (higher = more important)
 	kindWeights := map[string]float64{
 		"interest":      1.0, // User interests are most important
@@ -466,6 +500,298 @@ func (s *TagService) calculateMatchScore(userTags []models.UserTag, eventTags []
 
 	return math.Round(normalizedScore*100) / 100, matchedTags
 }
+
+// calculateBudgetMatchScore calculates match score between user budget preference and event budget
+func (s *TagService) calculateBudgetMatchScore(userBudget models.PrefBudget, event models.Event) float64 {
+	// If user has unlimited budget, match all events
+	if userBudget.Unlimited {
+		return 100.0
+	}
+
+	// If event has no budget, give neutral score
+	if event.BudgetMin == nil && event.BudgetMax == nil {
+		return 50.0
+	}
+
+	// Get user budget range for event type
+	userMin, userMax := userBudget.GetBudgetForEventType(event.EventType)
+
+	// If user has no budget preference for this event type, give neutral score
+	if userMin == nil && userMax == nil {
+		return 50.0
+	}
+
+	// Calculate event budget range
+	eventMin := 0
+	eventMax := 0
+	if event.BudgetMin != nil {
+		eventMin = *event.BudgetMin
+	}
+	if event.BudgetMax != nil {
+		eventMax = *event.BudgetMax
+	} else {
+		// If event has only min, assume reasonable max (2x min or 100k)
+		eventMax = eventMin * 2
+		if eventMax < 100000 {
+			eventMax = 100000
+		}
+	}
+
+	// Normalize to same currency (for simplicity, assume same currency)
+	// In production, you might want to add currency conversion here
+
+	// Calculate overlap and match score
+	var userMinVal, userMaxVal int
+	if userMin != nil {
+		userMinVal = *userMin
+	} else {
+		userMinVal = 0
+	}
+	if userMax != nil {
+		userMaxVal = *userMax
+	} else {
+		userMaxVal = 1000000 // Large number for unlimited max
+	}
+
+	// Check if ranges overlap
+	overlapMin := math.Max(float64(userMinVal), float64(eventMin))
+	overlapMax := math.Min(float64(userMaxVal), float64(eventMax))
+
+	if overlapMin > overlapMax {
+		// No overlap - calculate distance-based score
+		distance := 0.0
+		if overlapMin > float64(eventMax) {
+			distance = overlapMin - float64(eventMax)
+		} else {
+			distance = float64(eventMin) - overlapMax
+		}
+
+		// Calculate score based on distance (penalty)
+		// Use percentage of user budget range as reference
+		budgetRange := float64(userMaxVal - userMinVal)
+		if budgetRange <= 0 {
+			budgetRange = 10000 // Default range if user has no range
+		}
+
+		penaltyPercent := (distance / budgetRange) * 100
+		if penaltyPercent > 50 {
+			return 0.0 // Too far outside budget
+		}
+		return 50.0 - (penaltyPercent * 0.6) // Penalty: 0-30 points
+	}
+
+	// Ranges overlap - calculate overlap percentage
+	overlapRange := overlapMax - overlapMin
+	eventRange := float64(eventMax - eventMin)
+	userRange := float64(userMaxVal - userMinVal)
+
+	if eventRange <= 0 || userRange <= 0 {
+		return 100.0 // Exact match or edge case
+	}
+
+	// Calculate how much of the event budget overlaps with user budget
+	overlapPercent := (overlapRange / eventRange) * 100
+
+	// Calculate score: base score from overlap, bonus for being within user range
+	score := 70.0 + (overlapPercent * 0.3) // 70-100 points for overlap
+
+	// Bonus if event budget is completely within user budget
+	if float64(eventMin) >= float64(userMinVal) && float64(eventMax) <= float64(userMaxVal) {
+		score = 100.0 // Perfect match
+	}
+
+	return math.Round(score*100) / 100
+}
+
+// calculateTravelPreferenceScore calculates match score between travel preferences and event tags
+func (s *TagService) calculateTravelPreferenceScore(travelPrefs []models.TravelPreference, event models.Event) float64 {
+	if len(travelPrefs) == 0 {
+		// No travel preferences = neutral score (50)
+		return 50.0
+	}
+
+	// Map travel styles to potential tag names/activities
+	travelStyleMap := map[string][]string{
+		"outdoor_activity": {"fitness", "camping", "hiking", "outdoor", "sports"},
+		"social_activity":  {"social", "meetup", "gathering", "party"},
+		"karaoke":          {"karaoke", "singing", "music"},
+		"gaming":           {"gaming", "games", "esports"},
+		"movie":            {"movie", "cinema", "film"},
+		"board_game":       {"board game", "games", "tabletop"},
+		"swimming":         {"swimming", "pool", "water"},
+		"skateboarding":    {"skateboarding", "skate", "extreme"},
+		"cafe_dessert":     {"cafe", "dessert", "coffee", "bakery"},
+		"bubble_tea":       {"bubble tea", "tea", "drinks"},
+		"bakery_cake":      {"bakery", "cake", "pastry"},
+		"bingsu_ice_cream": {"bingsu", "ice cream", "dessert"},
+		"coffee":           {"coffee", "cafe"},
+		"matcha":           {"matcha", "tea"},
+		"pancakes":         {"pancakes", "breakfast", "brunch"},
+		"party_celebration": {"party", "celebration", "event"},
+	}
+
+	// Create map of user travel styles
+	userTravelStyles := make(map[string]bool)
+	for _, pref := range travelPrefs {
+		userTravelStyles[pref.TravelStyle] = true
+	}
+
+	// Check if event tags match any travel preferences
+	var matches int
+	var totalChecks int
+
+	for _, eventTag := range event.Tags {
+		if eventTag.Tag == nil {
+			continue
+		}
+
+		tagNameLower := strings.ToLower(eventTag.Tag.Name)
+
+		// Check each travel style mapping
+		for travelStyle, keywords := range travelStyleMap {
+			if userTravelStyles[travelStyle] {
+				totalChecks++
+				// Check if tag name contains any keyword
+				for _, keyword := range keywords {
+					if strings.Contains(tagNameLower, strings.ToLower(keyword)) {
+						matches++
+						break
+					}
+				}
+			}
+		}
+	}
+
+	// Calculate score: matches / total checks * 100
+	if totalChecks == 0 {
+		return 50.0 // No preferences to check
+	}
+
+	score := (float64(matches) / float64(totalChecks)) * 100
+	if score < 50 {
+		// Penalize if no matches found
+		score = 50.0 - ((50.0 - score) * 0.5) // Reduce penalty
+	}
+
+	return math.Round(score*100) / 100
+}
+
+// calculateFoodPreferenceScore calculates match score between food preferences and event tags
+func (s *TagService) calculateFoodPreferenceScore(foodPrefs []models.FoodPreference, event models.Event) float64 {
+	if len(foodPrefs) == 0 {
+		// No food preferences = neutral score (50)
+		return 50.0
+	}
+
+	// Map food categories to potential tag names
+	foodCategoryMap := map[string][]string{
+		"thai_food":          {"thai", "thailand", "pad thai", "tom yum"},
+		"japanese_food":      {"japanese", "japan", "sushi", "ramen"},
+		"chinese_food":       {"chinese", "china", "dim sum", "dumpling"},
+		"international_food": {"international", "western", "global"},
+		"halal_food":         {"halal", "muslim", "islamic"},
+		"buffet":             {"buffet", "all you can eat"},
+		"bbq_grill":          {"bbq", "barbecue", "grill", "grilled"},
+	}
+
+	// Create map of user food preferences with levels
+	userFoodPrefs := make(map[string]int) // food_category -> preference_level
+	for _, pref := range foodPrefs {
+		userFoodPrefs[pref.FoodCategory] = pref.PreferenceLevel
+	}
+
+	// Check if event tags match any food preferences
+	var totalScore float64
+	var matchCount int
+
+	for _, eventTag := range event.Tags {
+		if eventTag.Tag == nil {
+			continue
+		}
+
+		// Check if tag is food-related
+		if eventTag.Tag.Kind != "food" {
+			continue
+		}
+
+		tagNameLower := strings.ToLower(eventTag.Tag.Name)
+
+		// Check each food category mapping
+		for foodCategory, keywords := range foodCategoryMap {
+			if prefLevel, exists := userFoodPrefs[foodCategory]; exists {
+				// Check if tag name contains any keyword
+				for _, keyword := range keywords {
+					if strings.Contains(tagNameLower, strings.ToLower(keyword)) {
+						matchCount++
+						// Calculate score based on preference level
+						// 1 = dislike (0-20 points), 2 = neutral (40-60 points), 3 = love (80-100 points)
+						switch prefLevel {
+						case 1: // Dislike
+							totalScore += 10.0 // Low score
+						case 2: // Neutral
+							totalScore += 50.0 // Neutral score
+						case 3: // Love
+							totalScore += 90.0 // High score
+						default:
+							totalScore += 50.0
+						}
+						break
+					}
+				}
+			}
+		}
+	}
+
+	// If no matches, check if user dislikes everything (negative preference)
+	if matchCount == 0 {
+		// Check if user has mostly dislike preferences
+		dislikeCount := 0
+		loveCount := 0
+		for _, pref := range foodPrefs {
+			if pref.PreferenceLevel == 1 {
+				dislikeCount++
+			} else if pref.PreferenceLevel == 3 {
+				loveCount++
+			}
+		}
+		if dislikeCount > loveCount {
+			// User dislikes more than loves, neutral score for events without food
+			return 50.0
+		}
+	}
+
+	// Normalize score
+	if matchCount == 0 {
+		return 50.0 // No food tags found or no matches
+	}
+
+	avgScore := totalScore / float64(matchCount)
+	return math.Round(avgScore*100) / 100
+}
+
+// calculateEventTypeScore calculates match score based on event type (trip duration preference)
+func (s *TagService) calculateEventTypeScore(userUUID uuid.UUID, event models.Event) float64 {
+	// For now, we use neutral score (50) as we don't have explicit event type preferences
+	// In the future, we could add:
+	// - User's preferred event types
+	// - Historical event types user joined
+	// - Event type matching with budget preferences (already handled in budget score)
+
+	// Check if user has budget preference for this event type (indirect preference)
+	var userBudget models.PrefBudget
+	err := database.GetDB().Where("user_id = ?", userUUID).First(&userBudget).Error
+	if err == nil {
+		// If user has budget preference for this event type, it's a positive signal
+		_, max := userBudget.GetBudgetForEventType(event.EventType)
+		if max != nil {
+			return 70.0 // User has budget preference for this event type = preference
+		}
+	}
+
+	// Default: neutral score
+	return 50.0
+}
+
 
 // convertEventToResponse converts event model to response DTO
 func (s *TagService) convertEventToResponse(event models.Event, userID string) dto.EventResponse {

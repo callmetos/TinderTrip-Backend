@@ -19,7 +19,7 @@ type FoodPreferenceListResponse struct {
 
 // UpdateFoodPreferenceRequest represents an update food preference request
 type UpdateFoodPreferenceRequest struct {
-	FoodCategory    string `json:"food_category" binding:"required,oneof=thai_food japanese_food chinese_food international_food halal_food buffet bbq_grill"`
+	FoodCategory    string `json:"food_category" binding:"required"` // Validation against database is done in service layer
 	PreferenceLevel int    `json:"preference_level" binding:"required,min=1,max=3"`
 }
 

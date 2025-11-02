@@ -28,6 +28,7 @@ type EventResponse struct {
 	MemberCount   int                   `json:"member_count"`
 	IsJoined      bool                  `json:"is_joined"`
 	UserSwipe     *EventSwipeResponse   `json:"user_swipe,omitempty"`
+	MatchScore    *float64              `json:"match_score,omitempty"`
 	CreatedAt     time.Time             `json:"created_at"`
 	UpdatedAt     time.Time             `json:"updated_at"`
 }

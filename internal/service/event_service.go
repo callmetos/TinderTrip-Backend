@@ -267,6 +267,38 @@ func (s *EventService) CreateEvent(userID string, req dto.CreateEventRequest) (*
 		return nil, fmt.Errorf("failed to create chat room: %w", err)
 	}
 
+	// Add tags if provided
+	if len(req.TagIDs) > 0 {
+		for _, tagIDStr := range req.TagIDs {
+			tagUUID, err := uuid.Parse(tagIDStr)
+			if err != nil {
+				// Log error but don't fail the whole event creation
+				fmt.Printf("Warning: Invalid tag ID %s: %v\n", tagIDStr, err)
+				continue
+			}
+
+			// Check if tag exists
+			var tag models.Tag
+			err = database.GetDB().Where("id = ?", tagUUID).First(&tag).Error
+			if err != nil {
+				// Log error but don't fail
+				fmt.Printf("Warning: Tag %s not found: %v\n", tagIDStr, err)
+				continue
+			}
+
+			// Create event tag
+			eventTag := &models.EventTag{
+				EventID: event.ID,
+				TagID:   tagUUID,
+			}
+			err = database.GetDB().Create(eventTag).Error
+			if err != nil {
+				// Log error but don't fail the whole event creation
+				fmt.Printf("Warning: Failed to add tag %s to event: %v\n", tagIDStr, err)
+			}
+		}
+	}
+
 	// Load event with relationships
 	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
 		Where("id = ?", event.ID).First(event).Error
