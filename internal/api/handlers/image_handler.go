@@ -118,7 +118,7 @@ func (h *ImageHandler) ServeAvatar(c *gin.Context) {
 	// Generate ETag from image data for better caching
 	etag := generateETag(imageData)
 	c.Header("ETag", etag)
-	
+
 	// Check if client has cached version
 	if match := c.GetHeader("If-None-Match"); match == etag {
 		c.Status(http.StatusNotModified)
@@ -222,7 +222,7 @@ func (h *ImageHandler) ServeEventImage(c *gin.Context) {
 	// Generate ETag from image data for better caching
 	etag := generateETag(imageData)
 	c.Header("ETag", etag)
-	
+
 	// Check if client has cached version
 	if match := c.GetHeader("If-None-Match"); match == etag {
 		c.Status(http.StatusNotModified)
