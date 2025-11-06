@@ -118,7 +118,7 @@ func LoadConfig() {
 			Port:        getEnv("SERVER_PORT", ""),
 			Host:        getEnv("SERVER_HOST", ""),
 			Mode:        getEnv("GIN_MODE", ""),
-			FrontendURL: getEnv("FRONTEND_URL", "http://localhost:8081"),
+			FrontendURL: "http://192.168.1.120:8081",
 		},
 		Database: DatabaseConfig{
 			Host:     getEnv("DB_HOST", ""),
