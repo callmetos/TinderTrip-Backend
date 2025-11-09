@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	mathrand "math/rand"
+	"strings"
 	"time"
 
 	"TinderTrip-Backend/internal/models"
@@ -49,6 +50,16 @@ func (s *AuthService) Register(email, password, displayName string) (*models.Use
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 
+	// Check if display_name already exists
+	var existingDisplayName models.User
+	err = database.GetDB().Where("display_name = ? AND deleted_at IS NULL", displayName).First(&existingDisplayName).Error
+	if err == nil {
+		return nil, fmt.Errorf("display name already taken")
+	}
+	if err != gorm.ErrRecordNotFound {
+		return nil, fmt.Errorf("database error: %w", err)
+	}
+
 	// Hash password
 	hashedPassword, err := utils.HashPassword(password)
 	if err != nil {
@@ -66,6 +77,21 @@ func (s *AuthService) Register(email, password, displayName string) (*models.Use
 
 	// Save user to database
 	if err := database.GetDB().Create(user).Error; err != nil {
+		// Check if error is due to unique constraint violation for display_name
+		errStr := strings.ToLower(err.Error())
+		// PostgreSQL unique constraint violation error codes and messages
+		// Error format: "ERROR: duplicate key value violates unique constraint \"ux_users_display_name\"\nSQL state: 23505"
+		if errStr != "" && (
+			strings.Contains(errStr, "ux_users_display_name") || 
+			strings.Contains(errStr, "duplicate key value") || 
+			strings.Contains(errStr, "unique constraint") ||
+			strings.Contains(errStr, "23505") || // PostgreSQL unique violation error code
+			strings.Contains(errStr, "violates unique constraint") ||
+			strings.Contains(errStr, "already exists") ||
+			strings.Contains(errStr, "key (display_name)") ||
+			strings.Contains(errStr, "sql state: 23505")) {
+			return nil, fmt.Errorf("display name already taken")
+		}
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
@@ -346,12 +372,22 @@ func (s *AuthService) DeleteUser(userID string) error {
 }
 
 // SendEmailVerificationOTP sends an email verification OTP
-func (s *AuthService) SendEmailVerificationOTP(email string) error {
+func (s *AuthService) SendEmailVerificationOTP(email, displayName string) error {
 	// Check if user already exists
 	var existingUser models.User
 	err := database.GetDB().Where("email = ?", email).First(&existingUser).Error
 	if err == nil {
 		return fmt.Errorf("user already exists")
+	}
+	if err != gorm.ErrRecordNotFound {
+		return fmt.Errorf("database error: %w", err)
+	}
+
+	// Check if display_name already exists
+	var existingDisplayName models.User
+	err = database.GetDB().Where("display_name = ? AND deleted_at IS NULL", displayName).First(&existingDisplayName).Error
+	if err == nil {
+		return fmt.Errorf("display name already taken")
 	}
 	if err != gorm.ErrRecordNotFound {
 		return fmt.Errorf("database error: %w", err)
@@ -408,6 +444,16 @@ func (s *AuthService) VerifyEmailOTP(email, otp, password, displayName string) (
 		return nil, fmt.Errorf("database error: %w", err)
 	}
 
+	// Check if display_name already exists
+	var existingDisplayName models.User
+	err = database.GetDB().Where("display_name = ? AND deleted_at IS NULL", displayName).First(&existingDisplayName).Error
+	if err == nil {
+		return nil, fmt.Errorf("display name already taken")
+	}
+	if err != gorm.ErrRecordNotFound {
+		return nil, fmt.Errorf("database error: %w", err)
+	}
+
 	// Hash password
 	hashedPassword, err := utils.HashPassword(password)
 	if err != nil {
@@ -425,6 +471,21 @@ func (s *AuthService) VerifyEmailOTP(email, otp, password, displayName string) (
 
 	// Save user to database
 	if err := database.GetDB().Create(user).Error; err != nil {
+		// Check if error is due to unique constraint violation for display_name
+		errStr := strings.ToLower(err.Error())
+		// PostgreSQL unique constraint violation error codes and messages
+		// Error format: "ERROR: duplicate key value violates unique constraint \"ux_users_display_name\"\nSQL state: 23505"
+		if errStr != "" && (
+			strings.Contains(errStr, "ux_users_display_name") || 
+			strings.Contains(errStr, "duplicate key value") || 
+			strings.Contains(errStr, "unique constraint") ||
+			strings.Contains(errStr, "23505") || // PostgreSQL unique violation error code
+			strings.Contains(errStr, "violates unique constraint") ||
+			strings.Contains(errStr, "already exists") ||
+			strings.Contains(errStr, "key (display_name)") ||
+			strings.Contains(errStr, "sql state: 23505")) {
+			return nil, fmt.Errorf("display name already taken")
+		}
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 

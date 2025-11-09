@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"TinderTrip-Backend/internal/dto"
@@ -107,8 +108,34 @@ func (s *UserService) UpdateProfile(userID string, req dto.UpdateProfileRequest)
 
 	// Update display_name in users table if provided
 	if req.DisplayName != nil {
+		// Check if display_name already exists (excluding current user)
+		var existingDisplayName models.User
+		err = database.GetDB().Where("display_name = ? AND id != ? AND deleted_at IS NULL", *req.DisplayName, userUUID).First(&existingDisplayName).Error
+		if err == nil {
+			return nil, fmt.Errorf("display name already taken")
+		}
+		if err != gorm.ErrRecordNotFound {
+			return nil, fmt.Errorf("database error: %w", err)
+		}
+		
+		// Update display_name
 		err = database.GetDB().Model(&models.User{}).Where("id = ?", userUUID).Update("display_name", *req.DisplayName).Error
 		if err != nil {
+			// Check if error is due to unique constraint violation for display_name
+			errStr := strings.ToLower(err.Error())
+			// PostgreSQL unique constraint violation error codes and messages
+			// Error format: "ERROR: duplicate key value violates unique constraint \"ux_users_display_name\"\nSQL state: 23505"
+			if errStr != "" && (
+				strings.Contains(errStr, "ux_users_display_name") || 
+				strings.Contains(errStr, "duplicate key value") || 
+				strings.Contains(errStr, "unique constraint") ||
+				strings.Contains(errStr, "23505") || // PostgreSQL unique violation error code
+				strings.Contains(errStr, "violates unique constraint") ||
+				strings.Contains(errStr, "already exists") ||
+				strings.Contains(errStr, "key (display_name)") ||
+				strings.Contains(errStr, "sql state: 23505")) {
+				return nil, fmt.Errorf("display name already taken")
+			}
 			return nil, fmt.Errorf("failed to update display_name: %w", err)
 		}
 	}

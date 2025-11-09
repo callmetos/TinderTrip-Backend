@@ -110,6 +110,18 @@ func (s *GoogleOAuthService) CreateOrUpdateUser(ctx context.Context, userInfo *G
 		if err == gorm.ErrRecordNotFound {
 			// User doesn't exist, create new user
 			isNewUser = true
+			
+			// Check if display_name already exists
+			var existingDisplayName models.User
+			err = database.GetDB().Where("display_name = ? AND deleted_at IS NULL", userInfo.Name).First(&existingDisplayName).Error
+			if err == nil {
+				// Display name already taken, append Google ID suffix to make it unique
+				uniqueDisplayName := userInfo.Name + "_" + userInfo.ID[:8]
+				userInfo.Name = uniqueDisplayName
+			} else if err != gorm.ErrRecordNotFound {
+				return nil, false, fmt.Errorf("failed to check display name: %w", err)
+			}
+			
 			user = models.User{
 				Email:         &userInfo.Email,
 				Provider:      models.AuthProviderGoogle,
@@ -130,7 +142,24 @@ func (s *GoogleOAuthService) CreateOrUpdateUser(ctx context.Context, userInfo *G
 		// User exists, update last login and ensure email is verified
 		now := time.Now()
 		user.LastLoginAt = &now
-		user.DisplayName = &userInfo.Name
+		
+		// Check if display_name needs to be updated and if it's unique
+		if user.DisplayName == nil || *user.DisplayName != userInfo.Name {
+			// Check if new display_name already exists (excluding current user)
+			var existingDisplayName models.User
+			err = database.GetDB().Where("display_name = ? AND id != ? AND deleted_at IS NULL", userInfo.Name, user.ID).First(&existingDisplayName).Error
+			if err == nil {
+				// Display name already taken, append Google ID suffix to make it unique
+				uniqueDisplayName := userInfo.Name + "_" + userInfo.ID[:8]
+				user.DisplayName = &uniqueDisplayName
+			} else if err != gorm.ErrRecordNotFound {
+				return nil, false, fmt.Errorf("failed to check display name: %w", err)
+			} else {
+				// Display name is available, update it
+				user.DisplayName = &userInfo.Name
+			}
+		}
+		
 		user.EmailVerified = true // Ensure Google OAuth users are always verified
 
 		err = database.GetDB().Save(&user).Error

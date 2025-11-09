@@ -25,7 +25,7 @@ type User struct {
 	PasswordHash  *string      `json:"-" gorm:"type:text"`
 	EmailVerified bool         `json:"email_verified" gorm:"type:boolean;not null;default:false"`
 	GoogleID      *string      `json:"google_id" gorm:"type:text;uniqueIndex:ux_users_google_id,where:provider='google'"`
-	DisplayName   *string      `json:"display_name" gorm:"type:text"`
+	DisplayName   *string      `json:"display_name" gorm:"type:text;uniqueIndex:ux_users_display_name,where:deleted_at IS NULL"`
 	LastLoginAt   *time.Time   `json:"last_login_at" gorm:"type:timestamptz"`
 	CreatedAt     time.Time    `json:"created_at" gorm:"type:timestamptz;not null;default:now()"`
 	UpdatedAt     time.Time    `json:"updated_at" gorm:"type:timestamptz;not null;default:now()"`

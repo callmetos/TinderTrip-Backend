@@ -414,32 +414,117 @@ func (s *NotificationService) sendNotificationEmail(to, name, title, body string
 func (s *NotificationService) createGenericNotificationEmailHTML(name, title, body string, data map[string]interface{}) string {
 	return fmt.Sprintf(`
 		<!DOCTYPE html>
-		<html>
+		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>%s</title>
 			<style>
-				body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-				.container { max-width: 600px; margin: 0 auto; padding: 20px; }
-				.header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
-				.content { padding: 20px; background-color: #f9f9f9; }
-				.message { background-color: white; padding: 15px; border-radius: 4px; margin: 15px 0; }
-				.footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+				* { margin: 0; padding: 0; box-sizing: border-box; }
+				body { 
+					font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+					line-height: 1.6; 
+					color: #333333;
+					background-color: #f5f7fa;
+					padding: 20px;
+				}
+				.email-wrapper {
+					max-width: 600px;
+					margin: 0 auto;
+					background-color: #ffffff;
+					border-radius: 12px;
+					overflow: hidden;
+					box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				}
+				.header {
+					background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%);
+					color: white;
+					padding: 40px 30px;
+					text-align: center;
+				}
+				.header h1 {
+					font-size: 32px;
+					font-weight: 700;
+					margin-bottom: 10px;
+					letter-spacing: -0.5px;
+				}
+				.header-icon {
+					font-size: 48px;
+					margin-bottom: 15px;
+				}
+				.content {
+					padding: 40px 30px;
+					background-color: #ffffff;
+				}
+				.content h2 {
+					font-size: 24px;
+					font-weight: 600;
+					color: #1a202c;
+					margin-bottom: 20px;
+					text-align: center;
+				}
+				.content p {
+					font-size: 16px;
+					color: #4a5568;
+					margin-bottom: 15px;
+					line-height: 1.7;
+				}
+				.message {
+					background: linear-gradient(135deg, #f5f7fa 0%%, #e2e8f0 100%%);
+					border: 2px solid #667eea;
+					border-radius: 12px;
+					padding: 30px;
+					margin: 30px 0;
+					box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+				}
+				.message h3 {
+					font-size: 22px;
+					font-weight: 700;
+					color: #1a202c;
+					margin-bottom: 15px;
+					text-align: center;
+				}
+				.message p {
+					font-size: 16px;
+					color: #4a5568;
+					line-height: 1.7;
+					margin: 0;
+				}
+				.footer {
+					text-align: center;
+					padding: 30px;
+					background-color: #f7fafc;
+					border-top: 1px solid #e2e8f0;
+				}
+				.footer p {
+					font-size: 13px;
+					color: #718096;
+					margin: 5px 0;
+				}
+				@media only screen and (max-width: 600px) {
+					.header { padding: 30px 20px; }
+					.header h1 { font-size: 26px; }
+					.content { padding: 30px 20px; }
+					.message { padding: 20px; }
+				}
 			</style>
 		</head>
 		<body>
-			<div class="container">
+			<div class="email-wrapper">
 				<div class="header">
+					<div class="header-icon">📬</div>
 					<h1>TinderTrip</h1>
+					<p style="margin: 0; opacity: 0.9;">Notification</p>
 				</div>
 				<div class="content">
-					<h2>Hello %s!</h2>
+					<h2>Hello %s! 👋</h2>
 					<div class="message">
 						<h3>%s</h3>
 						<p>%s</p>
 					</div>
 				</div>
 				<div class="footer">
+					<p><strong>TinderTrip</strong></p>
 					<p>&copy; 2024 TinderTrip. All rights reserved.</p>
 				</div>
 			</div>
@@ -457,73 +542,260 @@ func (s *NotificationService) createEventMemberChangeEmailHTML(name, title, body
 		}
 	}
 
+	icon := "👥"
+	if title == "New Member Joined" {
+		icon = "🎉"
+	} else if title == "Member Left" {
+		icon = "👋"
+	}
+
 	return fmt.Sprintf(`
 		<!DOCTYPE html>
-		<html>
+		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>%s</title>
 			<style>
-				body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-				.container { max-width: 600px; margin: 0 auto; padding: 20px; }
-				.header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
-				.content { padding: 20px; background-color: #f9f9f9; }
-				.event-info { background-color: white; padding: 15px; border-radius: 4px; margin: 15px 0; }
-				.footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+				* { margin: 0; padding: 0; box-sizing: border-box; }
+				body { 
+					font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+					line-height: 1.6; 
+					color: #333333;
+					background-color: #f5f7fa;
+					padding: 20px;
+				}
+				.email-wrapper {
+					max-width: 600px;
+					margin: 0 auto;
+					background-color: #ffffff;
+					border-radius: 12px;
+					overflow: hidden;
+					box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				}
+				.header {
+					background: linear-gradient(135deg, #10b981 0%%, #059669 100%%);
+					color: white;
+					padding: 40px 30px;
+					text-align: center;
+				}
+				.header h1 {
+					font-size: 32px;
+					font-weight: 700;
+					margin-bottom: 10px;
+					letter-spacing: -0.5px;
+				}
+				.header-icon {
+					font-size: 48px;
+					margin-bottom: 15px;
+				}
+				.content {
+					padding: 40px 30px;
+					background-color: #ffffff;
+				}
+				.content h2 {
+					font-size: 24px;
+					font-weight: 600;
+					color: #1a202c;
+					margin-bottom: 20px;
+					text-align: center;
+				}
+				.content p {
+					font-size: 16px;
+					color: #4a5568;
+					margin-bottom: 15px;
+					line-height: 1.7;
+				}
+				.event-info {
+					background: linear-gradient(135deg, #f0fdf4 0%%, #dcfce7 100%%);
+					border: 2px solid #10b981;
+					border-radius: 12px;
+					padding: 30px;
+					margin: 30px 0;
+					box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+					text-align: center;
+				}
+				.event-info h3 {
+					font-size: 22px;
+					font-weight: 700;
+					color: #065f46;
+					margin: 0;
+				}
+				.footer {
+					text-align: center;
+					padding: 30px;
+					background-color: #f7fafc;
+					border-top: 1px solid #e2e8f0;
+				}
+				.footer p {
+					font-size: 13px;
+					color: #718096;
+					margin: 5px 0;
+				}
+				@media only screen and (max-width: 600px) {
+					.header { padding: 30px 20px; }
+					.header h1 { font-size: 26px; }
+					.content { padding: 30px 20px; }
+					.event-info { padding: 20px; }
+				}
 			</style>
 		</head>
 		<body>
-			<div class="container">
+			<div class="email-wrapper">
 				<div class="header">
-					<h1>TinderTrip Notification</h1>
+					<div class="header-icon">%s</div>
+					<h1>TinderTrip</h1>
+					<p style="margin: 0; opacity: 0.9;">%s</p>
 				</div>
 				<div class="content">
-					<h2>Hello %s!</h2>
+					<h2>Hello %s! 👋</h2>
 					<p>%s</p>
 					<div class="event-info">
 						<h3>%s</h3>
 					</div>
 				</div>
 				<div class="footer">
+					<p><strong>TinderTrip</strong></p>
 					<p>&copy; 2024 TinderTrip. All rights reserved.</p>
 				</div>
 			</div>
 		</body>
 		</html>
-	`, title, name, body, eventTitle)
+	`, title, icon, title, name, body, eventTitle)
 }
 
 // createEventReminderEmailHTML creates HTML for event reminder notifications
 func (s *NotificationService) createEventReminderEmailHTML(name, title, body string, data map[string]interface{}) string {
 	return fmt.Sprintf(`
 		<!DOCTYPE html>
-		<html>
+		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>Event Reminder</title>
 			<style>
-				body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-				.container { max-width: 600px; margin: 0 auto; padding: 20px; }
-				.header { background-color: #FF9800; color: white; padding: 20px; text-align: center; }
-				.content { padding: 20px; background-color: #f9f9f9; }
-				.reminder-box { background-color: #fff3cd; border: 2px solid #FF9800; padding: 15px; border-radius: 4px; margin: 15px 0; }
-				.footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+				* { margin: 0; padding: 0; box-sizing: border-box; }
+				body { 
+					font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+					line-height: 1.6; 
+					color: #333333;
+					background-color: #f5f7fa;
+					padding: 20px;
+				}
+				.email-wrapper {
+					max-width: 600px;
+					margin: 0 auto;
+					background-color: #ffffff;
+					border-radius: 12px;
+					overflow: hidden;
+					box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				}
+				.header {
+					background: linear-gradient(135deg, #f59e0b 0%%, #d97706 100%%);
+					color: white;
+					padding: 40px 30px;
+					text-align: center;
+				}
+				.header h1 {
+					font-size: 32px;
+					font-weight: 700;
+					margin-bottom: 10px;
+					letter-spacing: -0.5px;
+				}
+				.header-icon {
+					font-size: 48px;
+					margin-bottom: 15px;
+				}
+				.content {
+					padding: 40px 30px;
+					background-color: #ffffff;
+				}
+				.content h2 {
+					font-size: 24px;
+					font-weight: 600;
+					color: #1a202c;
+					margin-bottom: 20px;
+					text-align: center;
+				}
+				.content p {
+					font-size: 16px;
+					color: #4a5568;
+					margin-bottom: 15px;
+					line-height: 1.7;
+				}
+				.reminder-box {
+					background: linear-gradient(135deg, #fffbeb 0%%, #fef3c7 100%%);
+					border: 3px solid #f59e0b;
+					border-radius: 12px;
+					padding: 30px;
+					margin: 30px 0;
+					box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+					text-align: center;
+				}
+				.reminder-box h3 {
+					font-size: 22px;
+					font-weight: 700;
+					color: #92400e;
+					margin-bottom: 15px;
+				}
+				.reminder-box p {
+					font-size: 16px;
+					color: #78350f;
+					margin: 0;
+					line-height: 1.7;
+				}
+				.reminder-note {
+					background: linear-gradient(135deg, #fef3c7 0%%, #fde68a 100%%);
+					border-left: 4px solid #f59e0b;
+					padding: 20px;
+					border-radius: 8px;
+					margin: 25px 0;
+					text-align: center;
+				}
+				.reminder-note p {
+					margin: 0;
+					color: #92400e;
+					font-weight: 600;
+					font-size: 16px;
+				}
+				.footer {
+					text-align: center;
+					padding: 30px;
+					background-color: #f7fafc;
+					border-top: 1px solid #e2e8f0;
+				}
+				.footer p {
+					font-size: 13px;
+					color: #718096;
+					margin: 5px 0;
+				}
+				@media only screen and (max-width: 600px) {
+					.header { padding: 30px 20px; }
+					.header h1 { font-size: 26px; }
+					.content { padding: 30px 20px; }
+					.reminder-box { padding: 20px; }
+				}
 			</style>
 		</head>
 		<body>
-			<div class="container">
+			<div class="email-wrapper">
 				<div class="header">
-					<h1>⏰ Event Reminder</h1>
+					<div class="header-icon">⏰</div>
+					<h1>Event Reminder</h1>
+					<p style="margin: 0; opacity: 0.9;">Don't miss out!</p>
 				</div>
 				<div class="content">
-					<h2>Hello %s!</h2>
+					<h2>Hello %s! 👋</h2>
 					<div class="reminder-box">
 						<h3>%s</h3>
 						<p>%s</p>
 					</div>
-					<p>Don't forget to prepare for your upcoming event!</p>
+					<div class="reminder-note">
+						<p>📋 Don't forget to prepare for your upcoming event!</p>
+					</div>
 				</div>
 				<div class="footer">
+					<p><strong>TinderTrip</strong></p>
 					<p>&copy; 2024 TinderTrip. All rights reserved.</p>
 				</div>
 			</div>
@@ -536,32 +808,117 @@ func (s *NotificationService) createEventReminderEmailHTML(name, title, body str
 func (s *NotificationService) createEventUpdateEmailHTML(name, title, body string, data map[string]interface{}) string {
 	return fmt.Sprintf(`
 		<!DOCTYPE html>
-		<html>
+		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>Event Update</title>
 			<style>
-				body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-				.container { max-width: 600px; margin: 0 auto; padding: 20px; }
-				.header { background-color: #2196F3; color: white; padding: 20px; text-align: center; }
-				.content { padding: 20px; background-color: #f9f9f9; }
-				.update-box { background-color: white; border-left: 4px solid #2196F3; padding: 15px; margin: 15px 0; }
-				.footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+				* { margin: 0; padding: 0; box-sizing: border-box; }
+				body { 
+					font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+					line-height: 1.6; 
+					color: #333333;
+					background-color: #f5f7fa;
+					padding: 20px;
+				}
+				.email-wrapper {
+					max-width: 600px;
+					margin: 0 auto;
+					background-color: #ffffff;
+					border-radius: 12px;
+					overflow: hidden;
+					box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				}
+				.header {
+					background: linear-gradient(135deg, #3b82f6 0%%, #2563eb 100%%);
+					color: white;
+					padding: 40px 30px;
+					text-align: center;
+				}
+				.header h1 {
+					font-size: 32px;
+					font-weight: 700;
+					margin-bottom: 10px;
+					letter-spacing: -0.5px;
+				}
+				.header-icon {
+					font-size: 48px;
+					margin-bottom: 15px;
+				}
+				.content {
+					padding: 40px 30px;
+					background-color: #ffffff;
+				}
+				.content h2 {
+					font-size: 24px;
+					font-weight: 600;
+					color: #1a202c;
+					margin-bottom: 20px;
+					text-align: center;
+				}
+				.content p {
+					font-size: 16px;
+					color: #4a5568;
+					margin-bottom: 15px;
+					line-height: 1.7;
+				}
+				.update-box {
+					background: linear-gradient(135deg, #eff6ff 0%%, #dbeafe 100%%);
+					border: 3px solid #3b82f6;
+					border-radius: 12px;
+					padding: 30px;
+					margin: 30px 0;
+					box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+				}
+				.update-box h3 {
+					font-size: 22px;
+					font-weight: 700;
+					color: #1e40af;
+					margin-bottom: 15px;
+					text-align: center;
+				}
+				.update-box p {
+					font-size: 16px;
+					color: #1e3a8a;
+					margin: 0;
+					line-height: 1.7;
+				}
+				.footer {
+					text-align: center;
+					padding: 30px;
+					background-color: #f7fafc;
+					border-top: 1px solid #e2e8f0;
+				}
+				.footer p {
+					font-size: 13px;
+					color: #718096;
+					margin: 5px 0;
+				}
+				@media only screen and (max-width: 600px) {
+					.header { padding: 30px 20px; }
+					.header h1 { font-size: 26px; }
+					.content { padding: 30px 20px; }
+					.update-box { padding: 20px; }
+				}
 			</style>
 		</head>
 		<body>
-			<div class="container">
+			<div class="email-wrapper">
 				<div class="header">
-					<h1>📢 Event Update</h1>
+					<div class="header-icon">📢</div>
+					<h1>Event Update</h1>
+					<p style="margin: 0; opacity: 0.9;">Important information</p>
 				</div>
 				<div class="content">
-					<h2>Hello %s!</h2>
+					<h2>Hello %s! 👋</h2>
 					<div class="update-box">
 						<h3>%s</h3>
 						<p>%s</p>
 					</div>
 				</div>
 				<div class="footer">
+					<p><strong>TinderTrip</strong></p>
 					<p>&copy; 2024 TinderTrip. All rights reserved.</p>
 				</div>
 			</div>
@@ -574,33 +931,134 @@ func (s *NotificationService) createEventUpdateEmailHTML(name, title, body strin
 func (s *NotificationService) createEventCancelledEmailHTML(name, title, body string, data map[string]interface{}) string {
 	return fmt.Sprintf(`
 		<!DOCTYPE html>
-		<html>
+		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>Event Cancelled</title>
 			<style>
-				body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-				.container { max-width: 600px; margin: 0 auto; padding: 20px; }
-				.header { background-color: #f44336; color: white; padding: 20px; text-align: center; }
-				.content { padding: 20px; background-color: #f9f9f9; }
-				.cancelled-box { background-color: #ffebee; border: 2px solid #f44336; padding: 15px; border-radius: 4px; margin: 15px 0; }
-				.footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+				* { margin: 0; padding: 0; box-sizing: border-box; }
+				body { 
+					font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+					line-height: 1.6; 
+					color: #333333;
+					background-color: #f5f7fa;
+					padding: 20px;
+				}
+				.email-wrapper {
+					max-width: 600px;
+					margin: 0 auto;
+					background-color: #ffffff;
+					border-radius: 12px;
+					overflow: hidden;
+					box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				}
+				.header {
+					background: linear-gradient(135deg, #ef4444 0%%, #dc2626 100%%);
+					color: white;
+					padding: 40px 30px;
+					text-align: center;
+				}
+				.header h1 {
+					font-size: 32px;
+					font-weight: 700;
+					margin-bottom: 10px;
+					letter-spacing: -0.5px;
+				}
+				.header-icon {
+					font-size: 48px;
+					margin-bottom: 15px;
+				}
+				.content {
+					padding: 40px 30px;
+					background-color: #ffffff;
+				}
+				.content h2 {
+					font-size: 24px;
+					font-weight: 600;
+					color: #1a202c;
+					margin-bottom: 20px;
+					text-align: center;
+				}
+				.content p {
+					font-size: 16px;
+					color: #4a5568;
+					margin-bottom: 15px;
+					line-height: 1.7;
+				}
+				.cancelled-box {
+					background: linear-gradient(135deg, #fef2f2 0%%, #fee2e2 100%%);
+					border: 3px solid #ef4444;
+					border-radius: 12px;
+					padding: 30px;
+					margin: 30px 0;
+					box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+					text-align: center;
+				}
+				.cancelled-box h3 {
+					font-size: 22px;
+					font-weight: 700;
+					color: #991b1b;
+					margin-bottom: 15px;
+				}
+				.cancelled-box p {
+					font-size: 16px;
+					color: #7f1d1d;
+					margin: 0;
+					line-height: 1.7;
+				}
+				.sorry-message {
+					background: linear-gradient(135deg, #fef2f2 0%%, #fee2e2 100%%);
+					border-left: 4px solid #ef4444;
+					padding: 20px;
+					border-radius: 8px;
+					margin: 25px 0;
+					text-align: center;
+				}
+				.sorry-message p {
+					margin: 0;
+					color: #991b1b;
+					font-weight: 600;
+					font-size: 16px;
+				}
+				.footer {
+					text-align: center;
+					padding: 30px;
+					background-color: #f7fafc;
+					border-top: 1px solid #e2e8f0;
+				}
+				.footer p {
+					font-size: 13px;
+					color: #718096;
+					margin: 5px 0;
+				}
+				@media only screen and (max-width: 600px) {
+					.header { padding: 30px 20px; }
+					.header h1 { font-size: 26px; }
+					.content { padding: 30px 20px; }
+					.cancelled-box { padding: 20px; }
+				}
 			</style>
 		</head>
 		<body>
-			<div class="container">
+			<div class="email-wrapper">
 				<div class="header">
-					<h1>❌ Event Cancelled</h1>
+					<div class="header-icon">❌</div>
+					<h1>Event Cancelled</h1>
+					<p style="margin: 0; opacity: 0.9;">We're sorry</p>
 				</div>
 				<div class="content">
-					<h2>Hello %s!</h2>
+					<h2>Hello %s! 👋</h2>
 					<div class="cancelled-box">
 						<h3>%s</h3>
 						<p>%s</p>
 					</div>
-					<p>We're sorry for any inconvenience. Please check for other events you might be interested in!</p>
+					<div class="sorry-message">
+						<p>😔 We're sorry for any inconvenience. Please check for other events you might be interested in!</p>
+					</div>
 				</div>
 				<div class="footer">
+					<p><strong>TinderTrip</strong></p>
 					<p>&copy; 2024 TinderTrip. All rights reserved.</p>
 				</div>
 			</div>
@@ -613,33 +1071,134 @@ func (s *NotificationService) createEventCancelledEmailHTML(name, title, body st
 func (s *NotificationService) createEventCompletedEmailHTML(name, title, body string, data map[string]interface{}) string {
 	return fmt.Sprintf(`
 		<!DOCTYPE html>
-		<html>
+		<html lang="en">
 		<head>
 			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>Event Completed</title>
 			<style>
-				body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-				.container { max-width: 600px; margin: 0 auto; padding: 20px; }
-				.header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; }
-				.content { padding: 20px; background-color: #f9f9f9; }
-				.completed-box { background-color: #e8f5e9; border: 2px solid #4CAF50; padding: 15px; border-radius: 4px; margin: 15px 0; }
-				.footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+				* { margin: 0; padding: 0; box-sizing: border-box; }
+				body { 
+					font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+					line-height: 1.6; 
+					color: #333333;
+					background-color: #f5f7fa;
+					padding: 20px;
+				}
+				.email-wrapper {
+					max-width: 600px;
+					margin: 0 auto;
+					background-color: #ffffff;
+					border-radius: 12px;
+					overflow: hidden;
+					box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+				}
+				.header {
+					background: linear-gradient(135deg, #10b981 0%%, #059669 100%%);
+					color: white;
+					padding: 40px 30px;
+					text-align: center;
+				}
+				.header h1 {
+					font-size: 32px;
+					font-weight: 700;
+					margin-bottom: 10px;
+					letter-spacing: -0.5px;
+				}
+				.header-icon {
+					font-size: 48px;
+					margin-bottom: 15px;
+				}
+				.content {
+					padding: 40px 30px;
+					background-color: #ffffff;
+				}
+				.content h2 {
+					font-size: 24px;
+					font-weight: 600;
+					color: #1a202c;
+					margin-bottom: 20px;
+					text-align: center;
+				}
+				.content p {
+					font-size: 16px;
+					color: #4a5568;
+					margin-bottom: 15px;
+					line-height: 1.7;
+				}
+				.completed-box {
+					background: linear-gradient(135deg, #f0fdf4 0%%, #dcfce7 100%%);
+					border: 3px solid #10b981;
+					border-radius: 12px;
+					padding: 30px;
+					margin: 30px 0;
+					box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+					text-align: center;
+				}
+				.completed-box h3 {
+					font-size: 22px;
+					font-weight: 700;
+					color: #065f46;
+					margin-bottom: 15px;
+				}
+				.completed-box p {
+					font-size: 16px;
+					color: #047857;
+					margin: 0;
+					line-height: 1.7;
+				}
+				.thanks-message {
+					background: linear-gradient(135deg, #ecfdf5 0%%, #d1fae5 100%%);
+					border-left: 4px solid #10b981;
+					padding: 20px;
+					border-radius: 8px;
+					margin: 25px 0;
+					text-align: center;
+				}
+				.thanks-message p {
+					margin: 0;
+					color: #065f46;
+					font-weight: 600;
+					font-size: 16px;
+				}
+				.footer {
+					text-align: center;
+					padding: 30px;
+					background-color: #f7fafc;
+					border-top: 1px solid #e2e8f0;
+				}
+				.footer p {
+					font-size: 13px;
+					color: #718096;
+					margin: 5px 0;
+				}
+				@media only screen and (max-width: 600px) {
+					.header { padding: 30px 20px; }
+					.header h1 { font-size: 26px; }
+					.content { padding: 30px 20px; }
+					.completed-box { padding: 20px; }
+				}
 			</style>
 		</head>
 		<body>
-			<div class="container">
+			<div class="email-wrapper">
 				<div class="header">
-					<h1>✅ Event Completed</h1>
+					<div class="header-icon">✅</div>
+					<h1>Event Completed</h1>
+					<p style="margin: 0; opacity: 0.9;">Great job!</p>
 				</div>
 				<div class="content">
-					<h2>Hello %s!</h2>
+					<h2>Hello %s! 👋</h2>
 					<div class="completed-box">
 						<h3>%s</h3>
 						<p>%s</p>
 					</div>
-					<p>Thanks for participating! We hope you had a great time.</p>
+					<div class="thanks-message">
+						<p>🎉 Thanks for participating! We hope you had a great time.</p>
+					</div>
 				</div>
 				<div class="footer">
+					<p><strong>TinderTrip</strong></p>
 					<p>&copy; 2024 TinderTrip. All rights reserved.</p>
 				</div>
 			</div>

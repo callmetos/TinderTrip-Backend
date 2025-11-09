@@ -60,11 +60,16 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	// Send email verification OTP
-	err := h.authService.SendEmailVerificationOTP(req.Email)
+	err := h.authService.SendEmailVerificationOTP(req.Email, req.DisplayName)
 	if err != nil {
 		// Check if error is due to user already exists
 		if err.Error() == "user already exists" {
 			utils.ConflictResponse(c, "An account with this email already exists")
+			return
+		}
+		// Check if error is due to display name already taken
+		if err.Error() == "display name already taken" {
+			utils.ConflictResponse(c, "Display name already taken. Please choose a different name.")
 			return
 		}
 		utils.InternalServerErrorResponse(c, "Failed to send verification OTP", err)
