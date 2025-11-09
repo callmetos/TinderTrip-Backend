@@ -81,9 +81,8 @@ func (s *AuthService) Register(email, password, displayName string) (*models.Use
 		errStr := strings.ToLower(err.Error())
 		// PostgreSQL unique constraint violation error codes and messages
 		// Error format: "ERROR: duplicate key value violates unique constraint \"ux_users_display_name\"\nSQL state: 23505"
-		if errStr != "" && (
-			strings.Contains(errStr, "ux_users_display_name") || 
-			strings.Contains(errStr, "duplicate key value") || 
+		if errStr != "" && (strings.Contains(errStr, "ux_users_display_name") ||
+			strings.Contains(errStr, "duplicate key value") ||
 			strings.Contains(errStr, "unique constraint") ||
 			strings.Contains(errStr, "23505") || // PostgreSQL unique violation error code
 			strings.Contains(errStr, "violates unique constraint") ||
@@ -475,9 +474,8 @@ func (s *AuthService) VerifyEmailOTP(email, otp, password, displayName string) (
 		errStr := strings.ToLower(err.Error())
 		// PostgreSQL unique constraint violation error codes and messages
 		// Error format: "ERROR: duplicate key value violates unique constraint \"ux_users_display_name\"\nSQL state: 23505"
-		if errStr != "" && (
-			strings.Contains(errStr, "ux_users_display_name") || 
-			strings.Contains(errStr, "duplicate key value") || 
+		if errStr != "" && (strings.Contains(errStr, "ux_users_display_name") ||
+			strings.Contains(errStr, "duplicate key value") ||
 			strings.Contains(errStr, "unique constraint") ||
 			strings.Contains(errStr, "23505") || // PostgreSQL unique violation error code
 			strings.Contains(errStr, "violates unique constraint") ||

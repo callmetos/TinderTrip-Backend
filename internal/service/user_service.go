@@ -117,7 +117,7 @@ func (s *UserService) UpdateProfile(userID string, req dto.UpdateProfileRequest)
 		if err != gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("database error: %w", err)
 		}
-		
+
 		// Update display_name
 		err = database.GetDB().Model(&models.User{}).Where("id = ?", userUUID).Update("display_name", *req.DisplayName).Error
 		if err != nil {
@@ -125,9 +125,8 @@ func (s *UserService) UpdateProfile(userID string, req dto.UpdateProfileRequest)
 			errStr := strings.ToLower(err.Error())
 			// PostgreSQL unique constraint violation error codes and messages
 			// Error format: "ERROR: duplicate key value violates unique constraint \"ux_users_display_name\"\nSQL state: 23505"
-			if errStr != "" && (
-				strings.Contains(errStr, "ux_users_display_name") || 
-				strings.Contains(errStr, "duplicate key value") || 
+			if errStr != "" && (strings.Contains(errStr, "ux_users_display_name") ||
+				strings.Contains(errStr, "duplicate key value") ||
 				strings.Contains(errStr, "unique constraint") ||
 				strings.Contains(errStr, "23505") || // PostgreSQL unique violation error code
 				strings.Contains(errStr, "violates unique constraint") ||
