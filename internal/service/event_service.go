@@ -936,7 +936,7 @@ func (s *EventService) CompleteEvent(eventID, userID string) error {
 // AutoCompleteExpiredEvents automatically completes events that have passed their end date
 func (s *EventService) AutoCompleteExpiredEvents() error {
 	now := time.Now()
-	
+
 	// Get all published events that have passed their end date
 	var expiredEvents []models.Event
 	err := database.GetDB().Where("status = ? AND end_at IS NOT NULL AND end_at < ? AND deleted_at IS NULL",
