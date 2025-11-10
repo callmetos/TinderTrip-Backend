@@ -71,9 +71,12 @@ func (s *NotificationService) SendPushNotification(userID, title, body string, d
 		}
 
 		// Send email notification
+		log.Printf("Attempting to send email notification to %s for user %s: %s - %s", *user.Email, userID, title, body)
 		err = s.sendNotificationEmail(*user.Email, user.GetDisplayName(), title, body, data)
 		if err != nil {
 			log.Printf("Failed to send email notification to %s: %v", *user.Email, err)
+		} else {
+			log.Printf("Successfully sent email notification to %s for user %s", *user.Email, userID)
 		}
 	}()
 
@@ -219,7 +222,7 @@ func (s *NotificationService) SendUserJoinedEventNotification(eventID, userID st
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 
-	// Send notification to event creator
+	// Send notification to event creator only
 	if event.CreatorID != userUUID {
 		title := "New Member Joined"
 		body := fmt.Sprintf("%s joined your event: %s", user.GetDisplayName(), event.Title)
@@ -232,8 +235,12 @@ func (s *NotificationService) SendUserJoinedEventNotification(eventID, userID st
 
 		err := s.SendPushNotification(event.CreatorID.String(), title, body, data)
 		if err != nil {
-			log.Printf("Error sending join notification: %v", err)
+			log.Printf("Error sending join notification to creator: %v", err)
+			return err
 		}
+		log.Printf("Successfully sent join notification to creator %s for event %s", event.CreatorID.String(), eventID)
+	} else {
+		log.Printf("User %s is the creator of event %s, skipping notification", userID, eventID)
 	}
 
 	return nil
