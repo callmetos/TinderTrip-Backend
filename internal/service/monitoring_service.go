@@ -202,7 +202,7 @@ func (ms *MonitoringService) healthCheck(c *gin.Context) {
 		"status":    "healthy",
 		"timestamp": time.Now().Format(time.RFC3339),
 		"uptime":    time.Since(ms.startTime).String(),
-		"version":   "1.0.0",
+		"version":   "1.0.1",
 	}
 
 	c.JSON(http.StatusOK, status)

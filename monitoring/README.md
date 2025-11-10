@@ -133,7 +133,7 @@ Returns overall application health:
   "status": "healthy",
   "timestamp": "2024-01-01T00:00:00Z",
   "uptime": "1h30m45s",
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
 ```
 
