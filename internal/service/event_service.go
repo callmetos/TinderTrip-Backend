@@ -933,6 +933,104 @@ func (s *EventService) CompleteEvent(eventID, userID string) error {
 	return nil
 }
 
+// AutoCompleteExpiredEvents automatically completes events that have passed their end date
+func (s *EventService) AutoCompleteExpiredEvents() error {
+	now := time.Now()
+	
+	// Get all published events that have passed their end date
+	var expiredEvents []models.Event
+	err := database.GetDB().Where("status = ? AND end_at IS NOT NULL AND end_at < ? AND deleted_at IS NULL",
+		models.EventStatusPublished, now).Find(&expiredEvents).Error
+	if err != nil {
+		return fmt.Errorf("failed to get expired events: %w", err)
+	}
+
+	if len(expiredEvents) == 0 {
+		return nil
+	}
+
+	log.Printf("Found %d expired events to auto-complete", len(expiredEvents))
+
+	// Complete each expired event
+	for _, event := range expiredEvents {
+		err := s.autoCompleteEvent(event)
+		if err != nil {
+			log.Printf("Error auto-completing event %s: %v", event.ID, err)
+			continue
+		}
+		log.Printf("Auto-completed event %s (title: %s)", event.ID, event.Title)
+	}
+
+	return nil
+}
+
+// autoCompleteEvent completes an event automatically (without creator check)
+func (s *EventService) autoCompleteEvent(event models.Event) error {
+	eventID := event.ID.String()
+
+	// Update event status to completed
+	now := time.Now()
+	err := database.GetDB().Model(&event).Updates(map[string]interface{}{
+		"status":     models.EventStatusCompleted,
+		"updated_at": now,
+	}).Error
+	if err != nil {
+		return fmt.Errorf("failed to complete event: %w", err)
+	}
+
+	// Log event completion (use system as actor)
+	systemUserID := "system"
+	s.auditLogger.LogEventComplete(&systemUserID, eventID)
+
+	// Create history records for all confirmed members
+	var confirmedMembers []models.EventMember
+	err = database.GetDB().Where("event_id = ? AND status = ?", event.ID, models.MemberStatusConfirmed).Find(&confirmedMembers).Error
+	if err != nil {
+		return fmt.Errorf("failed to get confirmed members: %w", err)
+	}
+
+	// Create history record for each confirmed member
+	for _, member := range confirmedMembers {
+		// Check if history already exists
+		var existingHistory models.UserEventHistory
+		err = database.GetDB().Where("event_id = ? AND user_id = ?", event.ID, member.UserID).First(&existingHistory).Error
+		if err == nil {
+			// Update existing history
+			err = database.GetDB().Model(&existingHistory).Updates(map[string]interface{}{
+				"completed":    true,
+				"completed_at": now,
+			}).Error
+			if err != nil {
+				log.Printf("Failed to update history for user %s: %v", member.UserID, err)
+			}
+		} else if err == gorm.ErrRecordNotFound {
+			// Create new history record
+			history := &models.UserEventHistory{
+				UserID:      member.UserID,
+				EventID:     event.ID,
+				Completed:   true,
+				CompletedAt: &now,
+			}
+
+			err = database.GetDB().Create(history).Error
+			if err != nil {
+				log.Printf("Failed to create history for user %s: %v", member.UserID, err)
+			}
+		} else {
+			log.Printf("Error checking history for user %s: %v", member.UserID, err)
+		}
+	}
+
+	// Send completion notification to all confirmed members
+	notificationService := NewNotificationService()
+	err = notificationService.SendEventCompletedNotification(eventID)
+	if err != nil {
+		log.Printf("Failed to send completion notification for event %s: %v", eventID, err)
+	}
+
+	return nil
+}
+
 // GetEventSuggestions gets event suggestions based on user interests
 func (s *EventService) GetEventSuggestions(userID string, page, limit int) ([]dto.EventSuggestionItem, int64, error) {
 	// Create tag service

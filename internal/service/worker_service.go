@@ -38,6 +38,9 @@ func (s *WorkerService) Start() {
 	// Start audit log worker
 	go s.auditLogWorker()
 
+	// Start event auto-complete worker
+	go s.eventAutoCompleteWorker()
+
 	log.Println("Worker service started")
 }
 
@@ -210,21 +213,11 @@ func (s *WorkerService) processNotifications() {
 		}
 	}
 
-	// Get events that just completed
-	var completedEvents []models.Event
-	err = database.GetDB().Where("status = ? AND end_at BETWEEN ? AND ?",
-		models.EventStatusPublished, time.Now().Add(-1*time.Hour), time.Now()).Find(&completedEvents).Error
+	// Auto-complete expired events (events that have passed their end date)
+	eventService := NewEventService()
+	err = eventService.AutoCompleteExpiredEvents()
 	if err != nil {
-		log.Printf("Error getting completed events: %v", err)
-		return
-	}
-
-	// Mark completed events and send notifications
-	for _, event := range completedEvents {
-		err := s.markEventCompleted(event)
-		if err != nil {
-			log.Printf("Error marking event %s as completed: %v", event.ID, err)
-		}
+		log.Printf("Error auto-completing expired events: %v", err)
 	}
 
 	log.Println("Notification processing completed")
@@ -244,32 +237,6 @@ func (s *WorkerService) sendEventReminder(event models.Event) error {
 		if member.User != nil {
 			// TODO: Implement actual notification sending
 			log.Printf("Sending reminder to user %s for event %s", member.User.ID, event.ID)
-		}
-	}
-
-	return nil
-}
-
-// markEventCompleted marks an event as completed
-func (s *WorkerService) markEventCompleted(event models.Event) error {
-	// Update event status
-	err := database.GetDB().Model(&event).Update("status", models.EventStatusCompleted).Error
-	if err != nil {
-		return fmt.Errorf("failed to mark event as completed: %w", err)
-	}
-
-	// Get event members
-	var members []models.EventMember
-	err = database.GetDB().Preload("User").Where("event_id = ? AND status = ?", event.ID, models.MemberStatusConfirmed).Find(&members).Error
-	if err != nil {
-		return fmt.Errorf("failed to get event members: %w", err)
-	}
-
-	// Send completion notification to each member
-	for _, member := range members {
-		if member.User != nil {
-			// TODO: Implement actual notification sending
-			log.Printf("Sending completion notification to user %s for event %s", member.User.ID, event.ID)
 		}
 	}
 
@@ -358,4 +325,28 @@ func (w *WorkerService) processEmailQueue() {
 func (w *WorkerService) processNotificationQueue() {
 	// TODO: Implement notification queue processing
 	log.Println("Processing notification queue...")
+}
+
+// eventAutoCompleteWorker automatically completes events that have passed their end date
+func (s *WorkerService) eventAutoCompleteWorker() {
+	ticker := time.NewTicker(1 * time.Minute) // Run every minute
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-s.ctx.Done():
+			return
+		case <-ticker.C:
+			s.autoCompleteExpiredEvents()
+		}
+	}
+}
+
+// autoCompleteExpiredEvents completes events that have passed their end date
+func (s *WorkerService) autoCompleteExpiredEvents() {
+	eventService := NewEventService()
+	err := eventService.AutoCompleteExpiredEvents()
+	if err != nil {
+		log.Printf("Error auto-completing expired events: %v", err)
+	}
 }
