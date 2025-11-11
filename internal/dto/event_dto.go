@@ -46,6 +46,8 @@ type EventPhotoResponse struct {
 type EventMemberResponse struct {
 	EventID     string     `json:"event_id"`
 	UserID      string     `json:"user_id"`
+	DisplayName string     `json:"display_name"`
+	AvatarURL   *string    `json:"avatar_url,omitempty"`
 	Role        string     `json:"role"`
 	Status      string     `json:"status"`
 	JoinedAt    time.Time  `json:"joined_at"`

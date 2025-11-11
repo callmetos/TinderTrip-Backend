@@ -3697,6 +3697,12 @@ const docTemplate = `{
                 "event_id": {
                     "type": "string"
                 },
+                "avatar_url": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
                 "joined_at": {
                     "type": "string"
                 },

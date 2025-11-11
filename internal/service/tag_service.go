@@ -358,7 +358,9 @@ func (s *TagService) GetEventSuggestions(userID string, page, limit int) ([]dto.
 		Preload("Photos").
 		Preload("Categories.Tag").
 		Preload("Tags.Tag").
-		Preload("Members").
+		Preload("Members", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("User").Preload("User.Profile")
+		}).
 		Where("deleted_at IS NULL AND status = ?", models.EventStatusPublished).
 		Order("created_at DESC").
 		Find(&events).Error
@@ -880,9 +882,18 @@ func (s *TagService) convertEventToResponse(event models.Event, userID string) d
 	// Add members
 	response.Members = make([]dto.EventMemberResponse, len(event.Members))
 	for i, member := range event.Members {
+		displayName := ""
+		var avatarURL *string
+		if member.User != nil {
+			displayName = member.User.GetDisplayName()
+			avatarURL = buildAvatarURL(member.User)
+		}
+
 		response.Members[i] = dto.EventMemberResponse{
 			EventID:     member.EventID.String(),
 			UserID:      member.UserID.String(),
+			DisplayName: displayName,
+			AvatarURL:   avatarURL,
 			Role:        string(member.Role),
 			Status:      string(member.Status),
 			JoinedAt:    member.JoinedAt,

@@ -49,7 +49,15 @@ func (s *EventService) GetEvents(userID string, page, limit int, eventType, stat
 	// Get events with pagination
 	var events []models.Event
 	offset := (page - 1) * limit
-	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
+	err = query.
+		Preload("Creator").
+		Preload("Photos").
+		Preload("Categories.Tag").
+		Preload("Tags.Tag").
+		Preload("Members", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("User").Preload("User.Profile")
+		}).
+		Preload("Swipes").
 		Offset(offset).Limit(limit).Order("created_at DESC").Find(&events).Error
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get events: %w", err)
@@ -84,7 +92,15 @@ func (s *EventService) GetPublicEvents(page, limit int, eventType string) ([]dto
 	// Get events with pagination
 	var events []models.Event
 	offset := (page - 1) * limit
-	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
+	err = query.
+		Preload("Creator").
+		Preload("Photos").
+		Preload("Categories.Tag").
+		Preload("Tags.Tag").
+		Preload("Members", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("User").Preload("User.Profile")
+		}).
+		Preload("Swipes").
 		Offset(offset).Limit(limit).Order("created_at DESC").Find(&events).Error
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get events: %w", err)
@@ -148,7 +164,15 @@ func (s *EventService) GetJoinedEvents(userID string, page, limit int, memberSta
 	// Get events with pagination
 	var events []models.Event
 	offset := (page - 1) * limit
-	err = query.Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
+	err = query.
+		Preload("Creator").
+		Preload("Photos").
+		Preload("Categories.Tag").
+		Preload("Tags.Tag").
+		Preload("Members", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("User").Preload("User.Profile")
+		}).
+		Preload("Swipes").
 		Offset(offset).Limit(limit).Order("created_at DESC").Find(&events).Error
 	if err != nil {
 		return nil, 0, fmt.Errorf("failed to get joined events: %w", err)
@@ -173,7 +197,15 @@ func (s *EventService) GetEvent(eventID, userID string) (*dto.EventResponse, err
 
 	// Get event
 	var event models.Event
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
+	err = database.GetDB().
+		Preload("Creator").
+		Preload("Photos").
+		Preload("Categories.Tag").
+		Preload("Tags.Tag").
+		Preload("Members", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("User").Preload("User.Profile")
+		}).
+		Preload("Swipes").
 		Where("id = ? AND deleted_at IS NULL", eventUUID).First(&event).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -196,7 +228,15 @@ func (s *EventService) GetPublicEvent(eventID string) (*dto.EventResponse, error
 
 	// Get event (only active events)
 	var event models.Event
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
+	err = database.GetDB().
+		Preload("Creator").
+		Preload("Photos").
+		Preload("Categories.Tag").
+		Preload("Tags.Tag").
+		Preload("Members", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("User").Preload("User.Profile")
+		}).
+		Preload("Swipes").
 		Where("id = ? AND deleted_at IS NULL AND status = ?", eventUUID, models.EventStatusPublished).First(&event).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -300,7 +340,15 @@ func (s *EventService) CreateEvent(userID string, req dto.CreateEventRequest) (*
 	}
 
 	// Load event with relationships
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
+	err = database.GetDB().
+		Preload("Creator").
+		Preload("Photos").
+		Preload("Categories.Tag").
+		Preload("Tags.Tag").
+		Preload("Members", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("User").Preload("User.Profile")
+		}).
+		Preload("Swipes").
 		Where("id = ?", event.ID).First(event).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to load event: %w", err)
@@ -379,7 +427,15 @@ func (s *EventService) UpdateEvent(eventID, userID string, req dto.UpdateEventRe
 	}
 
 	// Load updated event with relationships
-	err = database.GetDB().Preload("Creator").Preload("Photos").Preload("Categories.Tag").Preload("Tags.Tag").Preload("Members").Preload("Swipes").
+	err = database.GetDB().
+		Preload("Creator").
+		Preload("Photos").
+		Preload("Categories.Tag").
+		Preload("Tags.Tag").
+		Preload("Members", func(db *gorm.DB) *gorm.DB {
+			return db.Preload("User").Preload("User.Profile")
+		}).
+		Preload("Swipes").
 		Where("id = ?", event.ID).First(&event).Error
 	if err != nil {
 		return nil, fmt.Errorf("failed to load event: %w", err)
@@ -701,9 +757,18 @@ func (s *EventService) convertEventToResponse(event models.Event, userID string)
 	// Add members
 	response.Members = make([]dto.EventMemberResponse, len(event.Members))
 	for i, member := range event.Members {
+		displayName := ""
+		var avatarURL *string
+		if member.User != nil {
+			displayName = member.User.GetDisplayName()
+			avatarURL = buildAvatarURL(member.User)
+		}
+
 		response.Members[i] = dto.EventMemberResponse{
 			EventID:     member.EventID.String(),
 			UserID:      member.UserID.String(),
+			DisplayName: displayName,
+			AvatarURL:   avatarURL,
 			Role:        string(member.Role),
 			Status:      string(member.Status),
 			JoinedAt:    member.JoinedAt,
@@ -754,6 +819,15 @@ func (s *EventService) convertEventToResponse(event models.Event, userID string)
 	}
 
 	return response
+}
+
+func buildAvatarURL(user *models.User) *string {
+	if user == nil || user.Profile == nil || user.Profile.AvatarURL == nil || *user.Profile.AvatarURL == "" {
+		return nil
+	}
+
+	publicURL := fmt.Sprintf("https://api.tindertrip.phitik.com/images/avatars/%s", user.ID.String())
+	return &publicURL
 }
 
 // ConfirmEventParticipation confirms participation in an event
