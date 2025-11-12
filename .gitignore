@@ -211,4 +211,5 @@ scripts/seed_tags.sql
 
 # Binary files
 main
+/bin/api
 api
