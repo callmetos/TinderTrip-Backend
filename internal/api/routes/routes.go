@@ -27,6 +27,10 @@ func SetupRoutes(router *gin.Engine) {
 	tagHandlerPublic := handlers.NewTagHandler()
 	v1.GET("/tags", tagHandlerPublic.GetTags)
 
+	// Public interests route
+	interestHandlerPublic := handlers.NewInterestHandler()
+	v1.GET("/interests", interestHandlerPublic.GetAllInterests)
+
 	// OTP monitoring for development
 	otpHandler := handlers.NewOTPHandler()
 
@@ -173,6 +177,15 @@ func SetupRoutes(router *gin.Engine) {
 			travelPreferences.GET("/travel-preferences/styles", travelPreferenceHandler.GetTravelPreferenceStylesWithUserPreferences)
 			travelPreferences.GET("/travel-preferences/stats", travelPreferenceHandler.GetTravelPreferenceStats)
 			travelPreferences.DELETE("/travel-preferences/:style", travelPreferenceHandler.DeleteTravelPreference)
+		}
+
+		// Unified interests routes
+		interestHandler := handlers.NewInterestHandler()
+		interests := protected.Group("/users")
+		{
+			interests.GET("/interests", interestHandler.GetUserInterests)
+			interests.PUT("/interests", interestHandler.UpdateUserInterests)
+			interests.GET("/interests/selected", interestHandler.GetUserSelectedInterests)
 		}
 
 		// Audit routes

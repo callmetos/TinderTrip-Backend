@@ -60,7 +60,8 @@ type EventSuggestionResponse struct {
 
 // EventSuggestionItem represents an event suggestion item with match score
 type EventSuggestionItem struct {
-	Event       EventResponse `json:"event"`
-	MatchScore  float64       `json:"match_score"`
-	MatchedTags []TagResponse `json:"matched_tags"`
+	Event            EventResponse      `json:"event"`
+	MatchScore       float64            `json:"match_score"`
+	MatchedTags      []TagResponse      `json:"matched_tags,omitempty"` // Keep for backward compatibility
+	MatchedInterests []InterestResponse `json:"matched_interests,omitempty"`
 }

@@ -24,6 +24,7 @@ type EventResponse struct {
 	Photos        []EventPhotoResponse  `json:"photos,omitempty"`
 	Categories    []TagResponse         `json:"categories,omitempty"`
 	Tags          []TagResponse         `json:"tags,omitempty"`
+	Interests     []InterestResponse    `json:"interests,omitempty"`
 	Members       []EventMemberResponse `json:"members,omitempty"`
 	MemberCount   int                   `json:"member_count"`
 	IsJoined      bool                  `json:"is_joined"`
@@ -81,6 +82,7 @@ type CreateEventRequest struct {
 	CoverImageURL *string    `json:"cover_image_url,omitempty"`
 	CategoryIDs   []string   `json:"category_ids,omitempty"`
 	TagIDs        []string   `json:"tag_ids,omitempty"`
+	InterestCodes []string   `json:"interest_codes,omitempty"`
 }
 
 // UpdateEventRequest represents an update event request
@@ -101,6 +103,7 @@ type UpdateEventRequest struct {
 	CoverImageURL *string    `json:"cover_image_url,omitempty"`
 	CategoryIDs   []string   `json:"category_ids,omitempty"`
 	TagIDs        []string   `json:"tag_ids,omitempty"`
+	InterestCodes []string   `json:"interest_codes,omitempty"`
 }
 
 // JoinEventRequest represents a join event request

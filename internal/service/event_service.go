@@ -54,6 +54,7 @@ func (s *EventService) GetEvents(userID string, page, limit int, eventType, stat
 		Preload("Photos").
 		Preload("Categories.Tag").
 		Preload("Tags.Tag").
+		Preload("Interests.Interest").
 		Preload("Members", func(db *gorm.DB) *gorm.DB {
 			return db.Preload("User").Preload("User.Profile")
 		}).
@@ -97,6 +98,7 @@ func (s *EventService) GetPublicEvents(page, limit int, eventType string) ([]dto
 		Preload("Photos").
 		Preload("Categories.Tag").
 		Preload("Tags.Tag").
+		Preload("Interests.Interest").
 		Preload("Members", func(db *gorm.DB) *gorm.DB {
 			return db.Preload("User").Preload("User.Profile")
 		}).
@@ -169,6 +171,7 @@ func (s *EventService) GetJoinedEvents(userID string, page, limit int, memberSta
 		Preload("Photos").
 		Preload("Categories.Tag").
 		Preload("Tags.Tag").
+		Preload("Interests.Interest").
 		Preload("Members", func(db *gorm.DB) *gorm.DB {
 			return db.Preload("User").Preload("User.Profile")
 		}).
@@ -202,6 +205,7 @@ func (s *EventService) GetEvent(eventID, userID string) (*dto.EventResponse, err
 		Preload("Photos").
 		Preload("Categories.Tag").
 		Preload("Tags.Tag").
+		Preload("Interests.Interest").
 		Preload("Members", func(db *gorm.DB) *gorm.DB {
 			return db.Preload("User").Preload("User.Profile")
 		}).
@@ -233,6 +237,7 @@ func (s *EventService) GetPublicEvent(eventID string) (*dto.EventResponse, error
 		Preload("Photos").
 		Preload("Categories.Tag").
 		Preload("Tags.Tag").
+		Preload("Interests.Interest").
 		Preload("Members", func(db *gorm.DB) *gorm.DB {
 			return db.Preload("User").Preload("User.Profile")
 		}).
@@ -339,12 +344,40 @@ func (s *EventService) CreateEvent(userID string, req dto.CreateEventRequest) (*
 		}
 	}
 
+	// Add interests if provided
+	if len(req.InterestCodes) > 0 {
+		// Get interests by codes
+		var interests []models.Interest
+		err = database.GetDB().Where("code IN ? AND is_active = ?", req.InterestCodes, true).Find(&interests).Error
+		if err != nil {
+			// Log error but don't fail
+			fmt.Printf("Warning: Failed to get interests: %v\n", err)
+		} else {
+			// Create event interests
+			eventInterests := make([]models.EventInterest, len(interests))
+			for i, interest := range interests {
+				eventInterests[i] = models.EventInterest{
+					EventID:    event.ID,
+					InterestID: interest.ID,
+				}
+			}
+			if len(eventInterests) > 0 {
+				err = database.GetDB().Create(&eventInterests).Error
+				if err != nil {
+					// Log error but don't fail the whole event creation
+					fmt.Printf("Warning: Failed to add interests to event: %v\n", err)
+				}
+			}
+		}
+	}
+
 	// Load event with relationships
 	err = database.GetDB().
 		Preload("Creator").
 		Preload("Photos").
 		Preload("Categories.Tag").
 		Preload("Tags.Tag").
+		Preload("Interests.Interest").
 		Preload("Members", func(db *gorm.DB) *gorm.DB {
 			return db.Preload("User").Preload("User.Profile")
 		}).
@@ -426,12 +459,47 @@ func (s *EventService) UpdateEvent(eventID, userID string, req dto.UpdateEventRe
 		return nil, fmt.Errorf("failed to update event: %w", err)
 	}
 
+	// Update interests if provided (bulk replace)
+	if req.InterestCodes != nil {
+		// Delete all existing event interests
+		err = database.GetDB().Where("event_id = ?", eventUUID).Delete(&models.EventInterest{}).Error
+		if err != nil {
+			return nil, fmt.Errorf("failed to delete existing interests: %w", err)
+		}
+
+		// Add new interests if provided
+		if len(req.InterestCodes) > 0 {
+			// Get interests by codes
+			var interests []models.Interest
+			err = database.GetDB().Where("code IN ? AND is_active = ?", req.InterestCodes, true).Find(&interests).Error
+			if err != nil {
+				return nil, fmt.Errorf("failed to get interests: %w", err)
+			}
+
+			// Create event interests
+			eventInterests := make([]models.EventInterest, len(interests))
+			for i, interest := range interests {
+				eventInterests[i] = models.EventInterest{
+					EventID:    eventUUID,
+					InterestID: interest.ID,
+				}
+			}
+			if len(eventInterests) > 0 {
+				err = database.GetDB().Create(&eventInterests).Error
+				if err != nil {
+					return nil, fmt.Errorf("failed to add interests to event: %w", err)
+				}
+			}
+		}
+	}
+
 	// Load updated event with relationships
 	err = database.GetDB().
 		Preload("Creator").
 		Preload("Photos").
 		Preload("Categories.Tag").
 		Preload("Tags.Tag").
+		Preload("Interests.Interest").
 		Preload("Members", func(db *gorm.DB) *gorm.DB {
 			return db.Preload("User").Preload("User.Profile")
 		}).
@@ -750,6 +818,23 @@ func (s *EventService) convertEventToResponse(event models.Event, userID string)
 				ID:   tag.Tag.ID.String(),
 				Name: tag.Tag.Name,
 				Kind: tag.Tag.Kind,
+			}
+		}
+	}
+
+	// Add interests
+	response.Interests = make([]dto.InterestResponse, len(event.Interests))
+	for i, eventInterest := range event.Interests {
+		if eventInterest.Interest != nil {
+			response.Interests[i] = dto.InterestResponse{
+				ID:          eventInterest.Interest.ID.String(),
+				Code:        eventInterest.Interest.Code,
+				DisplayName: eventInterest.Interest.DisplayName,
+				Icon:        eventInterest.Interest.Icon,
+				Category:    eventInterest.Interest.Category,
+				SortOrder:   eventInterest.Interest.SortOrder,
+				IsActive:    eventInterest.Interest.IsActive,
+				CreatedAt:   eventInterest.Interest.CreatedAt,
 			}
 		}
 	}

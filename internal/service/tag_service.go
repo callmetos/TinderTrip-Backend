@@ -321,7 +321,7 @@ func (s *TagService) RemoveEventTag(eventID, tagID, userID string) error {
 	return nil
 }
 
-// GetEventSuggestions gets event suggestions based on user preferences (travel, food, budget, event type)
+// GetEventSuggestions gets event suggestions based on user interests (unified interests system)
 func (s *TagService) GetEventSuggestions(userID string, page, limit int) ([]dto.EventSuggestionItem, int64, error) {
 	// Parse user ID
 	userUUID, err := uuid.Parse(userID)
@@ -329,27 +329,15 @@ func (s *TagService) GetEventSuggestions(userID string, page, limit int) ([]dto.
 		return nil, 0, fmt.Errorf("invalid user ID")
 	}
 
-	// Get travel preferences
-	var travelPrefs []models.TravelPreference
-	err = database.GetDB().Where("user_id = ? AND deleted_at IS NULL", userUUID).Find(&travelPrefs).Error
+	// Get user interests (unified preferences)
+	var userInterests []models.UserInterest
+	err = database.GetDB().
+		Preload("Interest").
+		Where("user_id = ?", userUUID).
+		Find(&userInterests).Error
 	if err != nil {
-		return nil, 0, fmt.Errorf("failed to get travel preferences: %w", err)
+		return nil, 0, fmt.Errorf("failed to get user interests: %w", err)
 	}
-
-	// Get food preferences
-	var foodPrefs []models.FoodPreference
-	err = database.GetDB().Where("user_id = ? AND deleted_at IS NULL", userUUID).Find(&foodPrefs).Error
-	if err != nil {
-		return nil, 0, fmt.Errorf("failed to get food preferences: %w", err)
-	}
-
-	// Get user budget preference
-	var userBudget models.PrefBudget
-	err = database.GetDB().Where("user_id = ?", userUUID).First(&userBudget).Error
-	if err != nil && err != gorm.ErrRecordNotFound {
-		return nil, 0, fmt.Errorf("failed to get user budget: %w", err)
-	}
-	hasBudget := err == nil
 
 	// Get all published events (will be sorted by match score later)
 	var events []models.Event
@@ -358,6 +346,7 @@ func (s *TagService) GetEventSuggestions(userID string, page, limit int) ([]dto.
 		Preload("Photos").
 		Preload("Categories.Tag").
 		Preload("Tags.Tag").
+		Preload("Interests.Interest").
 		Preload("Members", func(db *gorm.DB) *gorm.DB {
 			return db.Preload("User").Preload("User.Profile")
 		}).
@@ -371,32 +360,17 @@ func (s *TagService) GetEventSuggestions(userID string, page, limit int) ([]dto.
 	// Calculate match scores
 	suggestions := make([]dto.EventSuggestionItem, len(events))
 	for i, event := range events {
-		// Calculate travel preference score
-		travelScore := s.calculateTravelPreferenceScore(travelPrefs, event)
+		// Calculate interests match score (100% weight)
+		interestsScore, matchedInterests := s.calculateInterestsMatchScore(userInterests, event)
 
-		// Calculate food preference score
-		foodScore := s.calculateFoodPreferenceScore(foodPrefs, event)
-
-		// Calculate event type (trip duration) score
-		eventTypeScore := s.calculateEventTypeScore(userUUID, event)
-
-		// Calculate budget match score
-		var budgetScore float64
-		if hasBudget {
-			budgetScore = s.calculateBudgetMatchScore(userBudget, event)
-		} else {
-			// No budget preference = neutral score (50)
-			budgetScore = 50.0
-		}
-
-		// Combined score: 30% travel + 30% food + 30% budget + 10% event type
-		// Weights can be adjusted based on importance
-		combinedScore := (travelScore * 0.3) + (foodScore * 0.3) + (budgetScore * 0.3) + (eventTypeScore * 0.1)
+		// Combined score: 100% interests
+		// Interests are the primary matching factor
+		combinedScore := interestsScore
 
 		// Convert event to response
 		eventResponse := s.convertEventToResponse(event, userID)
 
-		// Get matched tags for display (from event tags)
+		// Get matched tags for display (from event tags) - keep for backward compatibility
 		matchedTags := make([]dto.TagResponse, len(event.Tags))
 		for j, eventTag := range event.Tags {
 			if eventTag.Tag != nil {
@@ -410,9 +384,10 @@ func (s *TagService) GetEventSuggestions(userID string, page, limit int) ([]dto.
 		}
 
 		suggestions[i] = dto.EventSuggestionItem{
-			Event:       eventResponse,
-			MatchScore:  math.Round(combinedScore*100) / 100,
-			MatchedTags: matchedTags,
+			Event:            eventResponse,
+			MatchScore:       math.Round(combinedScore*100) / 100,
+			MatchedTags:      matchedTags,
+			MatchedInterests: matchedInterests,
 		}
 	}
 
@@ -501,6 +476,80 @@ func (s *TagService) calculateTagMatchScore(userTags []models.UserTag, eventTags
 	}
 
 	return math.Round(normalizedScore*100) / 100, matchedTags
+}
+
+// calculateInterestsMatchScore calculates match score between user interests and event interests
+func (s *TagService) calculateInterestsMatchScore(userInterests []models.UserInterest, event models.Event) (float64, []dto.InterestResponse) {
+	// Category weights (higher = more important)
+	categoryWeights := map[string]float64{
+		"restaurant": 1.0, // Restaurant interests are most important
+		"cafe":       0.9, // Cafe interests are very important
+		"activity":   0.8, // Activities are important
+		"pub_bar":    0.7, // Pub & Bar interests are important
+		"sport":      0.8, // Sports are important
+	}
+
+	// Create maps for quick lookup
+	userInterestMap := make(map[uuid.UUID]models.Interest)
+	for _, userInterest := range userInterests {
+		if userInterest.Interest != nil {
+			userInterestMap[userInterest.InterestID] = *userInterest.Interest
+		}
+	}
+
+	eventInterestMap := make(map[uuid.UUID]models.Interest)
+	for _, eventInterest := range event.Interests {
+		if eventInterest.Interest != nil {
+			eventInterestMap[eventInterest.InterestID] = *eventInterest.Interest
+		}
+	}
+
+	// Calculate matches
+	var totalScore float64
+	var matchedInterests []dto.InterestResponse
+
+	// Check for exact matches
+	for userInterestID, userInterest := range userInterestMap {
+		if eventInterest, exists := eventInterestMap[userInterestID]; exists {
+			// Exact match - full weight based on category
+			weight := categoryWeights[userInterest.Category]
+			if weight == 0 {
+				weight = 0.5 // Default weight for unknown categories
+			}
+			totalScore += weight
+
+			matchedInterests = append(matchedInterests, dto.InterestResponse{
+				ID:          eventInterest.ID.String(),
+				Code:        eventInterest.Code,
+				DisplayName: eventInterest.DisplayName,
+				Icon:        eventInterest.Icon,
+				Category:    eventInterest.Category,
+				SortOrder:   eventInterest.SortOrder,
+				IsActive:    eventInterest.IsActive,
+				CreatedAt:   eventInterest.CreatedAt,
+			})
+		}
+	}
+
+	// Normalize score to 0-100
+	maxPossibleScore := 0.0
+	for _, userInterest := range userInterestMap {
+		weight := categoryWeights[userInterest.Category]
+		if weight == 0 {
+			weight = 0.5 // Default weight
+		}
+		maxPossibleScore += weight
+	}
+
+	var normalizedScore float64
+	if maxPossibleScore > 0 {
+		normalizedScore = (totalScore / maxPossibleScore) * 100
+	} else {
+		// No user interests = neutral score
+		normalizedScore = 50.0
+	}
+
+	return math.Round(normalizedScore*100) / 100, matchedInterests
 }
 
 // calculateBudgetMatchScore calculates match score between user budget preference and event budget

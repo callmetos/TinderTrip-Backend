@@ -54,6 +54,7 @@ type Event struct {
 	Photos        []EventPhoto       `json:"photos,omitempty" gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE"`
 	Categories    []EventCategory    `json:"categories,omitempty" gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE"`
 	Tags          []EventTag         `json:"tags,omitempty" gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE"`
+	Interests     []EventInterest    `json:"interests,omitempty" gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE"`
 	Members       []EventMember      `json:"members,omitempty" gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE"`
 	Swipes        []EventSwipe       `json:"swipes,omitempty" gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE"`
 	ChatRoom      *ChatRoom          `json:"chat_room,omitempty" gorm:"foreignKey:EventID;constraint:OnDelete:CASCADE"`
