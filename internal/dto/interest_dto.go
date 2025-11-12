@@ -31,4 +31,3 @@ type GetUserInterestsResponse struct {
 	Interests []InterestResponse `json:"interests"`
 	Total     int64              `json:"total"`
 }
-

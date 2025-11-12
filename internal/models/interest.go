@@ -52,4 +52,3 @@ type UserInterest struct {
 func (UserInterest) TableName() string {
 	return "user_interests"
 }
-

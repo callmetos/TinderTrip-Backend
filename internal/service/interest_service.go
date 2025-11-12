@@ -163,4 +163,3 @@ func (s *InterestService) GetUserSelectedInterests(userID uuid.UUID) ([]dto.Inte
 
 	return responses, nil
 }
-

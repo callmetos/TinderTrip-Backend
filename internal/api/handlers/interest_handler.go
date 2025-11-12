@@ -160,4 +160,3 @@ func (h *InterestHandler) GetUserSelectedInterests(c *gin.Context) {
 		Total:     int64(len(interests)),
 	})
 }
-
