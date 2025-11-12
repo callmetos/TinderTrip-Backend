@@ -212,4 +212,4 @@ scripts/seed_tags.sql
 # Binary files
 main
 /bin/api
-api
+# Note: 'api' binary at root is ignored, but internal/api/ directory is tracked
