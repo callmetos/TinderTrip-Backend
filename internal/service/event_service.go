@@ -731,9 +731,20 @@ func (s *EventService) SwipeEvent(eventID, userID, direction string) error {
 			if err != nil {
 				return fmt.Errorf("failed to create member: %w", err)
 			}
+
+			// Send notification (in background - don't block on error)
+			// Swipe like = join event, so send join notification
+			go func() {
+				notificationService := NewNotificationService()
+				if err := notificationService.SendUserJoinedEventNotification(eventID, userID); err != nil {
+					// Log error but don't fail the swipe operation
+					log.Printf("Failed to send swipe like notification: %v", err)
+				}
+			}()
 		} else if err != nil {
 			return fmt.Errorf("failed to check member: %w", err)
 		}
+		// If user already a member, no need to send notification again
 	}
 
 	return nil
