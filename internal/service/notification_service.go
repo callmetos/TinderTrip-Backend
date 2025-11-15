@@ -233,12 +233,13 @@ func (s *NotificationService) SendUserJoinedEventNotification(eventID, userID st
 			"event_title": event.Title,
 		}
 
+		// Send push notification (includes email notification)
 		err := s.SendPushNotification(event.CreatorID.String(), title, body, data)
 		if err != nil {
 			log.Printf("Error sending join notification to creator: %v", err)
 			return err
 		}
-		log.Printf("Successfully sent join notification to creator %s for event %s", event.CreatorID.String(), eventID)
+		log.Printf("Successfully sent join notification (push + email) to creator %s for event %s", event.CreatorID.String(), eventID)
 	} else {
 		log.Printf("User %s is the creator of event %s, skipping notification", userID, eventID)
 	}
@@ -283,9 +284,12 @@ func (s *NotificationService) SendUserLeftEventNotification(eventID, userID stri
 			"event_title": event.Title,
 		}
 
+		// Send push notification (includes email notification)
 		err := s.SendPushNotification(event.CreatorID.String(), title, body, data)
 		if err != nil {
 			log.Printf("Error sending leave notification: %v", err)
+		} else {
+			log.Printf("Successfully sent leave notification (push + email) to creator %s for event %s", event.CreatorID.String(), eventID)
 		}
 	}
 
